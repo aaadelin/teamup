@@ -1,5 +1,6 @@
 package com.team.TeamUp.dtos;
 
+import com.team.TeamUp.domain.enums.Department;
 import com.team.TeamUp.domain.enums.UserStatus;
 
 import java.time.LocalDateTime;
@@ -25,6 +26,8 @@ public class UserDTO {
     private int teamID;
 
     private UserStatus status;
+
+    private Department department;
 
     public UserDTO() {
     }
@@ -107,5 +110,13 @@ public class UserDTO {
 
     public void setStatus(UserStatus status) {
         this.status = status;
+    }
+
+    public Department getDepartment() {
+        return department;
+    }
+
+    public void setDepartment(Department department) {
+        this.department = department;
     }
 }

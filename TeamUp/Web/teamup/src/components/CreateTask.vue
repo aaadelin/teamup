@@ -38,9 +38,8 @@
 
                 <div class="row">
                   <label for="difficulty" class="col-md-3">Difficulty </label>
-                  <select id="difficulty" v-model="difficulty" name="summary" class="form-control col-md-8">
-                    <option>Opt1</option>
-                    <option>Opt2</option>
+                  <select id="difficulty" v-model="difficulty" name="difficulty" class="form-control col-md-8">
+                    <option v-for="(diff, index) in 3" :key="index">{{ diff }}</option>
                   </select>
                 </div>
 
@@ -48,34 +47,41 @@
 
                 <div class="row">
                   <label for="priority" class="col-md-3">Priority </label>
-                  <input id="priority" type="text" v-model="priority" name="priority" class="form-control col-md-8"/>
+                  <select id="priority" v-model="priority" name="priority" class="form-control col-md-8">
+                    <option v-for="(priority, index) in 3" :key="index">{{ priority }}</option>
+                  </select>
                 </div>
 
                 <br/>
 
                 <div class="row">
                   <label for="tasktype" class="col-md-3">Task type </label>
-                  <input id="tasktype" type="text" v-model="taskType" name="tasktype" class="form-control col-md-8"/>
+                  <select id="tasktype" v-model="taskType" name="tasktype" class="form-control col-md-8">
+                    <option v-for="(type, index) in taskTypes" :key="index">{{ type}}</option>
+                  </select>
                 </div>
 
                 <br/>
 
                 <div class="row">
                   <label for="department" class="col-md-3">Department </label>
-                  <input id="department" type="text" v-model="department" name="department" class="form-control col-md-8"/>
+                  <select id="department" v-model="department" name="department" class="form-control col-md-8">
+                    <option v-for="(department, index) in departments" :key="index">{{ department }}</option>
+                  </select>
                 </div>
 
                 <br/>
 
                 <div class="row">
                   <label for="assignees" class="col-md-3">Assignees </label>
-                  <input id="assignees" type="text" v-model="assignees" name="assignees" class="form-control col-md-8"/>
+                  <select id="assignees" v-model="assignees" name="assignees" class="form-control col-md-8">
+                    <option v-for="assignee in filterAdmins(assigneesList)" :key="assignee.id">{{ assignee.firstName }} {{ assignee.lastName }} ({{ assignee.department }})</option>
+                  </select>
                 </div>
 
                 <br/>
 
-                <div id="assigneesList" class="row">
-
+                <div id="assigneesList" class="row justify-content-center">
                 </div>
 
               </slot>
@@ -102,7 +108,12 @@
 </template>
 
 <script>
+import axios from 'axios'
+
 export default {
+  beforeMount () {
+    this.getDataArrays()
+  },
   summary: 'CreateTask',
   props: [ 'isVisible' ],
   data () {
@@ -117,7 +128,11 @@ export default {
       taskType: null,
       department: null,
       reporter: null,
-      assignees: null
+      assignees: null,
+
+      taskTypes: [],
+      departments: [],
+      assigneesList: [],
     }
   },
   methods: {
@@ -147,7 +162,56 @@ export default {
       }
     },
     clearData () {
-      console.log('CLEAR')
+      console.log('TODO = CLEAR')
+    },
+    getDataArrays () {
+      let baseURL = 'http://192.168.0.150:8081/api'
+
+      axios({
+        url: baseURL + '/task-types',
+        method: 'get',
+        config: {
+          headers: {
+            'key': localStorage.getItem('access_key')
+          }
+        }
+      }).then(rez => {
+        this.taskTypes = rez.data
+      })
+
+      axios({
+        url: baseURL + '/departments',
+        method: 'get',
+        config: {
+          headers: {
+            'key': localStorage.getItem('access_key')
+          }
+        }
+      }).then(rez => {
+        this.departments = rez.data
+      })
+
+      axios({
+        url: baseURL + '/users',
+        method: 'get',
+        config: {
+          headers: {
+            'key': localStorage.getItem('access_key')
+          }
+        }
+      }).then(rez => {
+        console.log(rez.data)
+        this.assigneesList = rez.data
+      })
+    },
+    filterAdmins (users) {
+      let newUsers = []
+      for (let i = 0; i < users.length; i++) {
+        if (users[i].status !== "ADMIN"){
+          newUsers.push(users[i])
+        }
+      }
+      return newUsers
     }
   }
 }

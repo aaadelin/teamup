@@ -37,7 +37,7 @@ public class DTOsConverter {
      * @param user user Object to be converted
      * @return userDTO instance containing user parameters data
      */
-    public UserDTO getDTOFromUser(User user){ //TODO
+    public UserDTO getDTOFromUser(User user){
         UserDTO userDTO = new UserDTO();
 
         userDTO.setId(user.getId());
@@ -50,6 +50,7 @@ public class DTOsConverter {
         userDTO.setPhoto(user.getPhoto());
         if(user.getTeam() != null){
             userDTO.setTeamID(user.getTeam().getId());
+            userDTO.setDepartment(user.getTeam().getDepartment());
         }else{
             userDTO.setTeamID(-1);
         }

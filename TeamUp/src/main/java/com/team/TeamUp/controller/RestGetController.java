@@ -1,6 +1,10 @@
 package com.team.TeamUp.controller;
 
 import com.team.TeamUp.domain.*;
+import com.team.TeamUp.domain.enums.Department;
+import com.team.TeamUp.domain.enums.TaskStatus;
+import com.team.TeamUp.domain.enums.TaskType;
+import com.team.TeamUp.domain.enums.UserStatus;
 import com.team.TeamUp.dtos.TaskDTO;
 import com.team.TeamUp.dtos.TeamDTO;
 import com.team.TeamUp.dtos.UserDTO;
@@ -10,9 +14,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static org.springframework.web.bind.annotation.RequestMethod.GET;
@@ -57,6 +59,26 @@ public class RestGetController extends AbstractRestController{
     @RequestMapping(value = "/comments", method = GET)
     public List<Comment> getAllComments() {
         return commentRepository.findAll();//.stream().map(project -> dtOsConverter.getDTOFromProject(project)).collect(Collectors.toList());
+    }
+
+    @RequestMapping(value = "/departments", method = GET)
+    public List<Department> getAllDepartments() {
+        return Arrays.asList(Department.values());
+    }
+
+    @RequestMapping(value = "/task-status", method = GET)
+    public List<TaskStatus> getAllTaskStatus() {
+        return Arrays.asList(TaskStatus.values());
+    }
+
+    @RequestMapping(value = "/task-types", method = GET)
+    public List<TaskType> getAllTaskTypes() {
+        return Arrays.asList(TaskType.values());
+    }
+
+    @RequestMapping(value = "/user-status", method = GET)
+    public List<UserStatus> getAllUserStatus() {
+        return Arrays.asList(UserStatus.values());
     }
 
     @RequestMapping(value = "/post/{postid}/comments", method = GET)
