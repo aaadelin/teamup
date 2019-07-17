@@ -34,7 +34,7 @@ export default {
     },
     openTaskPage () {
       this.$router.push({
-        summary: 'task',
+        name: 'task',
         query: {
           taskId: this.task.id
         }

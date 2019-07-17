@@ -78,7 +78,7 @@
                     <option v-for="assignee in filterAdmins(assigneesList)" :key="assignee.id">{{ assignee.firstName }} {{ assignee.lastName }} ({{ assignee.department }})</option>
                   </select>
                 </div>
-
+                <span v-if="localStorage.getItem('isAdmin')==='false'">Assign to me</span>
                 <br/>
 
                 <div id="assigneesList" class="row justify-content-center">
@@ -124,11 +124,12 @@ export default {
       lastChanged: null,
       deadline: null,
       difficulty: 3,
-      priority: 1,
+      priority: 3,
       taskType: null,
       department: null,
       reporter: null,
       assignees: null,
+      localStorage: localStorage,
 
       taskTypes: [],
       departments: [],
