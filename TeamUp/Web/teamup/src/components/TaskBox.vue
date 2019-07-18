@@ -14,7 +14,7 @@
 <script>
 
 export default {
-  summary: 'TaskBox',
+  name: 'TaskBox',
   props: {
     task: Object
   },

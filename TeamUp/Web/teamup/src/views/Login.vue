@@ -9,12 +9,12 @@
           <form @submit.prevent="handleSubmit">
             <div class="form-group">
               <label for="username">Username</label>
-              <input id="username" type="text" v-model="username" summary="username" class="form-control" :class="{ 'is-invalid': submitted && !username }" />
+              <input id="username" type="text" v-model="username" name="username" class="form-control" :class="{ 'is-invalid': submitted && !username }" />
               <div v-show="submitted && !username" class="invalid-feedback">Username is required</div>
             </div>
             <div class="form-group">
               <label for="password">Password</label>
-              <input id="password" type="password" v-model="password" summary="password" class="form-control" :class="{ 'is-invalid': submitted && !password }" />
+              <input id="password" type="password" v-model="password" name="password" class="form-control" :class="{ 'is-invalid': submitted && !password }" />
               <div v-show="submitted && !password" class="invalid-feedback">Password is required</div>
             </div>
             <div class="form-group">
@@ -31,7 +31,7 @@
 import axios from 'axios'
 
 export default {
-  summary: 'Login',
+  name: 'Login',
   data () {
     return {
       username: '',

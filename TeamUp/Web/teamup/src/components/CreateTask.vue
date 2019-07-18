@@ -2,19 +2,19 @@
 
   <div v-if="isVisible" id="container">
 
-    <transition summary="modal">
+    <transition name="modal">
       <div class="modal-mask">
         <div class="modal-wrapper">
           <div class="modal-container">
 
             <div class="modal-header">
-              <slot summary="header">
+              <slot name="header">
                 Create a new Issue
               </slot>
             </div>
 
             <div class="modal-body overflow-auto">
-              <slot summary="body">
+              <slot name="body">
                 <div class="row">
                   <label for="summary" class="col-md-3">Summary </label>
                   <input id="summary" type="text" v-model="summary" name="summary" class="form-control col-md-8"/>
@@ -114,7 +114,7 @@ export default {
   beforeMount () {
     this.getDataArrays()
   },
-  summary: 'CreateTask',
+  name: 'CreateTask',
   props: [ 'isVisible' ],
   data () {
     return {

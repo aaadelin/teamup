@@ -5,7 +5,7 @@
 
 <script>
 export default {
-  summary: 'Profile'
+  name: 'Profile'
 }
 </script>
 

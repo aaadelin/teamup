@@ -65,7 +65,7 @@ export default {
   beforeMount () {
     this.getUsersTasks()
   },
-  summary: 'Tasks',
+  name: 'Tasks',
   components: { TaskBox },
   data () {
     return {

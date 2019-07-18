@@ -55,7 +55,7 @@ import { logout } from '../persistance/RestRepository'
 import CreateTask from './CreateTask'
 
 export default {
-  summary: 'NavBar',
+  name: 'NavBar',
   components: { CreateTask },
   data () {
     return {

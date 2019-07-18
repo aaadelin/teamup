@@ -28,7 +28,7 @@
 
 <script>
 export default {
-  summary: 'CreateUser'
+  name: 'CreateUser'
 }
 </script>
 

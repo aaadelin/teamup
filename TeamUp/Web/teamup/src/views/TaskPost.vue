@@ -5,7 +5,7 @@
       <p> {{ task.description }} </p>
 
       <ul>
-        <li v-for="comment in comments" v-bind:key="comment.id"> {{ comment }} </li>
+<!--        <li v-for="comment in comments" v-bind:key="comment.id"> {{ comment }} </li>-->
       </ul>
     </div>
 </template>
@@ -14,34 +14,31 @@
 import axios from 'axios'
 
 export default {
-  summary: 'TaskPost',
-  beforeMount () {
+  name: 'TaskPost',
+  created () {
     this.loadData()
   },
   data () {
     return {
       task: null,
-      comments: [],
-      taskId: null
+      comments: []
     }
   },
   methods: {
     loadData () {
-      let url = 'http://192.168.0.150/api/post/taskid=' + this.taskId
+      let url = 'http://192.168.0.150:8081/api/post/taskid=' + this.$route.query.taskId
 
       axios({
         method: 'get',
         url: url,
         data: {
-
         },
-        config: {
-          headers: {
-            'token': localStorage.getItem('access_key')
-          }
+        headers: {
+          'token': localStorage.getItem('access_key')
         }
       }).then(res => {
-        console.log(res)
+        this.task = res.data.task
+        this.comments = res.data.comments
       })
     }
   }

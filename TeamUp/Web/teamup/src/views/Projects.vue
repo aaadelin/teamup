@@ -5,7 +5,7 @@
 
 <script>
 export default {
-  summary: 'Porjects'
+  name: 'Porjects'
 }
 </script>
 
