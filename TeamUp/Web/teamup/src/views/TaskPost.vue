@@ -5,7 +5,7 @@
       <p> {{ task.description }} </p>
 
       <ul>
-<!--        <li v-for="comment in comments" v-bind:key="comment.id"> {{ comment }} </li>-->
+        <li v-for="comment in comments" v-bind:key="comment.id"> {{ comment }} </li>
       </ul>
     </div>
 </template>
@@ -20,7 +20,10 @@ export default {
   },
   data () {
     return {
-      task: null,
+      task: {
+        summary: null,
+        deadline: null
+      },
       comments: []
     }
   },

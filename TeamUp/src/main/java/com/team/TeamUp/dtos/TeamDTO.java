@@ -75,4 +75,17 @@ public class TeamDTO {
     public void setMembers(List<Integer> members) {
         this.members = members;
     }
+
+    @Override
+    public String toString() {
+        return "TeamDTO{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", description='" + description + '\'' +
+                ", location='" + location + '\'' +
+                ", department=" + department +
+                ", leaderID=" + leaderID +
+                ", members=" + members +
+                '}';
+    }
 }

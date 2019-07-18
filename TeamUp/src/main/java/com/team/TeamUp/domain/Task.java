@@ -197,4 +197,24 @@ public class Task {
     public int hashCode() {
         return Objects.hash(id, summary, description, reporter, createdAt, doneAt, lastChanged, deadline, taskStatus, project);
     }
+
+    @Override
+    public String toString() {
+        return "Task{" +
+                "id=" + id +
+                ", summary='" + summary + '\'' +
+                ", description='" + description + '\'' +
+                ", createdAt=" + createdAt +
+                ", doneAt=" + doneAt +
+                ", lastChanged=" + lastChanged +
+                ", deadline=" + deadline +
+                ", difficulty=" + difficulty +
+                ", priority=" + priority +
+                ", taskType=" + taskType +
+                ", taskStatus=" + taskStatus +
+                ", department=" + department +
+                ", reporter=" + reporter +
+                ", assignees=" + assignees +
+                '}';
+    }
 }

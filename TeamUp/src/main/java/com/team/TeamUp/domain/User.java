@@ -130,5 +130,21 @@ public class User {
     public void setTeam(Team team) {
         this.team = team;
     }
+
+    @Override
+    public String toString() {
+        return "User{" +
+                "id=" + id +
+                ", username='" + username + '\'' +
+                ", password='" + password + '\'' +
+                ", photo='" + photo + '\'' +
+                ", firstName='" + firstName + '\'' +
+                ", lastName='" + lastName + '\'' +
+                ", lastActive=" + lastActive +
+                ", isActive=" + isActive +
+                ", hashKey='" + hashKey + '\'' +
+                ", status=" + status +
+                '}';
+    }
 }
 

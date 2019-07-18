@@ -66,4 +66,16 @@ public class ProjectDTO {
     public void setOwnerID(int ownerID) {
         this.ownerID = ownerID;
     }
+
+    @Override
+    public String toString() {
+        return "ProjectDTO{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", description='" + description + '\'' +
+                ", deadline=" + deadline +
+                ", tasksIDs=" + tasksIDs +
+                ", ownerID=" + ownerID +
+                '}';
+    }
 }

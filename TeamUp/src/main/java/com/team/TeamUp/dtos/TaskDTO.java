@@ -158,4 +158,25 @@ public class TaskDTO {
     public void setReporterID(int reporterID) {
         this.reporterID = reporterID;
     }
+
+    @Override
+    public String toString() {
+        return "TaskDTO{" +
+                "id=" + id +
+                ", summary='" + summary + '\'' +
+                ", description='" + description + '\'' +
+                ", difficulty=" + difficulty +
+                ", priority=" + priority +
+                ", department=" + department +
+                ", createdAt=" + createdAt +
+                ", doneAt=" + doneAt +
+                ", lastChanged=" + lastChanged +
+                ", deadline=" + deadline +
+                ", taskStatus=" + taskStatus +
+                ", taskType=" + taskType +
+                ", project=" + project +
+                ", assignees=" + assignees +
+                ", reporterID=" + reporterID +
+                '}';
+    }
 }

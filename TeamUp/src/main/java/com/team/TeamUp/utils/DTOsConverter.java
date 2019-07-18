@@ -7,6 +7,8 @@ import com.team.TeamUp.dtos.TaskDTO;
 import com.team.TeamUp.dtos.TeamDTO;
 import com.team.TeamUp.dtos.UserDTO;
 import com.team.TeamUp.persistance.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -16,6 +18,8 @@ import java.util.stream.Collectors;
  */
 public class DTOsConverter {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(DTOsConverter.class);
+
     private UserRepository userRepository;
     private TeamRepository teamRepository;
     private TaskRepository taskRepository;
@@ -24,13 +28,14 @@ public class DTOsConverter {
     public DTOsConverter(UserRepository userRepository,
                          TeamRepository teamRepository,
                          TaskRepository taskRepository,
-                         ProjectRepository projectRepository){
+                         ProjectRepository projectRepository) {
 
         this.userRepository = userRepository;
         this.teamRepository = teamRepository;
         this.taskRepository = taskRepository;
         this.projectRepository = projectRepository;
 
+        LOGGER.info("Instance of class DtosConverter created");
     }
 
     /**
@@ -38,7 +43,8 @@ public class DTOsConverter {
      * @param user user Object to be converted
      * @return userDTO instance containing user parameters data
      */
-    public UserDTO getDTOFromUser(User user){
+    public UserDTO getDTOFromUser(User user) {
+        LOGGER.info(String.format("Method get UserDTO from User called with user parameter: %s", user));
         UserDTO userDTO = new UserDTO();
 
         userDTO.setId(user.getId());
@@ -56,6 +62,7 @@ public class DTOsConverter {
             userDTO.setTeamID(-1);
         }
 
+        LOGGER.info(String.format("UserDTO instance created: %s", userDTO));
         return userDTO;
     }
 
@@ -65,10 +72,11 @@ public class DTOsConverter {
      * @return user entity containing userDTO data
      */
     public User getUserFromDTO(UserDTO userDTO){
+        LOGGER.info(String.format("Method create User from UserDTO called with parameter %s", userDTO));
+
         Optional<User> userOptional = userRepository.findById(userDTO.getId());
         User user;
         user = userOptional.orElseGet(User::new);
-
         if(userDTO.getUsername() != null){
             user.setUsername(userDTO.getUsername());
         }
@@ -93,6 +101,7 @@ public class DTOsConverter {
             user.setHashKey(TokenUtils.getMD5Token());
         }
 
+        LOGGER.info(String.format("Instance of type User created: %s", user));
         return user;
     }
 
@@ -101,7 +110,9 @@ public class DTOsConverter {
      * @param taskDTO TaskDTO instance to be converted to Task domain model
      * @return Task object containing taskDTO data
      */
-    public Task getTaskFromDTO(TaskDTO taskDTO){ //TODO
+    public Task getTaskFromDTO(TaskDTO taskDTO){
+        LOGGER.info(String.format("Method create Task from TaskDto called with parameter: %s", taskDTO));
+
         Task task;
         Optional<Task> taskOptional = taskRepository.findById(taskDTO.getId());
         task = taskOptional.orElseGet(Task::new);
@@ -123,6 +134,7 @@ public class DTOsConverter {
         task.setTaskType(taskDTO.getTaskType());
         task.setAssignees(taskDTO.getAssignees().stream().map(assignee -> userRepository.findById(assignee).get()).collect(Collectors.toList()));
 
+        LOGGER.info(String.format("Instance of type Task created: %s", task));
         return task;
     }
 
@@ -131,7 +143,8 @@ public class DTOsConverter {
      * @param task Task domain model instance to be converted to TaskDTO
      * @return TaskDTO instance containing task data
      */
-    public TaskDTO getDTOFromTask(Task task){ //TODO
+    public TaskDTO getDTOFromTask(Task task){
+        LOGGER.info(String.format("Method to create TaskDTO from Task called with parameter :%s", task));
         TaskDTO taskDTO = new TaskDTO();
 
         taskDTO.setId(task.getId());
@@ -150,6 +163,7 @@ public class DTOsConverter {
         taskDTO.setReporterID(task.getReporter().getId());
         taskDTO.setAssignees(task.getAssignees().stream().map(User::getId).collect(Collectors.toList()));
 
+        LOGGER.info(String.format("Instance of type TaskDTO created: %s", taskDTO));
         return taskDTO;
     }
 
@@ -158,7 +172,8 @@ public class DTOsConverter {
      * @param projectDTO ProjectDTO instance to be converted to Project domain model
      * @return Project object containing projectDTO data
      */
-    public Project getProjectFromDTO(ProjectDTO projectDTO){ //TODO
+    public Project getProjectFromDTO(ProjectDTO projectDTO){
+        LOGGER.info(String.format("Method to create Project from ProjectDTO called with parameter: %s", projectDTO));
         Optional<Project> projectOptional = projectRepository.findById(projectDTO.getId());
 
         Project project = projectOptional.orElseGet(Project::new);
@@ -169,6 +184,7 @@ public class DTOsConverter {
         project.setDeadline(projectDTO.getDeadline());
         project.setOwner(userRepository.findById(projectDTO.getOwnerID()).get());
 
+        LOGGER.info(String.format("Instance of type Project created: %s", project));
         return project;
     }
 
@@ -177,7 +193,8 @@ public class DTOsConverter {
      * @param project Project domain instance to be converted to ProjectDTO
      * @return ProjectDTO instance containing project data
      */
-    public ProjectDTO getDTOFromProject(Project project){ //TODO
+    public ProjectDTO getDTOFromProject(Project project){
+        LOGGER.info(String.format("Method to create ProjectDTO from Projecct called with parameter: %s", project));
         ProjectDTO projectDTO = new ProjectDTO();
 
         projectDTO.setId(project.getId());
@@ -187,6 +204,7 @@ public class DTOsConverter {
         projectDTO.setTasksIDs(project.getTasks().stream().map(Task::getId).collect(Collectors.toList()));
         projectDTO.setOwnerID(project.getOwner().getId());
 
+        LOGGER.info(String.format("Instance of type ProjectDTO created: %s", projectDTO));
         return projectDTO;
     }
 
@@ -195,7 +213,8 @@ public class DTOsConverter {
      * @param teamDTO TeamDTO object to be converted to Team model
      * @return Team model instance containing the information from teamDTO
      */
-    public Team getTeamFromDTO(TeamDTO teamDTO){
+    private Team getTeamFromDTO(TeamDTO teamDTO){
+        LOGGER.info(String.format("Method to create Team from DTO called with parameter: %s", teamDTO));
         Optional<Team> teamOptional = teamRepository.findById(teamDTO.getId());
         Team team = teamOptional.orElseGet(Team::new);
 
@@ -204,6 +223,7 @@ public class DTOsConverter {
         team.setLocation(teamDTO.getLocation());
         team.setDepartment(teamDTO.getDepartment());
 
+        LOGGER.info(String.format("Instance of type Team created: %s", team));
         return team;
     }
 
@@ -213,14 +233,16 @@ public class DTOsConverter {
      * @return Team model instance containing the information from teamDTO
      */
     public Team getTeamFromDTO(TeamDTO teamDTO, UserStatus status){
-
+        LOGGER.info(String.format("Method to create instance Team from TeamDTO called with %s and user status %s", teamDTO, status));
         Team team = getTeamFromDTO(teamDTO);
 
         if(status == UserStatus.ADMIN){
+            LOGGER.info("User is able to create such instances");
             Optional<User> leader = userRepository.findById(teamDTO.getLeaderID());
             leader.ifPresent(team::setLeader);
         }
 
+        LOGGER.info(String.format("Instance of type Team returned: %s", team));
         return team;
     }
 
@@ -230,6 +252,7 @@ public class DTOsConverter {
      * @return TeamDTO instance containing team object data
      */
     public TeamDTO getDTOFromTeam(Team team){
+        LOGGER.info(String.format("Method to convert from Team to TeamDTO called with parameter: %s", team));
         TeamDTO teamDTO = new TeamDTO();
 
         teamDTO.setId(team.getId());
@@ -242,6 +265,7 @@ public class DTOsConverter {
         }
         teamDTO.setMembers(team.getMembers().stream().map(User::getId).collect(Collectors.toList()));
 
+        LOGGER.info(String.format("Instance of type team created: %s", teamDTO));
         return teamDTO;
     }
 }

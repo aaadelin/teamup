@@ -106,4 +106,17 @@ public class Team {
     public int hashCode() {
         return Objects.hash(id, location, name, description, leader, members);
     }
+
+    @Override
+    public String toString() {
+        return "Team{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", description='" + description + '\'' +
+                ", location='" + location + '\'' +
+                ", department=" + department +
+                ", leader=" + leader +
+                ", members=" + members +
+                '}';
+    }
 }

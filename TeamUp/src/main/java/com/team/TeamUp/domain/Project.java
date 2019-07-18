@@ -96,4 +96,16 @@ public class Project {
     public void setOwner(User owner) {
         this.owner = owner;
     }
+
+    @Override
+    public String toString() {
+        return "Project{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", description='" + description + '\'' +
+                ", deadline=" + deadline +
+                ", owner=" + owner +
+                ", tasks=" + tasks +
+                '}';
+    }
 }

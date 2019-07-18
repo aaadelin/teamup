@@ -119,4 +119,21 @@ public class UserDTO {
     public void setDepartment(Department department) {
         this.department = department;
     }
+
+    @Override
+    public String toString() {
+        return "UserDTO{" +
+                "id=" + id +
+                ", username='" + username + '\'' +
+                ", password='" + password + '\'' +
+                ", photo='" + photo + '\'' +
+                ", firstName='" + firstName + '\'' +
+                ", lastName='" + lastName + '\'' +
+                ", lastActive=" + lastActive +
+                ", isActive=" + isActive +
+                ", teamID=" + teamID +
+                ", status=" + status +
+                ", department=" + department +
+                '}';
+    }
 }
