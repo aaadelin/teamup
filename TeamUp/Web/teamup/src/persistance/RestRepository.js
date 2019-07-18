@@ -26,7 +26,7 @@ export function logout () {
       'key': localStorage.getItem('access_key')
     }
   }).then(res => {
-    localStorage.removeItem('access_key')
+    localStorage.clear()
     location.reload()
   }).catch(err => {
     console.log(err)

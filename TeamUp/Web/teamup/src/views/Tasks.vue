@@ -84,7 +84,8 @@ export default {
     getUsersTasks () {
       let url = 'http://192.168.0.150:8081/api/tasks'
 
-      axios.get(url, null, {
+      axios({
+        url: url,
         headers: {
           'token': localStorage.getItem('access_key')
         }

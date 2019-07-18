@@ -133,7 +133,7 @@ export default {
 
       taskTypes: [],
       departments: [],
-      assigneesList: [],
+      assigneesList: []
     }
   },
   methods: {
@@ -171,10 +171,8 @@ export default {
       axios({
         url: baseURL + '/task-types',
         method: 'get',
-        config: {
-          headers: {
-            'key': localStorage.getItem('access_key')
-          }
+        headers: {
+          'token': localStorage.getItem('access_key')
         }
       }).then(rez => {
         this.taskTypes = rez.data
@@ -183,10 +181,8 @@ export default {
       axios({
         url: baseURL + '/departments',
         method: 'get',
-        config: {
-          headers: {
-            'key': localStorage.getItem('access_key')
-          }
+        headers: {
+          'token': localStorage.getItem('access_key')
         }
       }).then(rez => {
         this.departments = rez.data
@@ -195,10 +191,8 @@ export default {
       axios({
         url: baseURL + '/users',
         method: 'get',
-        config: {
-          headers: {
-            'key': localStorage.getItem('access_key')
-          }
+        headers: {
+          'token': localStorage.getItem('access_key')
         }
       }).then(rez => {
         console.log(rez.data)
@@ -208,7 +202,7 @@ export default {
     filterAdmins (users) {
       let newUsers = []
       for (let i = 0; i < users.length; i++) {
-        if (users[i].status !== "ADMIN"){
+        if (users[i].status !== 'ADMIN') {
           newUsers.push(users[i])
         }
       }

@@ -1,9 +1,13 @@
 package com.team.TeamUp.controller;
 
+import com.team.TeamUp.domain.enums.UserStatus;
 import com.team.TeamUp.persistance.*;
+import com.team.TeamUp.utils.UserValidationUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.Map;
 
 //DELETE methods - for deleting
 
@@ -14,8 +18,9 @@ public class RestDeleteController extends AbstractRestController {
 
 
     public RestDeleteController(TeamRepository teamRepository, UserRepository userRepository, TaskRepository taskRepository,
-                                ProjectRepository projectRepository, CommentRepository commentRepository, PostRepository postRepository) {
-        super(teamRepository, userRepository, taskRepository, projectRepository, commentRepository, postRepository);
+                                ProjectRepository projectRepository, CommentRepository commentRepository, PostRepository postRepository,
+                                UserValidationUtils userValidationUtils) {
+        super(teamRepository, userRepository, taskRepository, projectRepository, commentRepository, postRepository, userValidationUtils);
     }
 
     /**
@@ -23,12 +28,16 @@ public class RestDeleteController extends AbstractRestController {
      * @return responseEntity signaling the success or failure
      */
     @RequestMapping(value = "/user/{id}", method = RequestMethod.DELETE)
-    public ResponseEntity<?> deleteUser(@PathVariable int id) {
-        try {
-            userRepository.deleteById(id);
-            return new ResponseEntity<>("OK", HttpStatus.OK);
-        } catch (Exception ignore) {
-            return new ResponseEntity<>("Not found", HttpStatus.NOT_FOUND);
+    public ResponseEntity<?> deleteUser(@PathVariable int id, @RequestHeader Map<String, String> headers) {
+        if (userValidationUtils.isValid(headers, UserStatus.ADMIN)) {
+            try {
+                userRepository.deleteById(id);
+                return new ResponseEntity<>("OK", HttpStatus.OK);
+            } catch (Exception ignore) {
+                return new ResponseEntity<>("Not found", HttpStatus.NOT_FOUND);
+            }
         }
+        return new ResponseEntity<>("FORBIDDEN", HttpStatus.FORBIDDEN);
     }
+
 }

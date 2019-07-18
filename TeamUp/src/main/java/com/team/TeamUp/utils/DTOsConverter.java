@@ -1,6 +1,7 @@
 package com.team.TeamUp.utils;
 
 import com.team.TeamUp.domain.*;
+import com.team.TeamUp.domain.enums.UserStatus;
 import com.team.TeamUp.dtos.ProjectDTO;
 import com.team.TeamUp.dtos.TaskDTO;
 import com.team.TeamUp.dtos.TeamDTO;
@@ -112,9 +113,10 @@ public class DTOsConverter {
         task.setDeadline(taskDTO.getDeadline());
         task.setTaskStatus(taskDTO.getTaskStatus());
 
-        Project project = projectRepository.findById(taskDTO.getProject()).get(); //This should always exist
-        task.setProject(project);
-
+        Optional<Project> project = projectRepository.findById(taskDTO.getProject());
+        project.ifPresent(task::setProject);
+        //TODO change with user's hash key instead of id
+        task.setReporter(userRepository.findById(taskDTO.getReporterID()).get()); //should always have a reporter
         task.setDifficulty(taskDTO.getDifficulty());
         task.setPriority(taskDTO.getPriority());
         task.setDepartment(taskDTO.getDepartment());
@@ -145,6 +147,7 @@ public class DTOsConverter {
         taskDTO.setPriority(task.getPriority());
         taskDTO.setDepartment(taskDTO.getDepartment());
         taskDTO.setTaskType(task.getTaskType());
+        taskDTO.setReporterID(task.getReporter().getId());
         taskDTO.setAssignees(task.getAssignees().stream().map(User::getId).collect(Collectors.toList()));
 
         return taskDTO;
@@ -200,8 +203,23 @@ public class DTOsConverter {
         team.setDescription(teamDTO.getDescription());
         team.setLocation(teamDTO.getLocation());
         team.setDepartment(teamDTO.getDepartment());
-        Optional<User> leader = userRepository.findById(teamDTO.getLeaderID());
-        leader.ifPresent(team::setLeader);
+
+        return team;
+    }
+
+    /**
+     * Only the admin can change the leader
+     * @param teamDTO TeamDTO object to be converted to Team model
+     * @return Team model instance containing the information from teamDTO
+     */
+    public Team getTeamFromDTO(TeamDTO teamDTO, UserStatus status){
+
+        Team team = getTeamFromDTO(teamDTO);
+
+        if(status == UserStatus.ADMIN){
+            Optional<User> leader = userRepository.findById(teamDTO.getLeaderID());
+            leader.ifPresent(team::setLeader);
+        }
 
         return team;
     }

@@ -37,6 +37,8 @@ public class TaskDTO {
 
     private List<Integer> assignees;
 
+    private int reporterID;
+
     public int getId() {
         return id;
     }
@@ -149,4 +151,11 @@ public class TaskDTO {
         this.taskType = taskType;
     }
 
+    public int getReporterID() {
+        return reporterID;
+    }
+
+    public void setReporterID(int reporterID) {
+        this.reporterID = reporterID;
+    }
 }
