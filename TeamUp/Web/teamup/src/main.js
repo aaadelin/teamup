@@ -9,10 +9,12 @@ import 'bootstrap/dist/css/bootstrap.css'
 import 'bootstrap-vue/dist/bootstrap-vue.css'
 import 'bootstrap'
 
+import Notifications from 'vue-notification'
 import BootstrapVue from 'bootstrap-vue'
 
 Vue.use(BootstrapVue)
 Vue.use(VueAxios)
+Vue.use(Notifications)
 
 global.jQuery = jQuery
 global.$ = jQuery

@@ -7,6 +7,7 @@
 <!--      <router-link to="/about">About</router-link>-->
 <!--    </div>-->
     <router-view/>
+    <notifications group="notificationsGroup" />
   </div>
 </template>
 

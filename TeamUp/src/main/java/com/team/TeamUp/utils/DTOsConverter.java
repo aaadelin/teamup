@@ -118,20 +118,30 @@ public class DTOsConverter {
         Task task;
         Optional<Task> taskOptional = taskRepository.findById(taskDTO.getId());
         task = taskOptional.orElseGet(Task::new);
+        if(!taskDTO.getSummary().trim().equals("") ||
+            !taskDTO.getDescription().trim().equals("")){ //TODO validate ca deadline-ul sa nu depaseasca pe cel al proiectului
 
-        task.setSummary(taskDTO.getSummary());
-        task.setDescription(taskDTO.getDescription());
+            task.setSummary(taskDTO.getSummary());
+            task.setDescription(taskDTO.getDescription());
+        }else{
+            throw new IllegalArgumentException();
+        }
         task.setDoneAt(taskDTO.getDoneAt());
         task.setLastChanged(taskDTO.getLastChanged());
         task.setDeadline(taskDTO.getDeadline());
         task.setTaskStatus(taskDTO.getTaskStatus());
 
         Optional<Project> project = projectRepository.findById(taskDTO.getProject());
-        project.ifPresent(task::setProject);
+        task.setProject(project.orElseThrow());
         Optional<User> reporter = userRepository.findByHashKey(reporterKey);
-        reporter.ifPresent(task::setReporter);
-        task.setDifficulty(taskDTO.getDifficulty());
-        task.setPriority(taskDTO.getPriority());
+        task.setReporter(reporter.orElseThrow());
+
+        if(taskDTO.getDifficulty() <= 3 && taskDTO.getDifficulty() >= 1){
+            task.setDifficulty(taskDTO.getDifficulty());
+        }
+        if(taskDTO.getPriority() <= 3 && taskDTO.getPriority() >= 1) {
+            task.setPriority(taskDTO.getPriority());
+        }
         task.setDepartment(taskDTO.getDepartment());
         task.setTaskType(taskDTO.getTaskType());
         List<User> list = new ArrayList<>();

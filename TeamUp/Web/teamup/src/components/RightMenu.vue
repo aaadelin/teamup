@@ -79,7 +79,7 @@ export default {
   #sidebar {
     min-width: 250px;
     max-width: 250px;
-    min-height: 100vh;
+    min-height: 92.5vh;
   }
 
   #sidebar.active {

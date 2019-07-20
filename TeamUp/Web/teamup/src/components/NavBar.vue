@@ -80,18 +80,31 @@ export default {
     },
     saveTask (data) {
       let url = 'http://192.168.0.150:8081/api/task'
-      console.log(data)
-      axios({
-        url: url,
-        method: 'post',
-        headers: {
-          'token': localStorage.getItem('access_key')
-        },
-        data: data
-      }).then(rez => {
-        console.log(rez)
-      })
-      this.closeTask()
+      if (data !== null) {
+        axios({
+          url: url,
+          method: 'post',
+          headers: {
+            'token': localStorage.getItem('access_key')
+          },
+          data: data
+        }).then(rez => {
+          this.$notify({
+            group: 'notificationsGroup',
+            title: 'Success',
+            type: 'success',
+            text: 'Task saved!'
+          })
+          this.closeTask()
+        }).catch(rez => {
+          this.$notify({
+            group: 'notificationsGroup',
+            title: 'Error',
+            type: 'error',
+            text: 'An error occurred'
+          })
+        })
+      }
     },
     closeTask () {
       this.isVisible = false
@@ -100,12 +113,7 @@ export default {
       event.preventDefault()
       console.log('Sent!')
       console.log(this.searchTerm)
-      // this.$router.push({
-      //   summary: 'search',
-      //   params: {
-      //     term: this.searchTerm
-      //   }
-      // })
+      // TODO
     }
   }
 }

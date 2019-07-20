@@ -5,6 +5,7 @@ import com.team.TeamUp.domain.enums.Department;
 import com.team.TeamUp.domain.enums.TaskStatus;
 import com.team.TeamUp.domain.enums.TaskType;
 import com.team.TeamUp.domain.enums.UserStatus;
+import com.team.TeamUp.dtos.ProjectDTO;
 import com.team.TeamUp.dtos.TaskDTO;
 import com.team.TeamUp.dtos.TeamDTO;
 import com.team.TeamUp.dtos.UserDTO;
@@ -81,7 +82,7 @@ public class RestGetController extends AbstractRestController {
     public ResponseEntity<?> getAllProjects(@RequestHeader Map<String, String> headers) {
         LOGGER.info(String.format("Entering get all projects method with headers: %s", headers.toString()));
         if (userValidationUtils.isValid(headers)) {
-            List<Project> projects = projectRepository.findAll();//.stream().map(project -> dtOsConverter.getDTOFromProject(project)).collect(Collectors.toList());
+            List<ProjectDTO> projects = projectRepository.findAll().stream().map(project -> dtOsConverter.getDTOFromProject(project)).collect(Collectors.toList());
             LOGGER.info(String.format("Returning list of projects: %s", projects));
             return new ResponseEntity<>(projects, HttpStatus.OK);
         }

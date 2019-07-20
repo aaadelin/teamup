@@ -37,6 +37,15 @@
                 <br/>
 
                 <div class="row">
+                  <label for="project" class="col-md-3">Project </label>
+                  <select id="project" name="difficulty" v-model="project" class="form-control col-md-8">
+                    <option v-for="proj in projects" :key="proj.id" :value="proj">{{ proj.name }}</option>
+                  </select>
+                </div>
+
+                <br/>
+
+                <div class="row">
                   <label for="difficulty" class="col-md-3">Difficulty </label>
                   <select id="difficulty" name="difficulty" v-model="difficulty" class="form-control col-md-8">
                     <option v-for="(diff, index) in 3" :key="index">{{ diff }}</option>
@@ -133,8 +142,10 @@ export default {
       reporter: null,
       localStorage: localStorage,
       assignees: [],
+      project: null,
 
       taskTypes: [],
+      projects: [],
       departments: [],
       assigneesList: [],
       currentlySelected: null
@@ -156,20 +167,33 @@ export default {
       for (let i = 0; i < this.assignees.length; i++) {
         assigneesIds.push(this.assignees[i].id)
       }
+      if (this.summary !== '' && this.description !== '' && this.difficulty <= 3 && this.difficulty >= 1 &&
+          this.priority >= 1 && this.priority <= 3 && this.taskType !== '' && this.department !== '' &&
+          this.project !== '') {
+        return {
+          summary: this.summary,
+          description: this.description,
+          createdAt: new Date(),
+          lastChanged: new Date(),
+          deadline: this.deadline,
+          difficulty: this.difficulty,
+          priority: this.priority,
+          taskType: this.taskType,
+          taskStatus: 'OPEN',
+          department: this.department,
+          reporter: this.$store.state.access_key,
+          assignees: assigneesIds,
+          project: this.project.id
+        }
+      } else {
+        this.$notify({
+          group: 'notificationsGroup',
+          title: 'Error',
+          type: 'error',
+          text: 'An error occurred'
+        })
 
-      return {
-        summary: this.summary,
-        description: this.description,
-        createdAt: new Date(),
-        lastChanged: new Date(),
-        deadline: this.deadline,
-        difficulty: this.difficulty,
-        priority: this.priority,
-        taskType: this.taskType,
-        taskStatus: 'OPEN',
-        department: this.department,
-        reporter: this.$store.state.access_key,
-        assignees: assigneesIds
+        return null
       }
     },
     clearData () {
@@ -186,6 +210,7 @@ export default {
       this.assignees = []
       this.localStorage = localStorage
       this.currentlySelected = null
+      this.project = null
     },
     getDataArrays () {
       let baseURL = 'http://192.168.0.150:8081/api'
@@ -217,8 +242,17 @@ export default {
           'token': localStorage.getItem('access_key')
         }
       }).then(rez => {
-        console.log(rez.data)
         this.assigneesList = rez.data
+      })
+
+      axios({
+        url: baseURL + '/projects',
+        method: 'get',
+        headers: {
+          'token': localStorage.getItem('access_key')
+        }
+      }).then(rez => {
+        this.projects = rez.data
       })
     },
     filterAdmins (users) {
@@ -231,7 +265,6 @@ export default {
       return newUsers
     },
     add () {
-      console.log('here')
       if (!this.assignees.includes(this.currentlySelected)) {
         this.assignees.push(this.currentlySelected)
       }
