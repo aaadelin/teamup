@@ -1,5 +1,6 @@
 <template>
   <div id="tasksContainer">
+    <right-menu/>
     <p>Your tasks:</p>
     <div class="row">
 
@@ -60,13 +61,14 @@
 <script>
 import TaskBox from '../components/TaskBox'
 import axios from 'axios'
+import RightMenu from '../components/RightMenu'
 
 export default {
   beforeMount () {
     this.getUsersTasks()
   },
   name: 'Tasks',
-  components: { TaskBox },
+  components: { RightMenu, TaskBox },
   data () {
     return {
       tasks: [],
