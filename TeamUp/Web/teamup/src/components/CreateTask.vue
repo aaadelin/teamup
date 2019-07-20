@@ -160,7 +160,7 @@ export default {
       currentlySelected: null,
 
       options: {
-        format: 'YYYY-MM-DD HH:mm:ssaa',
+        format: 'YYYY-MM-DD HH:mm:ss',
         useCurrent: true,
         showClear: true,
         showClose: true
