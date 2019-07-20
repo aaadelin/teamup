@@ -1,6 +1,9 @@
 <template>
-  <div id="tasksContainer">
-    <right-menu/>
+  <div id="tasks">
+    <right-menu :name="navName" :menu="menu"/>
+  <div id="content">
+    <div id="tasksContainer">
+
     <p>Your tasks:</p>
     <div class="row">
 
@@ -56,6 +59,8 @@
     <router-view/>
 
   </div>
+  </div>
+  </div>
 </template>
 
 <script>
@@ -75,7 +80,9 @@ export default {
       todo_category: true,
       in_progress_category: true,
       under_review_category: true,
-      done_category: true
+      done_category: true,
+      navName: 'Options',
+      menu: []
     }
   },
   methods: {
@@ -107,7 +114,9 @@ export default {
 }
 </script>
 
-<style scoped>
+<style>
+
+  /*For the page*/
 
   .header{
     cursor: pointer;
@@ -126,10 +135,18 @@ export default {
     padding-top: 10px;
     border-radius: 5px;
     margin: 15px;
-    min-width: 300px;
+    min-width: 330px;
   }
 
   #tasksContainer{
     margin: 15px;
+    /*margin-left: 100px;*/
+    justify-content: center;
+  }
+
+  #tasks{
+    display: flex;
+    /*width: 100%;*/
+    /*align-items: stretch;*/
   }
 </style>

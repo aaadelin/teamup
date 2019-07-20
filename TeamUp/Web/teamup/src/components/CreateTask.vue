@@ -38,7 +38,7 @@
 
                 <div class="row">
                   <label for="difficulty" class="col-md-3">Difficulty </label>
-                  <select id="difficulty" v-model="difficulty" name="difficulty" class="form-control col-md-8">
+                  <select id="difficulty" name="difficulty" v-model="difficulty" class="form-control col-md-8">
                     <option v-for="(diff, index) in 3" :key="index">{{ diff }}</option>
                   </select>
                 </div>
@@ -47,7 +47,7 @@
 
                 <div class="row">
                   <label for="priority" class="col-md-3">Priority </label>
-                  <select id="priority" v-model="priority" name="priority" class="form-control col-md-8">
+                  <select id="priority" name="priority" v-model="priority" class="form-control col-md-8">
                     <option v-for="(priority, index) in 3" :key="index">{{ priority }}</option>
                   </select>
                 </div>
@@ -56,7 +56,7 @@
 
                 <div class="row">
                   <label for="tasktype" class="col-md-3">Task type </label>
-                  <select id="tasktype" v-model="taskType" name="tasktype" class="form-control col-md-8">
+                  <select id="tasktype" name="tasktype" v-model="taskType" class="form-control col-md-8">
                     <option v-for="(type, index) in taskTypes" :key="index">{{ type}}</option>
                   </select>
                 </div>
@@ -65,7 +65,7 @@
 
                 <div class="row">
                   <label for="department" class="col-md-3">Department </label>
-                  <select id="department" v-model="department" name="department" class="form-control col-md-8">
+                  <select id="department" name="department" v-model="department" class="form-control col-md-8">
                     <option v-for="(department, index) in departments" :key="index">{{ department }}</option>
                   </select>
                 </div>
@@ -73,15 +73,18 @@
                 <br/>
 
                 <div class="row">
-                  <label for="assignees" class="col-md-3">Assignees </label>
-                  <select id="assignees" v-model="assignees" name="assignees" class="form-control col-md-8">
+                  <label for="assigneesList" class="col-md-3">Assignees </label>
+                  <select id="assigneesList" name="assignees" class="form-control col-md-8" @change="add" v-model="currentlySelected">
                     <option v-for="assignee in filterAdmins(assigneesList)" :key="assignee.id">{{ assignee.firstName }} {{ assignee.lastName }} ({{ assignee.department }})</option>
                   </select>
                 </div>
                 <span v-if="localStorage.getItem('isAdmin')==='false'">Assign to me</span>
                 <br/>
 
-                <div id="assigneesList" class="row justify-content-center">
+                <div id="assignees" class="row justify-content-center">
+                  <ul>
+                    <li v-for="item in assignees" :key="item.id"> {{ item }} </li>
+                  </ul>
                 </div>
 
               </slot>
@@ -128,12 +131,13 @@ export default {
       taskType: null,
       department: null,
       reporter: null,
-      assignees: null,
       localStorage: localStorage,
+      assignees: [],
 
       taskTypes: [],
       departments: [],
-      assigneesList: []
+      assigneesList: [],
+      currentlySelected: null
     }
   },
   methods: {
@@ -163,7 +167,19 @@ export default {
       }
     },
     clearData () {
-      console.log('TODO = CLEAR')
+      this.summary = ''
+      this.description = ''
+      this.createdAt = null
+      this.lastChanged = null
+      this.deadline = null
+      this.difficulty = 3
+      this.priority = 3
+      this.taskType = null
+      this.department = null
+      this.reporter = null
+      this.assignees = []
+      this.localStorage = localStorage
+      this.currentlySelected = null
     },
     getDataArrays () {
       let baseURL = 'http://192.168.0.150:8081/api'
@@ -207,6 +223,12 @@ export default {
         }
       }
       return newUsers
+    },
+    add () {
+      console.log('here')
+      if (!this.assignees.includes(this.currentlySelected)) {
+        this.assignees.push(this.currentlySelected)
+      }
     }
   }
 }

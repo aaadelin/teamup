@@ -1,5 +1,5 @@
 <template>
-  <nav id="sidebar">
+    <div id="sidebar">
     <div class="sidebar-header">
       <h3>{{ name }}</h3>
     </div>
@@ -44,7 +44,7 @@
         <a href="#">Contact</a>
       </li>
     </ul>
-  </nav>
+  </div>
 
 </template>
 
@@ -72,7 +72,9 @@ export default {
 }
 </script>
 
-<style scoped>
+<style>
+
+  /*For the navbar*/
 
   #sidebar {
     min-width: 250px;
@@ -86,33 +88,12 @@ export default {
 
   @media (max-width: 768px) {
     #sidebar {
+      /*margin-left: -250px; -- Pentru a nu aparea deloc*/
       margin-left: -250px;
     }
     #sidebar.active {
       margin-left: 0;
     }
-  }
-
-  /* Additional styling */
-  @import "https://fonts.googleapis.com/css?family=Poppins:300,400,500,600,700";
-
-  body {
-    font-family: 'Poppins', sans-serif;
-    background: #fafafa;
-  }
-
-  p {
-    font-family: 'Poppins', sans-serif;
-    font-size: 1.1em;
-    font-weight: 300;
-    line-height: 1.7em;
-    color: #999;
-  }
-
-  a, a:hover, a:focus {
-    color: inherit;
-    text-decoration: none;
-    transition: all 0.3s;
   }
 
   #sidebar {
@@ -151,6 +132,29 @@ export default {
     color: #fff;
     background: #6d7fcc;
   }
+
+  /* Additional styling */
+  @import "https://fonts.googleapis.com/css?family=Poppins:300,400,500,600,700";
+
+  body {
+    font-family: 'Poppins', sans-serif;
+    background: #fafafa;
+  }
+
+  p {
+    font-family: 'Poppins', sans-serif;
+    font-size: 1.1em;
+    font-weight: 300;
+    line-height: 1.7em;
+    color: #999;
+  }
+
+  a, a:hover, a:focus {
+    color: inherit;
+    text-decoration: none;
+    transition: all 0.3s;
+  }
+
   ul ul a {
     font-size: 0.9em !important;
     padding-left: 30px !important;
