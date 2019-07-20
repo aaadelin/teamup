@@ -68,7 +68,7 @@ public class RestPostController extends AbstractRestController {
     public ResponseEntity<?> addTask(@RequestBody TaskDTO taskDTO, @RequestHeader Map<String, String> headers) {
         LOGGER.info(String.format("Entering method create task with task: %s and headers: %s", taskDTO, headers));
         if (userValidationUtils.isValid(headers)) {
-            taskRepository.save(dtOsConverter.getTaskFromDTO(taskDTO));
+            taskRepository.save(dtOsConverter.getTaskFromDTO(taskDTO, headers.get("token")));
             LOGGER.info("Task has been successfully created and saved to database");
             return new ResponseEntity<>("OK", HttpStatus.OK);
         }

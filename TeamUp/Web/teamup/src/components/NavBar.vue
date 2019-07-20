@@ -50,7 +50,7 @@
 </template>
 
 <script>
-// import axios from 'axios'
+import axios from 'axios'
 import { logout } from '../persistance/RestRepository'
 // import CreateUser from './CreateUser'
 import CreateTask from './CreateTask'
@@ -79,18 +79,18 @@ export default {
       location.reload()
     },
     saveTask (data) {
-      // let url = 'http://192.168.0.150:8081/api/task'
+      let url = 'http://192.168.0.150:8081/api/task'
       console.log(data)
-      // axios({
-      //   url: url,
-      //   method: 'post',
-      //   headers: {
-      //     'token': localStorage.getItem('access_key')
-      //   },
-      //   data: data
-      // }).then(rez => {
-      //   console.log(rez)
-      // })
+      axios({
+        url: url,
+        method: 'post',
+        headers: {
+          'token': localStorage.getItem('access_key')
+        },
+        data: data
+      }).then(rez => {
+        console.log(rez)
+      })
       this.closeTask()
     },
     closeTask () {

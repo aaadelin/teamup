@@ -10,6 +10,8 @@ import com.team.TeamUp.persistance.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -110,7 +112,7 @@ public class DTOsConverter {
      * @param taskDTO TaskDTO instance to be converted to Task domain model
      * @return Task object containing taskDTO data
      */
-    public Task getTaskFromDTO(TaskDTO taskDTO){
+    public Task getTaskFromDTO(TaskDTO taskDTO, String reporterKey){
         LOGGER.info(String.format("Method create Task from TaskDto called with parameter: %s", taskDTO));
 
         Task task;
@@ -126,13 +128,18 @@ public class DTOsConverter {
 
         Optional<Project> project = projectRepository.findById(taskDTO.getProject());
         project.ifPresent(task::setProject);
-        //TODO change with user's hash key instead of id
-        task.setReporter(userRepository.findById(taskDTO.getReporterID()).get()); //should always have a reporter
+        Optional<User> reporter = userRepository.findByHashKey(reporterKey);
+        reporter.ifPresent(task::setReporter);
         task.setDifficulty(taskDTO.getDifficulty());
         task.setPriority(taskDTO.getPriority());
         task.setDepartment(taskDTO.getDepartment());
         task.setTaskType(taskDTO.getTaskType());
-        task.setAssignees(taskDTO.getAssignees().stream().map(assignee -> userRepository.findById(assignee).get()).collect(Collectors.toList()));
+        List<User> list = new ArrayList<>();
+        for (Integer assignee : taskDTO.getAssignees()) {
+            Optional<User> user = userRepository.findById(assignee);
+            user.ifPresent(list::add);
+        }
+        task.setAssignees(list);
 
         LOGGER.info(String.format("Instance of type Task created: %s", task));
         return task;

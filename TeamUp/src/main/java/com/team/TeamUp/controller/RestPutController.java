@@ -97,7 +97,7 @@ public class RestPutController extends AbstractRestController {
                     LOGGER.info(String.format("Task with id %s has not been found to update", taskDTO.getId()));
                     return new ResponseEntity<>("NOT FOUND", HttpStatus.NOT_FOUND);
                 } else {
-                    Task task = dtOsConverter.getTaskFromDTO(taskDTO);
+                    Task task = dtOsConverter.getTaskFromDTO(taskDTO, headers.get("token"));
                     taskRepository.save(task);
                     LOGGER.info(String.format("Task with id %s has been successfully updated in database", task.getId()));
                     return new ResponseEntity<>("OK", HttpStatus.OK);

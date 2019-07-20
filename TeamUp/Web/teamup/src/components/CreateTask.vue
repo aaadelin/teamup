@@ -75,7 +75,7 @@
                 <div class="row">
                   <label for="assigneesList" class="col-md-3">Assignees </label>
                   <select id="assigneesList" name="assignees" class="form-control col-md-8" @change="add" v-model="currentlySelected">
-                    <option v-for="assignee in filterAdmins(assigneesList)" :key="assignee.id">{{ assignee.firstName }} {{ assignee.lastName }} ({{ assignee.department }})</option>
+                    <option v-for="assignee in filterAdmins(assigneesList)" :key="assignee.id" :value="assignee">{{ assignee.firstName }} {{ assignee.lastName }} ({{ assignee.department }})</option>
                   </select>
                 </div>
                 <span v-if="localStorage.getItem('isAdmin')==='false'">Assign to me</span>
@@ -83,7 +83,7 @@
 
                 <div id="assignees" class="row justify-content-center">
                   <ul>
-                    <li v-for="item in assignees" :key="item.id"> {{ item }} </li>
+                    <li v-for="item in assignees" :key="item.id"> {{ item.firstName }} {{ item.lastName }} </li>
                   </ul>
                 </div>
 
@@ -151,6 +151,12 @@ export default {
       this.$emit('cancel')
     },
     createData () {
+      let assigneesIds = []
+
+      for (let i = 0; i < this.assignees.length; i++) {
+        assigneesIds.push(this.assignees[i].id)
+      }
+
       return {
         summary: this.summary,
         description: this.description,
@@ -163,7 +169,7 @@ export default {
         taskStatus: 'OPEN',
         department: this.department,
         reporter: this.$store.state.access_key,
-        assignees: this.assignees
+        assignees: assigneesIds
       }
     },
     clearData () {
