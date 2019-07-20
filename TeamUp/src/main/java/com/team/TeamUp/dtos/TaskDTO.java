@@ -1,5 +1,6 @@
 package com.team.TeamUp.dtos;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.team.TeamUp.domain.enums.Department;
 import com.team.TeamUp.domain.enums.TaskStatus;
 import com.team.TeamUp.domain.enums.TaskType;
@@ -87,6 +88,7 @@ public class TaskDTO {
         this.lastChanged = lastChanged;
     }
 
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     public LocalDateTime getDeadline() {
         return deadline;
     }

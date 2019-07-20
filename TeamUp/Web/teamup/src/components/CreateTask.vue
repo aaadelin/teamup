@@ -31,7 +31,7 @@
 
                 <div class="row">
                   <label for="deadline" class="col-md-3">Deadline </label>
-                  <input id="deadline" v-model="deadline" name="deadline" class="form-control col-md-8"/>
+                  <Datepicker format="YYYY-MM-DD H:i:s" v-model="deadline" id="deadline" name="deadline" class="form-control col-md-8"/>
                 </div>
 
                 <br/>
@@ -121,10 +121,14 @@
 
 <script>
 import axios from 'axios'
+import Datepicker from 'vuejs-datetimepicker'
 
 export default {
   beforeMount () {
     this.getDataArrays()
+  },
+  components: {
+    Datepicker
   },
   name: 'CreateTask',
   props: [ 'isVisible' ],
@@ -167,6 +171,9 @@ export default {
       for (let i = 0; i < this.assignees.length; i++) {
         assigneesIds.push(this.assignees[i].id)
       }
+
+      this.deadline = this.deadline.replace(' ', 'T')
+
       if (this.summary !== '' && this.description !== '' && this.difficulty <= 3 && this.difficulty >= 1 &&
           this.priority >= 1 && this.priority <= 3 && this.taskType !== '' && this.department !== '' &&
           this.project !== '') {
