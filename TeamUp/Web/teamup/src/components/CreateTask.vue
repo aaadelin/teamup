@@ -172,8 +172,6 @@ export default {
         assigneesIds.push(this.assignees[i].id)
       }
 
-      this.deadline = this.deadline.replace(' ', 'T')
-
       if (this.summary !== '' && this.description !== '' && this.difficulty <= 3 && this.difficulty >= 1 &&
           this.priority >= 1 && this.priority <= 3 && this.taskType !== '' && this.department !== '' &&
           this.project !== '') {

@@ -3,9 +3,10 @@
       <div class="container" id="taskContainer">
         <div class="container">
           <p> <b>{{ trimTitle(task.summary) }}</b></p>
-<!--          <p class="lead">{{task.description}}</p>-->
           <p>Deadline: {{task.deadline}}</p>
-<!--          <h1> {{ // access_key }} </h1>-->
+          <div class="progress">
+            <div :class="progressClass" role="progressbar" :style="{width: deadlinePercent + '%'}" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">{{ deadlinePercent }}%</div>
+          </div>
         </div>
       </div>
     </div>
@@ -14,9 +15,21 @@
 <script>
 
 export default {
+  beforeMount () {
+    this.calculateDeadlinePercent() // TODO remove this interval?
+    setInterval(() => {
+      this.calculateDeadlinePercent()
+    }, 5000)
+  },
   name: 'TaskBox',
   props: {
     task: Object
+  },
+  data () {
+    return {
+      deadlinePercent: 0,
+      progressClass: 'progress-bar'
+    }
   },
   computed: {
     access_key () {
@@ -24,11 +37,47 @@ export default {
     }
   },
   methods: {
+    calculateDeadlinePercent () {
+      let task = this.task
+      if (task.createdAt !== null && task.deadline !== null) {
+        let createdAt = new Date(task.createdAt)
+        let deadline = new Date(task.deadline)
+        let now = new Date()
+        let allTime = deadline - createdAt
+
+        let passed = now - createdAt
+
+        let percent = parseInt((passed * 100) / allTime)
+
+        if (percent < 0) {
+          percent = 0
+        }
+        if (percent > 100) {
+          percent = 100
+        }
+
+        let color = ''
+        if (percent >= 0 && percent <= 40) {
+          color = ' bg-success'
+        } else if (percent > 40 && percent <= 70) {
+          color = ' bg-warning'
+        } else {
+          color = ' bg-danger'
+        }
+
+        this.progressClass += color
+
+        this.deadlinePercent = percent
+      }
+    },
     trimTitle (title) {
       let newTitle = ''
-      let cuvinte = title.split(' ')
-      for (let i = 0; i < (cuvinte.length > 5 ? 5 : cuvinte.length); i++) {
-        newTitle += cuvinte[i] + ' '
+      let words = title.split(' ')
+      for (let i = 0; i < (words.length > 5 ? 5 : words.length); i++) {
+        newTitle += words[i] + ' '
+      }
+      if (words.length > 5) {
+        newTitle += '...'
       }
       return newTitle
     },

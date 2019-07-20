@@ -4,8 +4,18 @@
   <div id="content">
     <div id="tasksContainer">
 
-    <p>Your tasks:</p>
-    <div class="row">
+      <div class="row justify-content-end">
+        <div class="col-4">
+          <p>Your tasks:</p>
+        </div>
+        <div class="col-4">
+          <label style="padding-left: 15px">
+          <input type="checkbox" @change="changeVisibleTasks">
+          Also see reported issues
+        </label>
+        </div>
+      </div>
+      <div class="row">
 
       <div class="col columnCategory">
         <div class="header" @click="todo_category = !todo_category">
@@ -82,6 +92,7 @@ export default {
       under_review_category: true,
       done_category: true,
       navName: 'Options',
+      reportedTasks: false,
       menu: []
     }
   },
@@ -90,8 +101,33 @@ export default {
     statusFilter (status) {
       return this.tasks.filter((task) => status.includes(task.taskStatus))
     },
+    changeVisibleTasks () {
+      this.reportedTasks = !this.reportedTasks
+      this.getUsersTasks()
+    },
     getUsersTasks () {
-      let url = 'http://192.168.0.150:8081/api/tasks'
+      this.tasks = []
+      this.getUsersAssignedTasks()
+      if (this.reportedTasks) {
+        this.getUsersReportedTasks()
+      }
+    },
+    getUsersReportedTasks () {
+      let url = 'http://192.168.0.150:8081/api/user/' + localStorage.getItem('access_key') + '/reported-tasks'
+
+      axios({
+        url: url,
+        headers: {
+          'token': localStorage.getItem('access_key')
+        }
+      }).then(res => {
+        this.tasks.push(...res.data)
+      }).catch(err => {
+        console.log(err)
+      })
+    },
+    getUsersAssignedTasks () {
+      let url = 'http://192.168.0.150:8081/api/user/' + localStorage.getItem('access_key') + '/assigned-tasks'
 
       axios({
         url: url,
@@ -103,9 +139,6 @@ export default {
       }).catch(err => {
         console.log(err)
       })
-    },
-    minimizeCategory (category) {
-
     }
   },
   filters: {

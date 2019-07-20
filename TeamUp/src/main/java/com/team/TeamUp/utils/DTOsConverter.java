@@ -10,6 +10,7 @@ import com.team.TeamUp.persistance.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -130,6 +131,7 @@ public class DTOsConverter {
         task.setLastChanged(taskDTO.getLastChanged());
         task.setDeadline(taskDTO.getDeadline());
         task.setTaskStatus(taskDTO.getTaskStatus());
+        task.setCreatedAt(LocalDateTime.now());
 
         Optional<Project> project = projectRepository.findById(taskDTO.getProject());
         task.setProject(project.orElseThrow());

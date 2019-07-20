@@ -26,7 +26,7 @@
 
             <b-nav-form  v-if="access_key" @submit="openSearchPage">
               <b-form-input size="sm" class="mr-sm-2" placeholder="Search" v-model="searchTerm"></b-form-input>
-              <b-button size="sm" class="my-2 my-sm-0" type="submit">Search</b-button>
+<!--              <b-button size="sm" class="my-2 my-sm-0" type="submit">Search</b-button>-->
             </b-nav-form>
 
             <b-nav-item-dropdown text="Administrate..." v-if="isAdmin === 'true'">

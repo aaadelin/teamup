@@ -179,6 +179,50 @@ public class RestGetController extends AbstractRestController {
         return new ResponseEntity<>("FORBIDDEN", HttpStatus.FORBIDDEN);
     }
 
+    @RequestMapping( value = "/user/{key}/assigned-tasks", method = GET)
+    public ResponseEntity<?> getAssignedTasksForUser(@PathVariable String key, @RequestHeader Map<String, String> headers){
+        LOGGER.info(String.format("Entering get user's assigned tasks with key %s and headers %s", key, headers));
+        if(userValidationUtils.isValid(headers)){
+            Optional<User> userOptional = userRepository.findByHashKey(key);
+            if(userOptional.isPresent()){
+                LOGGER.info(String.format("Acquiring tasks assigned to user %s ", userOptional.get()));
+                List<Task> allTasks = taskRepository.findAll();
+
+                List<TaskDTO> filteredTasks = allTasks.stream()
+                        .filter(task -> task.getAssignees().contains(userOptional.get()))
+                        .map(task -> dtOsConverter.getDTOFromTask(task)).collect(Collectors.toList());
+                LOGGER.info(String.format("Returning list of tasks: %s", filteredTasks));
+                return new ResponseEntity<>(filteredTasks, HttpStatus.OK);
+            }
+            LOGGER.info(String.format("No user found with key %s", key));
+            return new ResponseEntity<>("NOT FOUND", HttpStatus.NOT_FOUND);
+        }
+        LOGGER.info("User not eligible");
+        return new ResponseEntity<>("FORBIDDEN", HttpStatus.FORBIDDEN);
+    }
+
+    @RequestMapping( value = "/user/{key}/reported-tasks", method = GET)
+    public ResponseEntity<?> getReportedTasksByUser(@PathVariable String key, @RequestHeader Map<String, String> headers){
+        LOGGER.info(String.format("Entering get reported tasks by user with key %s and headers %s", key, headers));
+        if(userValidationUtils.isValid(headers)){
+            Optional<User> userOptional = userRepository.findByHashKey(key);
+            if(userOptional.isPresent()){
+                LOGGER.info(String.format("Acquiring tasks reported by user %s ", userOptional.get()));
+                List<Task> allTasks = taskRepository.findAll();
+
+                List<TaskDTO> filteredTasks = allTasks.stream()
+                        .filter(task -> task.getReporter().equals(userOptional.get()))
+                        .map(task -> dtOsConverter.getDTOFromTask(task)).collect(Collectors.toList());
+                LOGGER.info(String.format("Returning list of tasks: %s", filteredTasks));
+                return new ResponseEntity<>(filteredTasks, HttpStatus.OK);
+            }
+            LOGGER.info(String.format("No user found with key %s", key));
+            return new ResponseEntity<>("NOT FOUND", HttpStatus.NOT_FOUND);
+        }
+        LOGGER.info("User not eligible");
+        return new ResponseEntity<>("FORBIDDEN", HttpStatus.FORBIDDEN);
+    }
+
     ///Getter based on ids
     @RequestMapping(value = "/user/{id}", method = GET)
     public ResponseEntity<?> getUserById(@PathVariable int id, @RequestHeader Map<String, String> headers) {
