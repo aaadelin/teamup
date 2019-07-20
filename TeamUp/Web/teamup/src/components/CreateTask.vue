@@ -11,6 +11,7 @@
               <slot name="header">
                 Create a new Issue
               </slot>
+
             </div>
 
             <div class="modal-body overflow-auto">
@@ -31,7 +32,8 @@
 
                 <div class="row">
                   <label for="deadline" class="col-md-3">Deadline </label>
-                  <Datepicker format="YYYY-MM-DD H:i:s" v-model="deadline" id="deadline" name="deadline" class="form-control col-md-8"/>
+                  <date-picker v-model="deadline" id="deadline" name="deadline" :config="options" class="form-control col-md-8"/>
+<!--                  <Datepicker format="YYYY-MM-DD H:i:s" v-model="deadline" id="deadline" name="deadline" class="form-control col-md-8"/>-->
                 </div>
 
                 <br/>
@@ -121,14 +123,17 @@
 
 <script>
 import axios from 'axios'
-import Datepicker from 'vuejs-datetimepicker'
+// import Datepicker from 'vuejs-datetimepicker'
+// import datePicker from 'vue-bootstrap-datetimepicker'
+// Import date picker css
+import 'pc-bootstrap4-datetimepicker/build/css/bootstrap-datetimepicker.css'
 
 export default {
   beforeMount () {
     this.getDataArrays()
   },
   components: {
-    Datepicker
+    // datePicker
   },
   name: 'CreateTask',
   props: [ 'isVisible' ],
@@ -152,7 +157,14 @@ export default {
       projects: [],
       departments: [],
       assigneesList: [],
-      currentlySelected: null
+      currentlySelected: null,
+
+      options: {
+        format: 'YYYY-MM-DD hh:mm:ss',
+        useCurrent: true,
+        showClear: true,
+        showClose: true
+      }
     }
   },
   methods: {
@@ -298,8 +310,8 @@ export default {
   }
 
   .modal-container {
-    min-width: 300px;
-    max-width: 500px;
+    min-width: 400px;
+    max-width: 540px;
     margin: 0px auto;
     padding: 20px 30px;
     background-color: #fff;
