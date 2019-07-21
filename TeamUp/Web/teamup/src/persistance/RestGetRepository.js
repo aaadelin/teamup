@@ -17,7 +17,7 @@ export function logout () {
   })
 }
 
-export function getMyID () {
+export async function getMyID () {
   return axios({
     url: `${baseURL}/key`,
     method: 'get',
@@ -174,6 +174,21 @@ export async function getTeams () {
 
 export async function getUserStatuses () {
   let url = `${baseURL}/user-status`
+
+  return axios({
+    url: url,
+    headers: {
+      'token': localStorage.getItem('access_key')
+    }
+  }).then(res => {
+    return res.data
+  }).catch(rez => {
+    return null
+  })
+}
+
+export async function getUsersPhoto (id) {
+  let url = `${baseURL}/user/${id}/photo`
 
   return axios({
     url: url,

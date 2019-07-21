@@ -8,17 +8,19 @@ import com.team.TeamUp.domain.enums.UserStatus;
 import com.team.TeamUp.dtos.*;
 import com.team.TeamUp.persistance.*;
 import com.team.TeamUp.utils.UserValidationUtils;
+import org.apache.tomcat.util.http.fileupload.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
 import java.time.LocalDateTime;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static org.springframework.web.bind.annotation.RequestMethod.GET;
@@ -354,6 +356,35 @@ public class RestGetController extends AbstractRestController {
             return new ResponseEntity<>("OK", HttpStatus.OK);
         }
 
+        LOGGER.info("User not eligible");
+        return new ResponseEntity<>("FORBIDDEN", HttpStatus.FORBIDDEN);
+    }
+
+    // images
+
+    @RequestMapping(value = "/user/{id}/photo", method = GET, produces = "image/jpg")
+    public ResponseEntity<?> getFile(@PathVariable("id") Integer id, @RequestHeader Map<String, String> headers) throws IOException {
+        LOGGER.info(String.format("Entering get photo for user method with id: %s and headers: %s", id, headers));
+        if(userValidationUtils.isValid(headers)){
+            Optional<User> userOptional = userRepository.findById(id);
+
+            if(userOptional.isPresent() && userOptional.get().getPhoto() == null){
+                File file = new ClassPathResource("static/img/avatar.png").getFile();
+                byte[] bytes = Files.readAllBytes(file.toPath());
+                String encodedString = Base64.getEncoder().encodeToString(bytes);
+                LOGGER.info("Exited with default image");
+                return new ResponseEntity<>(encodedString, HttpStatus.OK);
+            }else if(userOptional.isPresent()){
+                File file = new ClassPathResource("static/img/" + userOptional.get().getPhoto()).getFile();
+                byte[] bytes = Files.readAllBytes(file.toPath());
+                LOGGER.info(String.format("Exited with photo with path %s", userOptional.get().getPhoto()));
+                String encodedString = Base64.getEncoder().encodeToString(bytes);
+                return new ResponseEntity<>(encodedString, HttpStatus.OK);
+            }else{
+                LOGGER.info(String.format("No user found with id %s", id));
+                return new ResponseEntity<>("NOT FOUND", HttpStatus.NOT_FOUND);
+            }
+        }
         LOGGER.info("User not eligible");
         return new ResponseEntity<>("FORBIDDEN", HttpStatus.FORBIDDEN);
     }

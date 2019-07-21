@@ -95,7 +95,9 @@ public class DTOsConverter {
             user.setLastActive(userDTO.getLastActive());
         }
         user.setActive(userDTO.isActive());
-        user.setPhoto(userDTO.getPhoto());
+        if(userDTO.getPhoto() != null){
+            user.setPhoto(userDTO.getPhoto());
+        }
         user.setStatus(userDTO.getStatus());
         user.setPassword(TokenUtils.getMD5Token(userDTO.getPassword()));
 

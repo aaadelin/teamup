@@ -23,6 +23,8 @@ public class User {
 
     private String photo;
 
+    private String newPhoto;
+
     private String firstName;
 
     private String lastName;
@@ -129,6 +131,14 @@ public class User {
 
     public void setTeam(Team team) {
         this.team = team;
+    }
+
+    public String getNewPhoto() {
+        return newPhoto;
+    }
+
+    public void setNewPhoto(String newPhoto) {
+        this.newPhoto = newPhoto;
     }
 
     @Override

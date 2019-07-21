@@ -20,20 +20,20 @@
           <b-navbar-nav class="ml-auto">
 
             <b-nav-item v-if="!access_key"  ><router-link to="/login">Log in</router-link></b-nav-item>
-            <!-- TODO add photo-->
-            <b-nav-item v-if="access_key" to="/profile">Profile</b-nav-item>
-            <b-nav-item @click="logoutMethod" v-if="access_key" to="/logout">Log out</b-nav-item>
 
             <b-nav-form  v-if="access_key" @submit="openSearchPage">
               <b-form-input size="sm" class="mr-sm-2" placeholder="Search" v-model="searchTerm"></b-form-input>
-<!--              <b-button size="sm" class="my-2 my-sm-0" type="submit">Search</b-button>-->
             </b-nav-form>
+            <b-nav-item v-if="access_key" to="/profile">
+              <img width="30" height="30" :src="image" alt="Profile"/>
+            </b-nav-item>
+            <b-nav-item @click="logoutMethod" v-if="access_key" to="/logout">Log out</b-nav-item>
 
-            <b-nav-item-dropdown text="Administrate..." v-if="isAdmin === 'true'">
+            <b-nav-item-dropdown text="Administrate..." v-if="isAdmin === 'true'" right>
               <b-dropdown-item @click="addUserIsVisible = true">Add User</b-dropdown-item>
               <b-dropdown-item>Add Team</b-dropdown-item>
-              <b-dropdown-item>Change User</b-dropdown-item>
-              <b-dropdown-item>Change Team</b-dropdown-item>
+              <b-dropdown-item>Administrate users</b-dropdown-item>
+              <b-dropdown-item>Administrate teams</b-dropdown-item>
             </b-nav-item-dropdown>
           </b-navbar-nav>
         </b-collapse>
@@ -45,6 +45,7 @@
       :is-visible="addTaskIsVisible"
       @fin="saveTask"
       @cancel="closeTask"/>
+
     <create-user class="overflow-auto"
       :is-visible="addUserIsVisible"
       @fin="saveUser"
@@ -54,20 +55,24 @@
 </template>
 
 <script>
-import { logout } from '../persistance/RestGetRepository'
+import { getMyID, getUsersPhoto, logout } from '../persistance/RestGetRepository'
 import CreateTask from './CreateTask'
 import CreateUser from './CreateUser'
 import { saveTask, saveUser } from '../persistance/RestPostRepository'
 // import CreateUser from './CreateUser'
 
 export default {
+  beforeMount () {
+    this.getPhoto()
+  },
   name: 'NavBar',
   components: { CreateTask, CreateUser },
   data () {
     return {
       addTaskIsVisible: false,
       addUserIsVisible: false,
-      searchTerm: ''
+      searchTerm: '',
+      image: ''
     }
   },
   computed: {
@@ -137,6 +142,13 @@ export default {
           })
         }
       }
+    },
+    getPhoto () {
+      getMyID().then(rez => {
+        getUsersPhoto(rez).then(photo => {
+          this.image = 'data:image/png;base64,' + (photo);
+        })
+      })
     }
   }
 }
