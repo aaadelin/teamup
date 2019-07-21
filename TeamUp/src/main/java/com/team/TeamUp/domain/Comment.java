@@ -1,6 +1,7 @@
 package com.team.TeamUp.domain;
 
 import javax.persistence.*;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Entity
@@ -13,6 +14,8 @@ public class Comment {
     private String title;
 
     private String content;
+
+    private LocalDateTime datePosted;
 
     @ManyToOne
     @JoinColumn(name = "USER_ID")
@@ -65,14 +68,12 @@ public class Comment {
         this.replies = replies;
     }
 
-    @Override
-    public String toString() {
-        return "Comment{" +
-                "id=" + id +
-                ", title='" + title + '\'' +
-                ", content='" + content + '\'' +
-                ", creator=" + creator +
-                ", replies=" + replies +
-                '}';
+    public LocalDateTime getDatePosted() {
+        return datePosted;
     }
+
+    public void setDatePosted(LocalDateTime datePosted) {
+        this.datePosted = datePosted;
+    }
+
 }

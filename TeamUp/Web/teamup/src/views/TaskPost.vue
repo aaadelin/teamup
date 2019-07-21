@@ -13,7 +13,15 @@
             <span v-else>{{ task.description }}</span> </p>
 
           <p> Created at: {{ task.createdAt }} </p>
-          <p> Deadline: {{ task.deadline }} </p>
+          <div class="row justify-content-center"> Deadline:
+              <date-picker v-if="editMode && canEditAll" v-model="currentDeadline" id="deadline" name="deadline"
+                           :config="options" @dp-change="hasChanged"
+                           class="form-control col col-4"></date-picker>
+            <span v-else>
+              {{task.deadline}}
+            </span>
+          </div>
+          <p></p>
           <p> Last changed: {{ task.lastChanged }} </p>
         </div>
         <div class="col">
@@ -116,7 +124,13 @@ export default {
       currentType: null,
       currentDifficulty: null,
       currentPriority: null,
-      editMode: false
+      editMode: false,
+      options: {
+        format: 'YYYY-MM-DD HH:mm:ss',
+        useCurrent: true,
+        showClear: true,
+        showClose: true
+      }
     }
   },
   methods: {

@@ -1,5 +1,8 @@
 package com.team.TeamUp.dtos;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+
+import java.time.LocalDateTime;
 import java.util.List;
 
 public class CommentDTO {
@@ -8,6 +11,7 @@ public class CommentDTO {
     private String title;
     private String content;
     private UserDTO creator;
+    private LocalDateTime datePosted;
     private List<CommentDTO> replies;
 
     public int getId() {
@@ -50,6 +54,15 @@ public class CommentDTO {
         this.replies = replies;
     }
 
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    public LocalDateTime getDatePosted() {
+        return datePosted;
+    }
+
+    public void setDatePosted(LocalDateTime datePosted) {
+        this.datePosted = datePosted;
+    }
+
     @Override
     public String toString() {
         return "CommentDTO{" +
@@ -57,6 +70,7 @@ public class CommentDTO {
                 ", title='" + title + '\'' +
                 ", content='" + content + '\'' +
                 ", creator=" + creator +
+                ", datePosted=" + datePosted +
                 ", replies=" + replies +
                 '}';
     }

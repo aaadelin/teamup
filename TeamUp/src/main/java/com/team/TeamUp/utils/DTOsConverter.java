@@ -298,7 +298,8 @@ public class DTOsConverter {
         comment.setContent(commentDTO.getContent());
         comment.setCreator(userRepository.findById(commentDTO.getId()).orElseThrow());
         comment.setReplies(commentDTO.getReplies().stream().map(this::getCommentFromDTO).collect(Collectors.toList()));
-
+        comment.setDatePosted(commentDTO.getDatePosted());
+        
         LOGGER.info(String.format("Instance of type Comment created: %s", comment));
         return comment;
     }
@@ -311,6 +312,7 @@ public class DTOsConverter {
         commentDTO.setContent(comment.getContent());
         commentDTO.setCreator(this.getDTOFromUser(comment.getCreator()));
         commentDTO.setReplies(comment.getReplies().stream().map(this::getDTOFromComment).collect(Collectors.toList()));
+        commentDTO.setDatePosted(comment.getDatePosted());
 
         LOGGER.info(String.format("Instance of type CommentDTO created: %s", commentDTO));
         return commentDTO;
