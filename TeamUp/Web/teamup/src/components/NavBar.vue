@@ -25,7 +25,7 @@
               <b-form-input size="sm" class="mr-sm-2" placeholder="Search" v-model="searchTerm"></b-form-input>
             </b-nav-form>
             <b-nav-item v-if="access_key" to="/profile">
-              <img width="30" height="30" :src="image" alt="Profile"/>
+              <img width="30" height="30" class="rounded-circle" :src="image" alt="Profile"/>
             </b-nav-item>
             <b-nav-item @click="logoutMethod" v-if="access_key" to="/logout">Log out</b-nav-item>
 
@@ -146,7 +146,7 @@ export default {
     getPhoto () {
       getMyID().then(rez => {
         getUsersPhoto(rez).then(photo => {
-          this.image = 'data:image/png;base64,' + (photo);
+          this.image = 'data:image/png;base64,' + (photo)
         })
       })
     }

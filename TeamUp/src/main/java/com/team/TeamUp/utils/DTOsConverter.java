@@ -63,6 +63,7 @@ public class DTOsConverter {
         userDTO.setPhoto(user.getPhoto());
         if(user.getTeam() != null){
             userDTO.setTeamID(user.getTeam().getId());
+            userDTO.setDepartment(user.getTeam().getDepartment());
         }else{
             userDTO.setTeamID(-1);
         }

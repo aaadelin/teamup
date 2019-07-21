@@ -8,61 +8,80 @@
       </div>
       <div class="row">
         <div class="col">
-          <p> Description:
+
+          <span> <strong>Description: </strong>
             <span v-if="editMode && canEditAll"> <textarea @keyup="hasChanged" v-model="currentDescription" cols="30" rows="4"></textarea> </span>
-            <span v-else>{{ task.description }}</span> </p>
+            <span v-else>{{ task.description }}</span>
+          </span>
 
-          <p> Created at: {{ task.createdAt }} </p>
+          <p></p>
 
-          <div class="row justify-content-center p"> Deadline:
+          <span> <strong>Created at: </strong>
+            {{ task.createdAt }} </span>
+
+          <p></p>
+
+          <span class="row justify-content-center"> <strong>Deadline:</strong>
               <date-picker v-if="editMode && canEditAll" v-model="currentDeadline" id="deadline" name="deadline"
                            :config="options" @dp-change="hasChanged"
                            class="form-control col col-4"></date-picker>
             <span v-else>
               {{task.deadline}}
             </span>
-          </div>
+          </span>
+
           <p></p>
-          <p> Last changed: {{ task.lastChanged }} </p>
+
+          <span> <strong> Last changed: </strong>{{ task.lastChanged }} </span>
         </div>
+
         <div class="col">
 
-          <p> Task status: <span v-if="editMode">
+          <span> <strong>Task status:</strong>  <span v-if="editMode">
             <select @change="hasChanged" v-model="currentStatus" >
                 <option v-for="(taskStatus, index) in taskStatuses" :key="index">
                   {{ taskStatus }}
                 </option>
             </select>
           </span>
-          <span v-else>{{ task.taskStatus }}</span></p>
+          <span v-else>{{ task.taskStatus }}</span>
+          </span>
 
-          <p> Task type: <span v-if="editMode && canEditAll">
+          <p></p>
+
+          <span> <strong>Task type:</strong>  <span v-if="editMode && canEditAll">
             <select @change="hasChanged" v-model="currentType" >
                 <option v-for="(taskType, index) in taskTypes" :key="index">
                   {{ taskType }}
                 </option>
             </select>
           </span>
-          <span v-else>{{ task.taskType }}</span></p>
+          <span v-else>{{ task.taskType }}</span></span>
 
-          <p> Difficulty: <span v-if="editMode && canEditAll">
+          <p></p>
+
+          <span> <strong>Difficulty: </strong> <span v-if="editMode && canEditAll">
             <select @change="hasChanged" v-model="currentDifficulty" >
                 <option v-for="(diff, index) in 3" :key="index">
                   {{ diff }}
                 </option>
             </select>
           </span>
+          <span v-else>{{ task.difficulty }}</span>
+          </span>
 
-          <span v-else>{{ task.difficulty }}</span></p>
+          <p></p>
 
-          <p> Priority: <span v-if="editMode && canEditAll">
+          <span> <strong>Priority: </strong><span v-if="editMode && canEditAll">
             <select @change="hasChanged" v-model="currentPriority" >
                 <option v-for="(priority, index) in 3" :key="index">
                   {{ priority }}
                 </option>
             </select>
+            </span>
+            <span v-else>{{ task.priority }}</span>
           </span>
-            <span v-else>{{ task.priority }}</span></p>
+
         </div>
 
       </div>
