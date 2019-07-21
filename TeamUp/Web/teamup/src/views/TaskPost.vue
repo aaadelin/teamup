@@ -13,7 +13,8 @@
             <span v-else>{{ task.description }}</span> </p>
 
           <p> Created at: {{ task.createdAt }} </p>
-          <div class="row justify-content-center"> Deadline:
+
+          <div class="row justify-content-center p"> Deadline:
               <date-picker v-if="editMode && canEditAll" v-model="currentDeadline" id="deadline" name="deadline"
                            :config="options" @dp-change="hasChanged"
                            class="form-control col col-4"></date-picker>
@@ -219,5 +220,13 @@ export default {
     flex-direction: row-reverse;
     padding-right: 30px;
     height: 30px;
+  }
+
+  p, .p {
+    font-family: 'Poppins', sans-serif;
+    font-size: 1.1em;
+    font-weight: 300;
+    line-height: 1.7em;
+    color: #999;
   }
 </style>

@@ -27,8 +27,6 @@ public class UserDTO {
 
     private UserStatus status;
 
-    private Department department;
-
     public UserDTO() {
     }
 
@@ -112,13 +110,6 @@ public class UserDTO {
         this.status = status;
     }
 
-    public Department getDepartment() {
-        return department;
-    }
-
-    public void setDepartment(Department department) {
-        this.department = department;
-    }
 
     @Override
     public String toString() {
@@ -133,7 +124,6 @@ public class UserDTO {
                 ", isActive=" + isActive +
                 ", teamID=" + teamID +
                 ", status=" + status +
-                ", department=" + department +
                 '}';
     }
 }

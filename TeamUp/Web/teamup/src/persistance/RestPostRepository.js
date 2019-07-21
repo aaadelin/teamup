@@ -17,17 +17,27 @@ export function login (username, password) {
     location.reload()
   }).catch(rez => {
     console.log('retry login')
-    // this.$notify({
-    //   group: 'notificationsGroup',
-    //   title: 'Error at login',
-    //   type: 'error',
-    //   text: 'Username or password is incorrect'
-    // })
   })
 }
 
 export async function saveTask (data) {
   let url = `${baseURL}/task`
+  return axios({
+    url: url,
+    method: 'post',
+    headers: {
+      'token': localStorage.getItem('access_key')
+    },
+    data: data
+  }).then(rez => {
+    return true
+  }).catch(rez => {
+    return false
+  })
+}
+
+export async function saveUser (data) {
+  let url = `${baseURL}/user`
   return axios({
     url: url,
     method: 'post',

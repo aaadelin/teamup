@@ -63,7 +63,6 @@ public class DTOsConverter {
         userDTO.setPhoto(user.getPhoto());
         if(user.getTeam() != null){
             userDTO.setTeamID(user.getTeam().getId());
-            userDTO.setDepartment(user.getTeam().getDepartment());
         }else{
             userDTO.setTeamID(-1);
         }
@@ -299,7 +298,7 @@ public class DTOsConverter {
         comment.setCreator(userRepository.findById(commentDTO.getId()).orElseThrow());
         comment.setReplies(commentDTO.getReplies().stream().map(this::getCommentFromDTO).collect(Collectors.toList()));
         comment.setDatePosted(commentDTO.getDatePosted());
-        
+
         LOGGER.info(String.format("Instance of type Comment created: %s", comment));
         return comment;
     }

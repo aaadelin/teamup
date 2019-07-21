@@ -257,7 +257,7 @@ export default {
     },
     async assignToMe () {
       let me = await getMyID()
-      console.log(me)
+
       for (let i = 0; i < this.assigneesList.length; i++) {
         if (this.assigneesList[i].id === me) {
           me = this.assigneesList[i]

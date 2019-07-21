@@ -12,7 +12,7 @@
 
             <b-nav-item v-if="access_key" to="/tasks">Tasks</b-nav-item>
             <b-nav-item v-if="access_key" to="/projects">Projects</b-nav-item>
-            <b-nav-item v-if="access_key" @click="isVisible = true">Create</b-nav-item>
+            <b-nav-item v-if="access_key" @click="addTaskIsVisible = true">Create</b-nav-item>
 
           </b-navbar-nav>
 
@@ -30,7 +30,7 @@
             </b-nav-form>
 
             <b-nav-item-dropdown text="Administrate..." v-if="isAdmin === 'true'">
-              <b-dropdown-item>Add User</b-dropdown-item>
+              <b-dropdown-item @click="addUserIsVisible = true">Add User</b-dropdown-item>
               <b-dropdown-item>Add Team</b-dropdown-item>
               <b-dropdown-item>Change User</b-dropdown-item>
               <b-dropdown-item>Change Team</b-dropdown-item>
@@ -42,9 +42,13 @@
 
     <div>
       <create-task class="overflow-auto"
-      :is-visible="isVisible"
+      :is-visible="addTaskIsVisible"
       @fin="saveTask"
       @cancel="closeTask"/>
+    <create-user class="overflow-auto"
+      :is-visible="addUserIsVisible"
+      @fin="saveUser"
+      @cancel="closeAddUser"/>
     </div>
   </div>
 </template>
@@ -52,15 +56,17 @@
 <script>
 import { logout } from '../persistance/RestGetRepository'
 import CreateTask from './CreateTask'
-import { saveTask } from '../persistance/RestPostRepository'
+import CreateUser from './CreateUser'
+import { saveTask, saveUser } from '../persistance/RestPostRepository'
 // import CreateUser from './CreateUser'
 
 export default {
   name: 'NavBar',
-  components: { CreateTask },
+  components: { CreateTask, CreateUser },
   data () {
     return {
-      isVisible: false,
+      addTaskIsVisible: false,
+      addUserIsVisible: false,
       searchTerm: ''
     }
   },
@@ -100,13 +106,37 @@ export default {
       }
     },
     closeTask () {
-      this.isVisible = false
+      this.addTaskIsVisible = false
     },
     openSearchPage (event) {
       event.preventDefault()
       console.log('Sent!')
       console.log(this.searchTerm)
       // TODO
+    },
+    closeAddUser () {
+      this.addUserIsVisible = false
+    },
+    async saveUser (data) {
+      if (data !== null) {
+        let ansewer = await saveUser(data)
+        if (ansewer) {
+          this.$notify({
+            group: 'notificationsGroup',
+            title: 'Success',
+            type: 'success',
+            text: 'Task saved!'
+          })
+          this.closeTask()
+        } else {
+          this.$notify({
+            group: 'notificationsGroup',
+            title: 'Error',
+            type: 'error',
+            text: 'An error occurred'
+          })
+        }
+      }
     }
   }
 }

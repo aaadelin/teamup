@@ -156,3 +156,33 @@ export async function getUsersAssignedTasks () {
     return null
   })
 }
+
+export async function getTeams () {
+  let url = `${baseURL}/teams`
+
+  return axios({
+    url: url,
+    headers: {
+      'token': localStorage.getItem('access_key')
+    }
+  }).then(res => {
+    return res.data
+  }).catch(rez => {
+    return null
+  })
+}
+
+export async function getUserStatuses () {
+  let url = `${baseURL}/user-status`
+
+  return axios({
+    url: url,
+    headers: {
+      'token': localStorage.getItem('access_key')
+    }
+  }).then(res => {
+    return res.data
+  }).catch(rez => {
+    return null
+  })
+}
