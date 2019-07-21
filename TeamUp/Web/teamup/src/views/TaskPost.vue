@@ -11,12 +11,12 @@
 </template>
 
 <script>
-import axios from 'axios'
+import { getTaskById } from '../persistance/RestGetRepository'
 
 export default {
   name: 'TaskPost',
-  created () {
-    this.loadData()
+  async created () {
+    await this.loadData()
   },
   data () {
     return {
@@ -28,21 +28,10 @@ export default {
     }
   },
   methods: {
-    loadData () {
-      let url = 'http://192.168.0.150:8081/api/post/taskid=' + this.$route.query.taskId
-
-      axios({
-        method: 'get',
-        url: url,
-        data: {
-        },
-        headers: {
-          'token': localStorage.getItem('access_key')
-        }
-      }).then(res => {
-        this.task = res.data.task
-        this.comments = res.data.comments
-      })
+    async loadData () {
+      let data = await getTaskById(this.$route.query.taskId)
+      this.task = data.task
+      this.comments = data.comments
     }
   }
 }

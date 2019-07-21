@@ -75,12 +75,12 @@
 
 <script>
 import TaskBox from '../components/TaskBox'
-import axios from 'axios'
 import RightMenu from '../components/RightMenu'
+import { getUsersAssignedTasks, getUsersReportedTasks } from '../persistance/RestGetRepository'
 
 export default {
-  beforeMount () {
-    this.getUsersTasks()
+  async beforeMount () {
+    await this.getUsersTasks()
   },
   name: 'Tasks',
   components: { RightMenu, TaskBox },
@@ -101,44 +101,29 @@ export default {
     statusFilter (status) {
       return this.tasks.filter((task) => status.includes(task.taskStatus))
     },
-    changeVisibleTasks () {
+    async changeVisibleTasks () {
       this.reportedTasks = !this.reportedTasks
-      this.getUsersTasks()
+      await this.getUsersTasks()
     },
-    getUsersTasks () {
+    async getUsersTasks () {
       this.tasks = []
-      this.getUsersAssignedTasks()
+      this.tasks = await getUsersAssignedTasks()
+
       if (this.reportedTasks) {
-        this.getUsersReportedTasks()
+        let reported = await getUsersReportedTasks()
+        for (let i = 0; i < reported.length; i++) {
+          if (!this.getIds(this.tasks).includes(reported[i].id)) {
+            this.tasks.push(reported[i])
+          }
+        }
       }
     },
-    getUsersReportedTasks () {
-      let url = 'http://192.168.0.150:8081/api/user/' + localStorage.getItem('access_key') + '/reported-tasks'
-
-      axios({
-        url: url,
-        headers: {
-          'token': localStorage.getItem('access_key')
-        }
-      }).then(res => {
-        this.tasks.push(...res.data)
-      }).catch(err => {
-        console.log(err)
-      })
-    },
-    getUsersAssignedTasks () {
-      let url = 'http://192.168.0.150:8081/api/user/' + localStorage.getItem('access_key') + '/assigned-tasks'
-
-      axios({
-        url: url,
-        headers: {
-          'token': localStorage.getItem('access_key')
-        }
-      }).then(res => {
-        this.tasks = res.data
-      }).catch(err => {
-        console.log(err)
-      })
+    getIds (tasks) {
+      let ids = []
+      for (let i = 0; i < tasks.length; i++) {
+        ids.push(tasks[i].id)
+      }
+      return ids
     }
   },
   filters: {

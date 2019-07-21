@@ -50,10 +50,10 @@
 </template>
 
 <script>
-import axios from 'axios'
-import { logout } from '../persistance/RestRepository'
-// import CreateUser from './CreateUser'
+import { logout } from '../persistance/RestGetRepository'
 import CreateTask from './CreateTask'
+import { saveTask } from '../persistance/RestPostRepository'
+// import CreateUser from './CreateUser'
 
 export default {
   name: 'NavBar',
@@ -79,31 +79,8 @@ export default {
       location.reload()
     },
     saveTask (data) {
-      let url = 'http://192.168.0.150:8081/api/task'
       if (data !== null) {
-        axios({
-          url: url,
-          method: 'post',
-          headers: {
-            'token': localStorage.getItem('access_key')
-          },
-          data: data
-        }).then(rez => {
-          this.$notify({
-            group: 'notificationsGroup',
-            title: 'Success',
-            type: 'success',
-            text: 'Task saved!'
-          })
-          this.closeTask()
-        }).catch(rez => {
-          this.$notify({
-            group: 'notificationsGroup',
-            title: 'Error',
-            type: 'error',
-            text: 'An error occurred'
-          })
-        })
+        saveTask(data)
       }
     },
     closeTask () {

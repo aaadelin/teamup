@@ -28,7 +28,7 @@
 </template>
 
 <script>
-import axios from 'axios'
+import { login } from '../persistance/RestPostRepository'
 
 export default {
   name: 'Login',
@@ -44,28 +44,9 @@ export default {
       this.submitted = true
       const { username, password } = this
       if (username && password) {
-        this.login(username, password)
+        login(username, password)
       }
-    },
-    login (username, password) {
-      let url = 'http://192.168.0.150:8081/api/login'
-
-      let data = new FormData()
-      data.set('username', username)
-      data.set('password', password)
-
-      axios.post(url, data, {
-        headers: { 'token': localStorage.getItem('access_key') }
-      }).then(res => {
-        console.log(res.data)
-        localStorage.setItem('access_key', res.data.key)
-        localStorage.setItem('isAdmin', res.data.isAdmin)
-        location.reload()
-      }).catch(err => {
-        console.log(err)
-      })
     }
-
   }
 }
 </script>

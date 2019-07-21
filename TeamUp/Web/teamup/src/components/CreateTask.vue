@@ -1,6 +1,6 @@
 <template>
 
-  <div v-if="isVisible" id="container">
+  <div v-if="isVisible && dataReady" id="container">
 
     <transition name="modal">
       <div class="modal-mask">
@@ -122,15 +122,15 @@
 </template>
 
 <script>
-import axios from 'axios'
+import 'pc-bootstrap4-datetimepicker/build/css/bootstrap-datetimepicker.css'
+import { getDepartments, getMyID, getProjects, getTaskTypes, getUsers } from '../persistance/RestGetRepository'
 // import Datepicker from 'vuejs-datetimepicker'
 // import datePicker from 'vue-bootstrap-datetimepicker'
 // Import date picker css
-import 'pc-bootstrap4-datetimepicker/build/css/bootstrap-datetimepicker.css'
 
 export default {
-  beforeMount () {
-    this.getDataArrays()
+  async beforeMount () {
+    await this.getDataArrays()
   },
   components: {
     // datePicker
@@ -158,6 +158,7 @@ export default {
       departments: [],
       assigneesList: [],
       currentlySelected: null,
+      dataReady: false,
 
       options: {
         format: 'YYYY-MM-DD HH:mm:ss',
@@ -229,48 +230,16 @@ export default {
       this.currentlySelected = null
       this.project = null
     },
-    getDataArrays () {
-      let baseURL = 'http://192.168.0.150:8081/api'
+    async getDataArrays () {
+      this.taskTypes = await getTaskTypes()
 
-      axios({
-        url: baseURL + '/task-types',
-        method: 'get',
-        headers: {
-          'token': localStorage.getItem('access_key')
-        }
-      }).then(rez => {
-        this.taskTypes = rez.data
-      })
+      this.departments = await getDepartments()
 
-      axios({
-        url: baseURL + '/departments',
-        method: 'get',
-        headers: {
-          'token': localStorage.getItem('access_key')
-        }
-      }).then(rez => {
-        this.departments = rez.data
-      })
+      this.assigneesList = await getUsers()
 
-      axios({
-        url: baseURL + '/users',
-        method: 'get',
-        headers: {
-          'token': localStorage.getItem('access_key')
-        }
-      }).then(rez => {
-        this.assigneesList = rez.data
-      })
+      this.projects = await getProjects()
 
-      axios({
-        url: baseURL + '/projects',
-        method: 'get',
-        headers: {
-          'token': localStorage.getItem('access_key')
-        }
-      }).then(rez => {
-        this.projects = rez.data
-      })
+      this.dataReady = true
     },
     filterAdmins (users) {
       let newUsers = []
@@ -287,7 +256,7 @@ export default {
       }
     },
     async assignToMe () {
-      let me = await this.getMyID()
+      let me = await getMyID()
       console.log(me)
       for (let i = 0; i < this.assigneesList.length; i++) {
         if (this.assigneesList[i].id === me) {
@@ -298,19 +267,6 @@ export default {
       if (!this.assignees.includes(me)) {
         this.assignees.push(me)
       }
-    },
-    getMyID () {
-      return axios({
-        url: 'http://192.168.0.150:8081/api/key',
-        method: 'get',
-        headers: {
-          'token': localStorage.getItem('access_key')
-        }
-      }).then(rez => {
-        return rez.data
-      }).catch(rez => {
-        return null
-      })
     }
   }
 }
