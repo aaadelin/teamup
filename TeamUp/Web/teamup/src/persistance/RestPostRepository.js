@@ -12,18 +12,23 @@ export function login (username, password) {
   axios.post(url, data, {
     headers: { 'token': localStorage.getItem('access_key') }
   }).then(res => {
-    console.log(res.data)
     localStorage.setItem('access_key', res.data.key)
     localStorage.setItem('isAdmin', res.data.isAdmin)
     location.reload()
-  }).catch(err => {
-    console.log(err)
+  }).catch(rez => {
+    console.log('retry login')
+    // this.$notify({
+    //   group: 'notificationsGroup',
+    //   title: 'Error at login',
+    //   type: 'error',
+    //   text: 'Username or password is incorrect'
+    // })
   })
 }
 
-export function saveTask (data) {
+export async function saveTask (data) {
   let url = `${baseURL}/task`
-  axios({
+  return axios({
     url: url,
     method: 'post',
     headers: {
@@ -31,19 +36,8 @@ export function saveTask (data) {
     },
     data: data
   }).then(rez => {
-    this.$notify({
-      group: 'notificationsGroup',
-      title: 'Success',
-      type: 'success',
-      text: 'Task saved!'
-    })
-    this.closeTask()
+    return true
   }).catch(rez => {
-    this.$notify({
-      group: 'notificationsGroup',
-      title: 'Error',
-      type: 'error',
-      text: 'An error occurred'
-    })
+    return false
   })
 }

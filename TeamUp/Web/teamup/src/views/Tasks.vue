@@ -109,8 +109,27 @@ export default {
       this.tasks = []
       this.tasks = await getUsersAssignedTasks()
 
+      if (this.tasks === null) {
+        this.$notify({
+          group: 'notificationsGroup',
+          title: 'Error getting assigned tasks',
+          type: 'error',
+          text: 'An error occurred'
+        })
+      }
+
       if (this.reportedTasks) {
         let reported = await getUsersReportedTasks()
+
+        if (reported === null) {
+          this.$notify({
+            group: 'notificationsGroup',
+            title: 'Error getting reported tasks',
+            type: 'error',
+            text: 'An error occurred'
+          })
+        }
+
         for (let i = 0; i < reported.length; i++) {
           if (!this.getIds(this.tasks).includes(reported[i].id)) {
             this.tasks.push(reported[i])

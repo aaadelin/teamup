@@ -15,10 +15,25 @@ import datePicker from 'vue-bootstrap-datetimepicker'
 import fontawesome from '@fortawesome/fontawesome-free'
 
 import { library } from '@fortawesome/fontawesome-svg-core'
-import { faCamera, faClock, faCalendar, faChevronLeft, faChevronRight, faCalendarCheck, faTrashAlt, faTimesCircle, faArrowUp, faArrowDown } from '@fortawesome/free-solid-svg-icons'
+import {
+  faCamera,
+  faClock,
+  faCalendar,
+  faChevronLeft,
+  faChevronRight,
+  faCalendarCheck,
+  faTrashAlt,
+  faTimesCircle,
+  faArrowUp,
+  faArrowDown,
+  faAngleDoubleUp,
+  faAngleUp,
+  faSortUp,
+  faEdit
+} from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 
-library.add(faCamera, faClock, faCalendar, faChevronLeft, faChevronRight, faCalendarCheck, faTrashAlt, faTimesCircle, faArrowUp, faArrowDown)
+library.add(faCamera, faClock, faCalendar, faChevronLeft, faChevronRight, faCalendarCheck, faTrashAlt, faTimesCircle, faArrowUp, faArrowDown, faAngleUp, faAngleDoubleUp, faSortUp, faEdit)
 
 Vue.component('fas', FontAwesomeIcon)
 

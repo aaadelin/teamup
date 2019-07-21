@@ -33,7 +33,7 @@ public abstract class AbstractRestController {
         this.userValidationUtils = userValidationUtils;
 
         this.dtOsConverter = new DTOsConverter(userRepository, teamRepository,
-                taskRepository, projectRepository);
+                taskRepository, projectRepository, postRepository, commentRepository);
     }
 
 }

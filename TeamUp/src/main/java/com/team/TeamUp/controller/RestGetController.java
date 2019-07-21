@@ -5,10 +5,7 @@ import com.team.TeamUp.domain.enums.Department;
 import com.team.TeamUp.domain.enums.TaskStatus;
 import com.team.TeamUp.domain.enums.TaskType;
 import com.team.TeamUp.domain.enums.UserStatus;
-import com.team.TeamUp.dtos.ProjectDTO;
-import com.team.TeamUp.dtos.TaskDTO;
-import com.team.TeamUp.dtos.TeamDTO;
-import com.team.TeamUp.dtos.UserDTO;
+import com.team.TeamUp.dtos.*;
 import com.team.TeamUp.persistance.*;
 import com.team.TeamUp.utils.UserValidationUtils;
 import org.slf4j.Logger;
@@ -94,7 +91,7 @@ public class RestGetController extends AbstractRestController {
     public ResponseEntity<?> getAllPosts(@RequestHeader Map<String, String> headers) {
         LOGGER.info(String.format("Entering get all posts method with headers: %s", headers.toString()));
         if (userValidationUtils.isValid(headers)) {
-            List<Post> posts = postRepository.findAll();//.stream().map(project -> dtOsConverter.getDTOFromProject(project)).collect(Collectors.toList());
+            List<PostDTO> posts = postRepository.findAll().stream().map(post -> dtOsConverter.getDTOFromPost(post)).collect(Collectors.toList());
             LOGGER.info(String.format("Returning list of posts: %s", posts.toString()));
             return new ResponseEntity<>(posts, HttpStatus.OK);
         }
@@ -168,8 +165,9 @@ public class RestGetController extends AbstractRestController {
         if (userValidationUtils.isValid(headers)) {
             Optional<Post> post = postRepository.findById(postid);
             if (post.isPresent()) {
-                LOGGER.info(String.format("Returning post: %s", post.toString()));
-                return new ResponseEntity<>(post.get().getComments(), HttpStatus.OK);
+                PostDTO postDTO = dtOsConverter.getDTOFromPost(post.get());
+                LOGGER.info(String.format("Returning post: %s", postDTO));
+                return new ResponseEntity<>(postDTO.getComments(), HttpStatus.OK);
             } else {
                 LOGGER.info(String.format("No post found with id %d", postid));
                 return new ResponseEntity<>("NOT FOUND", HttpStatus.NOT_FOUND);
@@ -319,8 +317,9 @@ public class RestGetController extends AbstractRestController {
             if (taskOptional.isPresent()) {
                 Optional<Post> postOptional = postRepository.findByTask(taskOptional.get());
                 if (postOptional.isPresent()) {
-                    LOGGER.info(String.format("Returning post: %s", postOptional.get().toString()));
-                    return new ResponseEntity<>(postOptional.get(), HttpStatus.OK);
+                    PostDTO postDTO = dtOsConverter.getDTOFromPost(postOptional.get());
+                    LOGGER.info(String.format("Returning post: %s", postDTO));
+                    return new ResponseEntity<>(postDTO, HttpStatus.OK);
                 } else {
                     LOGGER.info("Task doesn't have any post yet. Creating an empty one and returning it");
                     Post post = new Post();

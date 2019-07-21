@@ -12,8 +12,8 @@ export function logout () {
   }).then(res => {
     localStorage.clear()
     location.reload()
-  }).catch(err => {
-    console.log(err)
+  }).catch(rez => {
+    console.log('request denied')
   })
 }
 
@@ -33,6 +33,22 @@ export function getMyID () {
 
 export async function getTaskTypes () {
   let url = `${baseURL}/task-types`
+
+  return axios({
+    url: url,
+    method: 'get',
+    headers: {
+      'token': localStorage.getItem('access_key')
+    }
+  }).then(rez => {
+    return rez.data
+  }).catch(rez => {
+    return []
+  })
+}
+
+export async function getTaskStatus () {
+  let url = `${baseURL}/task-status`
 
   return axios({
     url: url,
@@ -121,8 +137,8 @@ export async function getUsersReportedTasks () {
     }
   }).then(res => {
     return res.data
-  }).catch(err => {
-    console.log(err)
+  }).catch(rez => {
+    return null
   })
 }
 
@@ -136,7 +152,7 @@ export async function getUsersAssignedTasks () {
     }
   }).then(res => {
     return res.data
-  }).catch(err => {
-    console.log(err)
+  }).catch(rez => {
+    return null
   })
 }

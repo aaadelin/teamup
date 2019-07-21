@@ -4,8 +4,17 @@
         <div class="container">
           <p> <b>{{ trimTitle(task.summary) }}</b></p>
           <p>Deadline: {{task.deadline}}</p>
-          <div class="progress">
-            <div :class="progressClass" role="progressbar" :style="{width: deadlinePercent + '%'}" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">{{ deadlinePercent }}%</div>
+          <div class="row">
+            <div class="col-1">
+              <i v-if="task.priority === 3" class="fas fa-angle-double-up"></i>
+              <i v-if="task.priority === 2" class="fas fa-angle-up"></i>
+              <i v-if="task.priority === 1" class="fas fa-sort-up"></i>
+            </div>
+            <div class="col-10">
+              <div class="progress">
+                <div :class="progressClass" role="progressbar" :style="{width: deadlinePercent + '%'}" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">{{ deadlinePercent }}%</div>
+              </div>
+            </div>
           </div>
         </div>
       </div>

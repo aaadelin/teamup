@@ -78,9 +78,25 @@ export default {
       localStorage.clear()
       location.reload()
     },
-    saveTask (data) {
+    async saveTask (data) {
       if (data !== null) {
-        saveTask(data)
+        let ansewer = await saveTask(data)
+        if (ansewer) {
+          this.$notify({
+            group: 'notificationsGroup',
+            title: 'Success',
+            type: 'success',
+            text: 'Task saved!'
+          })
+          this.closeTask()
+        } else {
+          this.$notify({
+            group: 'notificationsGroup',
+            title: 'Error',
+            type: 'error',
+            text: 'An error occurred'
+          })
+        }
       }
     },
     closeTask () {

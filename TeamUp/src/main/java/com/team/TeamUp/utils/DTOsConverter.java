@@ -2,10 +2,7 @@ package com.team.TeamUp.utils;
 
 import com.team.TeamUp.domain.*;
 import com.team.TeamUp.domain.enums.UserStatus;
-import com.team.TeamUp.dtos.ProjectDTO;
-import com.team.TeamUp.dtos.TaskDTO;
-import com.team.TeamUp.dtos.TeamDTO;
-import com.team.TeamUp.dtos.UserDTO;
+import com.team.TeamUp.dtos.*;
 import com.team.TeamUp.persistance.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,16 +24,22 @@ public class DTOsConverter {
     private TeamRepository teamRepository;
     private TaskRepository taskRepository;
     private ProjectRepository projectRepository;
+    private PostRepository postRepository;
+    private CommentRepository commentRepository;
 
     public DTOsConverter(UserRepository userRepository,
                          TeamRepository teamRepository,
                          TaskRepository taskRepository,
-                         ProjectRepository projectRepository) {
+                         ProjectRepository projectRepository,
+                         PostRepository postRepository,
+                         CommentRepository commentRepository) {
 
         this.userRepository = userRepository;
         this.teamRepository = teamRepository;
         this.taskRepository = taskRepository;
         this.projectRepository = projectRepository;
+        this.postRepository = postRepository;
+        this.commentRepository = commentRepository;
 
         LOGGER.info("Instance of class DtosConverter created");
     }
@@ -286,5 +289,53 @@ public class DTOsConverter {
 
         LOGGER.info(String.format("Instance of type team created: %s", teamDTO));
         return teamDTO;
+    }
+
+    public Comment getCommentFromDTO(CommentDTO commentDTO){
+        LOGGER.info(String.format("Method to convert from CommentDTO to Comment called with parameter: %s", commentDTO));
+        Comment comment = commentRepository.findById(commentDTO.getId()).orElseGet(Comment::new);
+        comment.setTitle(commentDTO.getTitle());
+        comment.setContent(commentDTO.getContent());
+        comment.setCreator(userRepository.findById(commentDTO.getId()).orElseThrow());
+        comment.setReplies(commentDTO.getReplies().stream().map(this::getCommentFromDTO).collect(Collectors.toList()));
+
+        LOGGER.info(String.format("Instance of type Comment created: %s", comment));
+        return comment;
+    }
+
+    public CommentDTO getDTOFromComment(Comment comment){
+        LOGGER.info(String.format("Method to convert from Comment to CommentDTO called with parameter: %s", comment));
+        CommentDTO commentDTO = new CommentDTO();
+        commentDTO.setId(comment.getId());
+        commentDTO.setTitle(comment.getTitle());
+        commentDTO.setContent(comment.getContent());
+        commentDTO.setCreator(this.getDTOFromUser(comment.getCreator()));
+        commentDTO.setReplies(comment.getReplies().stream().map(this::getDTOFromComment).collect(Collectors.toList()));
+
+        LOGGER.info(String.format("Instance of type CommentDTO created: %s", commentDTO));
+        return commentDTO;
+    }
+
+    public Post getPostFromDTO(PostDTO postDTO){
+        LOGGER.info(String.format("Method to convert from PostDTO to Post called with parameter: %s", postDTO));
+        Post post = postRepository.findById(postDTO.getId()).orElseGet(Post::new);
+
+        post.setTask(taskRepository.findById(postDTO.getTaskDTO().getId()).orElseThrow());
+        post.setComments(postDTO.getComments().stream().map(this::getCommentFromDTO).collect(Collectors.toList()));
+
+        LOGGER.info(String.format("Instance of type Post created: %s", post));
+        return post;
+    }
+
+    public PostDTO getDTOFromPost(Post post){
+        LOGGER.info(String.format("Method to convert from Post to PostDTO called with parameter: %s", post));
+
+        PostDTO postDTO = new PostDTO();
+        postDTO.setId(post.getId());
+        postDTO.setTaskDTO(getDTOFromTask(post.getTask()));
+        postDTO.setComments(post.getComments().stream().map(this::getDTOFromComment).collect(Collectors.toList()));
+
+        LOGGER.info(String.format("Instance of type PostDTO created: %s", postDTO));
+        return postDTO;
     }
 }
