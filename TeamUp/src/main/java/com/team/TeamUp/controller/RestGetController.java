@@ -293,6 +293,23 @@ public class RestGetController extends AbstractRestController {
         return new ResponseEntity<>("FORBIDDEN", HttpStatus.FORBIDDEN);
     }
 
+    @RequestMapping(value = "/key", method = GET)
+    public ResponseEntity<?> getIdForCurrentUser(@RequestHeader Map<String, String>headers) {
+        LOGGER.info(String.format("Entering get key for current user method with headers: %s", headers.toString()));
+        if (userValidationUtils.isValid(headers)) {
+            Optional<User> userOptional = userRepository.findByHashKey(headers.get("token"));
+            if (userOptional.isPresent()) {
+                LOGGER.info(String.format("Returning user id %s", userOptional.get().getId()));
+                return new ResponseEntity<>(userOptional.get().getId(), HttpStatus.OK);
+            } else {
+                LOGGER.info("No user found");
+                return new ResponseEntity<>("NOT FOUND", HttpStatus.NOT_FOUND);
+            }
+        }
+        LOGGER.info("User not eligible");
+        return new ResponseEntity<>("FORBIDDEN", HttpStatus.FORBIDDEN);
+    }
+
     @RequestMapping(value = "/post/taskid={id}", method = GET)
     public ResponseEntity<?> getPostByTaskId(@PathVariable int id, @RequestHeader Map<String, String > headers) {
         LOGGER.info(String.format("Entering get post by taskId method with taskId: %d /n and headers: %s", id, headers.toString()));

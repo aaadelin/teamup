@@ -89,7 +89,7 @@
                     <option v-for="assignee in filterAdmins(assigneesList)" :key="assignee.id" :value="assignee">{{ assignee.firstName }} {{ assignee.lastName }} ({{ assignee.department }})</option>
                   </select>
                 </div>
-                <span v-if="localStorage.getItem('isAdmin')==='false'">Assign to me</span>
+                <span v-if="localStorage.getItem('isAdmin')==='false'" @click="assignToMe" style="cursor: pointer">Assign to me</span>
                 <br/>
 
                 <div id="assignees" class="row justify-content-center">
@@ -285,6 +285,32 @@ export default {
       if (!this.assignees.includes(this.currentlySelected)) {
         this.assignees.push(this.currentlySelected)
       }
+    },
+    async assignToMe () {
+      let me = await this.getMyID()
+      console.log(me)
+      for (let i = 0; i < this.assigneesList.length; i++) {
+        if (this.assigneesList[i].id === me) {
+          me = this.assigneesList[i]
+          break
+        }
+      }
+      if (!this.assignees.includes(me)) {
+        this.assignees.push(me)
+      }
+    },
+    getMyID () {
+      return axios({
+        url: 'http://192.168.0.150:8081/api/key',
+        method: 'get',
+        headers: {
+          'token': localStorage.getItem('access_key')
+        }
+      }).then(rez => {
+        return rez.data
+      }).catch(rez => {
+        return null
+      })
     }
   }
 }
