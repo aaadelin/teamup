@@ -87,23 +87,27 @@ public class RestPutController extends AbstractRestController {
     @RequestMapping(value = "/task", method = RequestMethod.PUT)
     public ResponseEntity<?> updateTask(@RequestBody TaskDTO taskDTO, @RequestHeader Map<String, String> headers) {
         LOGGER.info(String.format("Entering update task with task: %s and headers: %s", taskDTO, headers));
-        if(userValidationUtils.isValid(headers)){
-            Optional<User> userOptional = userRepository.findByHashKey(headers.get("token"));
-            if(taskDTO.getAssignees().contains(userOptional.get().getId()) ||
-                taskDTO.getReporterID() == userOptional.get().getId()){
+        Optional<Task> taskOptional = taskRepository.findById(taskDTO.getId());
 
-                Optional<Task> taskOptional = taskRepository.findById(taskDTO.getId());
-                if (taskOptional.isEmpty()) {
-                    LOGGER.info(String.format("Task with id %s has not been found to update", taskDTO.getId()));
-                    return new ResponseEntity<>("NOT FOUND", HttpStatus.NOT_FOUND);
-                } else {
-                    Task task = dtOsConverter.getTaskFromDTO(taskDTO, headers.get("token"));
+        if(userValidationUtils.isValid(headers)){
+            if(taskOptional.isPresent()){
+                Optional<User> userOptional = userRepository.findByHashKey(headers.get("token"));
+                if(taskDTO.getAssignees().contains(userOptional.get().getId()) ||
+                        taskDTO.getReporterID() == userOptional.get().getId()){
+
+                    Task task = dtOsConverter.getTaskFromDTOForUpdate(taskDTO);
                     taskRepository.save(task);
                     LOGGER.info(String.format("Task with id %s has been successfully updated in database", task.getId()));
                     return new ResponseEntity<>("OK", HttpStatus.OK);
+                }else{
+                    LOGGER.error("User not eligible");
+                    return new ResponseEntity<>("FORBIDDEN", HttpStatus.FORBIDDEN);
                 }
-
+            }else{
+                LOGGER.info(String.format("Task with id %s has not been found to update", taskDTO.getId()));
+                return new ResponseEntity<>("NOT FOUND", HttpStatus.NOT_FOUND);
             }
+
         }
         LOGGER.error("User not eligible");
         return new ResponseEntity<>("FORBIDDEN", HttpStatus.FORBIDDEN);

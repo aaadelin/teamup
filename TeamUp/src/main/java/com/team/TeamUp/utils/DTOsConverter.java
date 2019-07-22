@@ -8,6 +8,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -45,7 +46,6 @@ public class DTOsConverter {
     }
 
     /**
-     *
      * @param user user Object to be converted
      * @return userDTO instance containing user parameters data
      */
@@ -61,10 +61,10 @@ public class DTOsConverter {
         userDTO.setActive(user.isActive());
         userDTO.setStatus(user.getStatus());
         userDTO.setPhoto(user.getPhoto());
-        if(user.getTeam() != null){
+        if (user.getTeam() != null) {
             userDTO.setTeamID(user.getTeam().getId());
             userDTO.setDepartment(user.getTeam().getDepartment());
-        }else{
+        } else {
             userDTO.setTeamID(-1);
         }
 
@@ -73,30 +73,29 @@ public class DTOsConverter {
     }
 
     /**
-     *
      * @param userDTO UserDTO instance to be converted to User domain model
      * @return user entity containing userDTO data
      */
-    public User getUserFromDTO(UserDTO userDTO){
+    public User getUserFromDTO(UserDTO userDTO) {
         LOGGER.info(String.format("Method create User from UserDTO called with parameter %s", userDTO));
 
         Optional<User> userOptional = userRepository.findById(userDTO.getId());
         User user;
         user = userOptional.orElseGet(User::new);
-        if(userDTO.getUsername() != null){
+        if (userDTO.getUsername() != null) {
             user.setUsername(userDTO.getUsername());
         }
-        if(userDTO.getFirstName() != null){
+        if (userDTO.getFirstName() != null) {
             user.setFirstName(userDTO.getFirstName());
         }
-        if(userDTO.getLastName() != null){
+        if (userDTO.getLastName() != null) {
             user.setLastName(userDTO.getLastName());
         }
-        if(userDTO.getLastActive() != null) {
+        if (userDTO.getLastActive() != null) {
             user.setLastActive(userDTO.getLastActive());
         }
         user.setActive(userDTO.isActive());
-        if(userDTO.getPhoto() != null){
+        if (userDTO.getPhoto() != null) {
             user.setPhoto(userDTO.getPhoto());
         }
         user.setStatus(userDTO.getStatus());
@@ -105,7 +104,7 @@ public class DTOsConverter {
         Optional<Team> team = teamRepository.findById(userDTO.getTeamID());
 
         user.setTeam(team.orElse(null));
-        if(user.getHashKey() == null){
+        if (user.getHashKey() == null) {
             user.setHashKey(TokenUtils.getMD5Token());
         }
 
@@ -114,24 +113,22 @@ public class DTOsConverter {
     }
 
     /**
-     *
      * @param taskDTO TaskDTO instance to be converted to Task domain model
      * @return Task object containing taskDTO data
      */
-    public Task getTaskFromDTO(TaskDTO taskDTO, String reporterKey){
+    public Task getTaskFromDTO(TaskDTO taskDTO, String reporterKey) {
         LOGGER.info(String.format("Method create Task from TaskDto called with parameter: %s", taskDTO));
 
-        Task task;
         Optional<Task> taskOptional = taskRepository.findById(taskDTO.getId());
-        task = taskOptional.orElseGet(Task::new);
-        if(!taskDTO.getSummary().trim().equals("") ||
-            !taskDTO.getDescription().trim().equals("")){ //TODO validate ca deadline-ul sa nu depaseasca pe cel al proiectului
+        Task task = taskOptional.orElseGet(Task::new);
+        if (taskDTO.getSummary() != null && !taskDTO.getSummary().trim().equals("") ||
+                !taskDTO.getDescription().trim().equals("")) { //TODO validate ca deadline-ul sa nu depaseasca pe cel al proiectului
 
             task.setSummary(taskDTO.getSummary());
-            task.setDescription(taskDTO.getDescription());
-        }else{
+        } else {
             throw new IllegalArgumentException();
         }
+        task.setDescription(taskDTO.getDescription());
         task.setDoneAt(taskDTO.getDoneAt());
         task.setLastChanged(taskDTO.getLastChanged());
         task.setDeadline(taskDTO.getDeadline());
@@ -143,10 +140,10 @@ public class DTOsConverter {
         Optional<User> reporter = userRepository.findByHashKey(reporterKey);
         task.setReporter(reporter.orElseThrow());
 
-        if(taskDTO.getDifficulty() <= 3 && taskDTO.getDifficulty() >= 1){
+        if (taskDTO.getDifficulty() <= 3 && taskDTO.getDifficulty() >= 1) {
             task.setDifficulty(taskDTO.getDifficulty());
         }
-        if(taskDTO.getPriority() <= 3 && taskDTO.getPriority() >= 1) {
+        if (taskDTO.getPriority() <= 3 && taskDTO.getPriority() >= 1) {
             task.setPriority(taskDTO.getPriority());
         }
         task.setDepartment(taskDTO.getDepartment());
@@ -162,12 +159,44 @@ public class DTOsConverter {
         return task;
     }
 
+    public Task getTaskFromDTOForUpdate(TaskDTO taskDTO) {
+        LOGGER.info(String.format("Method to update Task from TaskDto called with parameter: %s", taskDTO));
+
+        Optional<Task> taskOptional = taskRepository.findById(taskDTO.getId());
+        Task task = taskOptional.orElseThrow();
+
+        if (taskDTO.getDescription() == null && taskDTO.getDeadline() == null && taskDTO.getTaskType() == null &&
+                taskDTO.getDifficulty() == 0 && taskDTO.getPriority() == 0 && taskDTO.getTaskStatus() != null) {
+            // Only the status is updated
+            task.setTaskStatus(taskDTO.getTaskStatus());
+            task.setLastChanged(LocalDateTime.now());
+            return task;
+        } else if (taskDTO.getDescription() != null && !taskDTO.getDescription().trim().equals("") && taskDTO.getDeadline() != null && taskDTO.getTaskType() != null &&
+                taskDTO.getDifficulty() != 0 && taskDTO.getPriority() != 0 && taskDTO.getTaskStatus() != null) {
+
+            task.setDescription(taskDTO.getDescription());
+            task.setDeadline(taskDTO.getDeadline());
+            task.setTaskType(taskDTO.getTaskType());
+            if (taskDTO.getDifficulty() >= 1 && taskDTO.getDifficulty() <= 3){
+                task.setDifficulty(taskDTO.getDifficulty());
+            }
+            if (taskDTO.getPriority() >= 1 && taskDTO.getPriority() <= 3){
+                task.setPriority(taskDTO.getPriority());
+            }
+            task.setTaskStatus(taskDTO.getTaskStatus());
+            task.setLastChanged(LocalDateTime.now());
+            return task;
+        } else {
+            throw new IllegalArgumentException();
+        }
+    }
+
+
     /**
-     *
      * @param task Task domain model instance to be converted to TaskDTO
      * @return TaskDTO instance containing task data
      */
-    public TaskDTO getDTOFromTask(Task task){
+    public TaskDTO getDTOFromTask(Task task) {
         LOGGER.info(String.format("Method to create TaskDTO from Task called with parameter :%s", task));
         TaskDTO taskDTO = new TaskDTO();
 
@@ -192,11 +221,10 @@ public class DTOsConverter {
     }
 
     /**
-     *
      * @param projectDTO ProjectDTO instance to be converted to Project domain model
      * @return Project object containing projectDTO data
      */
-    public Project getProjectFromDTO(ProjectDTO projectDTO){
+    public Project getProjectFromDTO(ProjectDTO projectDTO) {
         LOGGER.info(String.format("Method to create Project from ProjectDTO called with parameter: %s", projectDTO));
         Optional<Project> projectOptional = projectRepository.findById(projectDTO.getId());
 
@@ -213,11 +241,10 @@ public class DTOsConverter {
     }
 
     /**
-     *
      * @param project Project domain instance to be converted to ProjectDTO
      * @return ProjectDTO instance containing project data
      */
-    public ProjectDTO getDTOFromProject(Project project){
+    public ProjectDTO getDTOFromProject(Project project) {
         LOGGER.info(String.format("Method to create ProjectDTO from Projecct called with parameter: %s", project));
         ProjectDTO projectDTO = new ProjectDTO();
 
@@ -233,11 +260,10 @@ public class DTOsConverter {
     }
 
     /**
-     *
      * @param teamDTO TeamDTO object to be converted to Team model
      * @return Team model instance containing the information from teamDTO
      */
-    private Team getTeamFromDTO(TeamDTO teamDTO){
+    private Team getTeamFromDTO(TeamDTO teamDTO) {
         LOGGER.info(String.format("Method to create Team from DTO called with parameter: %s", teamDTO));
         Optional<Team> teamOptional = teamRepository.findById(teamDTO.getId());
         Team team = teamOptional.orElseGet(Team::new);
@@ -253,14 +279,15 @@ public class DTOsConverter {
 
     /**
      * Only the admin can change the leader
+     *
      * @param teamDTO TeamDTO object to be converted to Team model
      * @return Team model instance containing the information from teamDTO
      */
-    public Team getTeamFromDTO(TeamDTO teamDTO, UserStatus status){
+    public Team getTeamFromDTO(TeamDTO teamDTO, UserStatus status) {
         LOGGER.info(String.format("Method to create instance Team from TeamDTO called with %s and user status %s", teamDTO, status));
         Team team = getTeamFromDTO(teamDTO);
 
-        if(status == UserStatus.ADMIN){
+        if (status == UserStatus.ADMIN) {
             LOGGER.info("User is able to create such instances");
             Optional<User> leader = userRepository.findById(teamDTO.getLeaderID());
             leader.ifPresent(team::setLeader);
@@ -271,11 +298,10 @@ public class DTOsConverter {
     }
 
     /**
-     *
      * @param team Team domain instance to be converted to TeamDTO
      * @return TeamDTO instance containing team object data
      */
-    public TeamDTO getDTOFromTeam(Team team){
+    public TeamDTO getDTOFromTeam(Team team) {
         LOGGER.info(String.format("Method to convert from Team to TeamDTO called with parameter: %s", team));
         TeamDTO teamDTO = new TeamDTO();
 
@@ -284,7 +310,7 @@ public class DTOsConverter {
         teamDTO.setDescription(team.getDescription());
         teamDTO.setLocation(team.getLocation());
         teamDTO.setDepartment(team.getDepartment());
-        if(team.getLeader() != null){
+        if (team.getLeader() != null) {
             teamDTO.setLeaderID(team.getLeader().getId());
         }
         teamDTO.setMembers(team.getMembers().stream().map(User::getId).collect(Collectors.toList()));
@@ -293,7 +319,7 @@ public class DTOsConverter {
         return teamDTO;
     }
 
-    public Comment getCommentFromDTO(CommentDTO commentDTO){
+    public Comment getCommentFromDTO(CommentDTO commentDTO) {
         LOGGER.info(String.format("Method to convert from CommentDTO to Comment called with parameter: %s", commentDTO));
         Comment comment = commentRepository.findById(commentDTO.getId()).orElseGet(Comment::new);
         comment.setTitle(commentDTO.getTitle());
@@ -306,7 +332,7 @@ public class DTOsConverter {
         return comment;
     }
 
-    public CommentDTO getDTOFromComment(Comment comment){
+    public CommentDTO getDTOFromComment(Comment comment) {
         LOGGER.info(String.format("Method to convert from Comment to CommentDTO called with parameter: %s", comment));
         CommentDTO commentDTO = new CommentDTO();
         commentDTO.setId(comment.getId());
@@ -320,7 +346,7 @@ public class DTOsConverter {
         return commentDTO;
     }
 
-    public Post getPostFromDTO(PostDTO postDTO){
+    public Post getPostFromDTO(PostDTO postDTO) {
         LOGGER.info(String.format("Method to convert from PostDTO to Post called with parameter: %s", postDTO));
         Post post = postRepository.findById(postDTO.getId()).orElseGet(Post::new);
 
@@ -331,7 +357,7 @@ public class DTOsConverter {
         return post;
     }
 
-    public PostDTO getDTOFromPost(Post post){
+    public PostDTO getDTOFromPost(Post post) {
         LOGGER.info(String.format("Method to convert from Post to PostDTO called with parameter: %s", post));
 
         PostDTO postDTO = new PostDTO();

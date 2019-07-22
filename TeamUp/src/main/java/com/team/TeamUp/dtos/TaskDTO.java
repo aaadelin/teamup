@@ -8,7 +8,8 @@ import com.team.TeamUp.domain.enums.TaskType;
 import java.time.LocalDateTime;
 import java.util.List;
 
-public class TaskDTO {
+public class
+TaskDTO {
 
     private int id;
 
@@ -80,6 +81,7 @@ public class TaskDTO {
         this.doneAt = doneAt;
     }
 
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     public LocalDateTime getLastChanged() {
         return lastChanged;
     }

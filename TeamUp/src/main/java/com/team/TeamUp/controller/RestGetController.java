@@ -310,6 +310,28 @@ public class RestGetController extends AbstractRestController {
         return new ResponseEntity<>("FORBIDDEN", HttpStatus.FORBIDDEN);
     }
 
+    @RequestMapping(value = "/users/{ids}", method = GET)
+    public ResponseEntity<?> getUsersByIds(@PathVariable List<Integer> ids, @RequestHeader Map<String, String> headers) {
+        LOGGER.info(String.format("Entering get users by ids method with userIds: %s /n and headers: %s", ids, headers.toString()));
+        if (userValidationUtils.isValid(headers)) {
+            List<UserDTO> users = new ArrayList<>();
+            for(int id : ids){
+                Optional<User> userOptional = userRepository.findById(id);
+                if (userOptional.isPresent()) {
+                    LOGGER.info(String.format("Adding user: %s", userOptional.get()));
+                    users.add(dtOsConverter.getDTOFromUser(userOptional.get()));
+                } else {
+                    LOGGER.info(String.format("No user found with id %s", id));
+                    return new ResponseEntity<>("NOT FOUND", HttpStatus.NOT_FOUND);
+                }
+            }
+            LOGGER.info(String.format("Returning users: %s", users));
+            return new ResponseEntity<>(users, HttpStatus.OK);
+        }
+        LOGGER.info("User not eligible");
+        return new ResponseEntity<>("FORBIDDEN", HttpStatus.FORBIDDEN);
+    }
+
     @RequestMapping(value = "/post/taskid={id}", method = GET)
     public ResponseEntity<?> getPostByTaskId(@PathVariable int id, @RequestHeader Map<String, String > headers) {
         LOGGER.info(String.format("Entering get post by taskId method with taskId: %d /n and headers: %s", id, headers.toString()));

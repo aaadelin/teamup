@@ -192,7 +192,7 @@ export default {
           summary: this.summary,
           description: this.description,
           createdAt: new Date(),
-          lastChanged: new Date(),
+          lastChanged: this.getDate(null),
           deadline: this.deadline,
           difficulty: this.difficulty,
           priority: this.priority,
@@ -213,6 +213,23 @@ export default {
 
         return null
       }
+    },
+    getDate (date) {
+      function appendLeadingZeroes (n) {
+        if (n <= 9) {
+          return '0' + n
+        }
+        return n
+      }
+
+      date = date === null ? new Date() : date
+
+      return date.getFullYear() + '-' +
+        appendLeadingZeroes(date.getMonth() + 1) + '-' +
+        appendLeadingZeroes(date.getDate()) + ' ' +
+        appendLeadingZeroes(date.getHours()) + ':' +
+        appendLeadingZeroes(date.getMinutes()) + ':' +
+        appendLeadingZeroes(date.getSeconds())
     },
     clearData () {
       this.summary = ''
@@ -292,7 +309,7 @@ export default {
   }
 
   .modal-container {
-    min-width: 400px;
+    min-width: 360px;
     max-width: 540px;
     margin: 0px auto;
     padding: 20px 30px;

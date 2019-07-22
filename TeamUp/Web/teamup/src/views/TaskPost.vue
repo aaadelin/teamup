@@ -1,7 +1,7 @@
 <template>
     <div class='taskDetails'>
       <h2> {{ task.summary }} </h2>
-      <div class="edit-post" v-if="canEditAll">
+      <div class="edit-post" v-if="canEditAll || canEditStatus">
         <div @click="editMode = !editMode">
           <i class="fas fa-edit pointer"></i>
         </div>
@@ -33,8 +33,13 @@
           <p></p>
 
           <span> <strong> Last changed: </strong>{{ task.lastChanged }} </span>
+
+          <p></p>
+
+          <div> <strong>Reporter: </strong> {{ reporter.firstName }} {{ reporter.lastName }} </div>
         </div>
 
+        <p></p>
         <div class="col">
 
           <span> <strong>Task status:</strong>  <span v-if="editMode">
@@ -82,12 +87,23 @@
             <span v-else>{{ task.priority }}</span>
           </span>
 
+          <p></p>
+
+          <span>
+            <strong>Assignees: </strong>
+<!--            TODO add menu to add more persons-->
+            <ul style="list-style-type: none">
+<!--              TODO add remove button-->
+              <li v-for="assignee in assignees" :key="assignee.id" style="cursor: pointer" @click="seeUsersProfile(assignee.id)"> {{assignee.firstName}} {{assignee.lastName}}</li>
+            </ul>
+          </span>
+
         </div>
 
       </div>
       <div class="save-btn">
         <transition name="fade">
-          <button v-if="edited && editMode" class="btn btn-outline-info" style="margin-left: 15px;">Save</button>
+          <button v-if="edited && editMode" class="btn btn-outline-info" style="margin-left: 15px;" @click="updateTask">Save</button>
         </transition>
         <transition name="fade">
           <button v-if="edited && editMode" class="btn btn-outline-danger" @click="revertEdit">Clear</button>
@@ -114,7 +130,15 @@
 </template>
 
 <script>
-import { getMyID, getTaskById, getTaskStatus, getTaskTypes } from '../persistance/RestGetRepository'
+import {
+  getMyID,
+  getTaskById,
+  getTaskStatus,
+  getTaskTypes,
+  getUserById,
+  getUsersByIds
+} from '../persistance/RestGetRepository'
+import { updateTask } from '../persistance/RestPutRepository'
 import CommentForm from '../components/CommentForm'
 
 export default {
@@ -138,6 +162,9 @@ export default {
       taskStatuses: [],
       taskTypes: [],
       edited: false,
+
+      reporter: { name: '' },
+      assignees: [],
       currentStatus: null,
       currentDescription: null,
       currentDeadline: null,
@@ -155,7 +182,21 @@ export default {
   },
   methods: {
     async loadData () {
-      let data = await getTaskById(this.$route.query.taskId)
+      let data
+      try {
+        data = await getTaskById(this.$route.query.taskId)
+      } catch (e) {
+        this.$notify({
+          group: 'notificationsGroup',
+          title: 'No task found',
+          type: 'error',
+          text: 'No task with this id found. Redirecting...'
+        })
+
+        setTimeout(() => {
+          this.$router.push({ path: '/tasks' })
+        }, 500)
+      }
       this.task = data.taskDTO
       this.currentStatus = this.task.taskStatus
       this.currentDescription = this.task.description
@@ -174,6 +215,9 @@ export default {
       if (this.task.assignees.includes(me)) {
         this.canEditStatus = true
       }
+      this.reporter = await getUserById(this.task.reporterID)
+
+      this.assignees = await getUsersByIds(this.task.assignees)
     },
     addComment () {
       console.log(this.title)
@@ -197,6 +241,40 @@ export default {
       this.task.taskType = this.currentType
       this.editMode = false
       this.edited = false
+    },
+    seeUsersProfile (userId) {
+      this.$router.push({ path: `/user/${userId}` })
+    },
+    updateTask () {
+      if (this.canEditAll) {
+        let task = {
+          id: this.$route.query.taskId,
+          taskStatus: this.currentStatus,
+          reporterID: this.task.reporterID,
+          assignees: this.task.assignees,
+          description: this.currentDescription,
+          deadline: this.currentDeadline,
+          taskType: this.currentType,
+          difficulty: this.currentDifficulty,
+          priority: this.currentPriority
+        }
+        updateTask(task)
+        this.editMode = false
+        setTimeout(() => {
+          window.location.reload()
+        }, 500)
+      } else if (this.canEditStatus) {
+        let task = {
+          id: this.$route.query.taskId,
+          taskStatus: this.currentStatus,
+          reporterID: this.task.reporterID,
+          assignees: this.task.assignees
+        }
+        updateTask(task)
+        setTimeout(() => {
+          window.location.reload()
+        }, 500)
+      }
     }
   }
 }

@@ -201,3 +201,33 @@ export async function getUsersPhoto (id) {
     return null
   })
 }
+
+export async function getUserById (id) {
+  let url = `${baseURL}/user/${id}`
+
+  return axios({
+    url: url,
+    headers: {
+      'token': localStorage.getItem('access_key')
+    }
+  }).then(res => {
+    return res.data
+  }).catch(rez => {
+    return null
+  })
+}
+
+export async function getUsersByIds (ids) {
+  let url = `${baseURL}/users/${ids}`
+
+  return axios({
+    url: url,
+    headers: {
+      'token': localStorage.getItem('access_key')
+    }
+  }).then(res => {
+    return res.data
+  }).catch(rez => {
+    return null
+  })
+}
