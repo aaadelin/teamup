@@ -79,7 +79,7 @@ import { getUsersAssignedTasks, getUsersReportedTasks } from '../persistance/Res
 import { updateTask } from '../persistance/RestPutRepository'
 
 export default {
-  async mounted () {
+  async beforeMount () {
     await this.getUsersTasks()
   },
   name: 'Tasks',

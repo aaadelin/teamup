@@ -113,7 +113,9 @@ import { getTeams, getUserStatuses } from '../persistance/RestGetRepository'
 
 export default {
   async beforeMount () {
-    await this.getDataArrays()
+    if (this.$store.state.access_key) {
+      await this.getDataArrays()
+    }
   },
   components: {
     // datePicker

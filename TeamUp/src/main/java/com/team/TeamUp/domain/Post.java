@@ -1,6 +1,7 @@
 package com.team.TeamUp.domain;
 
 import javax.persistence.*;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -15,7 +16,7 @@ public class Post {
 
     @OneToMany
     @JoinColumn(name = "POST_ID")
-    private List<Comment> comments;
+    private List<Comment> comments = new ArrayList<>();
 
     public Post() {
     }

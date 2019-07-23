@@ -72,6 +72,7 @@ public class Task {
         this.summary = summary;
     }
 
+    @Column(length = 2000)
     public String getDescription() {
         return description;
     }

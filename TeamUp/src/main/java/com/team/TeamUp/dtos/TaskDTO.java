@@ -65,6 +65,7 @@ TaskDTO {
         this.description = description;
     }
 
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     public LocalDateTime getCreatedAt() {
         return createdAt;
     }
@@ -73,6 +74,7 @@ TaskDTO {
         this.createdAt = createdAt;
     }
 
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     public LocalDateTime getDoneAt() {
         return doneAt;
     }

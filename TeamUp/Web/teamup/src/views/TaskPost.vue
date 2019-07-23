@@ -11,7 +11,7 @@
 
           <span> <strong>Description: </strong>
             <span v-if="editMode && canEditAll"> <textarea @keyup="hasChanged" v-model="currentDescription" cols="30" rows="4"></textarea> </span>
-            <span v-else>{{ task.description }}</span>
+            <span @click="editMode = canEditAll" v-else>{{ task.description }}</span>
           </span>
 
           <p></p>
@@ -25,7 +25,7 @@
               <date-picker v-if="editMode && canEditAll" v-model="currentDeadline" id="deadline" name="deadline"
                            :config="options" @dp-change="hasChanged"
                            class="form-control col col-4"></date-picker>
-            <span v-else>
+            <span @click="editMode = canEditAll" v-else>
               {{task.deadline}}
             </span>
           </span>
@@ -50,7 +50,7 @@
                 </option>
             </select>
           </span>
-          <span v-else>{{ task.taskStatus }}</span>
+          <span @click="editMode = canEditStatus || canEditAll" v-else>{{ task.taskStatus }}</span>
           </span>
 
           <p></p>
@@ -62,7 +62,7 @@
                 </option>
             </select>
           </span>
-          <span v-else>{{ task.taskType }}</span></span>
+          <span @click="editMode = canEditAll" v-else>{{ task.taskType }}</span></span>
 
           <p></p>
 
@@ -73,7 +73,7 @@
                 </option>
             </select>
           </span>
-          <span v-else>{{ task.difficulty }}</span>
+          <span @click="editMode = canEditAll" v-else>{{ task.difficulty }}</span>
           </span>
 
           <p></p>
@@ -85,7 +85,7 @@
                 </option>
             </select>
             </span>
-            <span v-else>{{ task.priority }}</span>
+            <span @click="editMode = canEditAll" v-else>{{ task.priority }}</span>
           </span>
 
           <p></p>
@@ -145,14 +145,15 @@ import CommentForm from '../components/CommentForm'
 export default {
   name: 'TaskPost',
   components: { CommentForm },
-  async created () {
+  async beforeMount () {
     await this.loadData()
   },
   data () {
     return {
       task: {
         summary: null,
-        deadline: null
+        deadline: null,
+        taskStatus: null
       },
       comments: [],
       title: '',
@@ -187,6 +188,7 @@ export default {
       try {
         data = await getTaskById(this.$route.query.taskId)
       } catch (e) {
+        console.log(e)
         this.$notify({
           group: 'notificationsGroup',
           title: 'No task found',
@@ -195,7 +197,7 @@ export default {
         })
 
         setTimeout(() => {
-          this.$router.push({ path: '/tasks' })
+          // this.$router.push({ path: '/tasks' })
         }, 500)
       }
       this.task = data.taskDTO

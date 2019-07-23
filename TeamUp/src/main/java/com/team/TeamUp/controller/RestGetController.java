@@ -350,8 +350,9 @@ public class RestGetController extends AbstractRestController {
                     post.setTask(taskOptional.get());
 
                     post = postRepository.save(post);
-                    LOGGER.info(String.format("Returning post: %s", post.toString()));
-                    return new ResponseEntity<>(post, HttpStatus.OK);
+                    PostDTO postDTO = dtOsConverter.getDTOFromPost(post);
+                    LOGGER.info(String.format("Returning post: %s", postDTO));
+                    return new ResponseEntity<>(postDTO, HttpStatus.OK);
                 }
             } else {
                 LOGGER.info(String.format("No task found with id %s", id));

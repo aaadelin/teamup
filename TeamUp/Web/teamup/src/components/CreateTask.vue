@@ -130,7 +130,9 @@ import { getDepartments, getMyID, getProjects, getTaskTypes, getUsers } from '..
 
 export default {
   async beforeMount () {
-    await this.getDataArrays()
+    if (this.$store.state.access_key) {
+      await this.getDataArrays()
+    }
   },
   components: {
     // datePicker
@@ -191,7 +193,7 @@ export default {
         return {
           summary: this.summary,
           description: this.description,
-          createdAt: new Date(),
+          createdAt: this.getDate(null),
           lastChanged: this.getDate(null),
           deadline: this.deadline,
           difficulty: this.difficulty,

@@ -64,7 +64,9 @@ import { saveTask, saveUser } from '../persistance/RestPostRepository'
 
 export default {
   beforeMount () {
-    this.getPhoto()
+    if (this.access_key) {
+      this.getPhoto()
+    }
   },
   name: 'NavBar',
   components: { CreateTask, CreateUser },
