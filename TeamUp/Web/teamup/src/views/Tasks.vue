@@ -74,7 +74,7 @@
 
 <script>
 import TaskBox from '../components/TaskBox'
-import RightMenu from '../components/RightMenu'
+import RightMenu from '../components/MySideMenu'
 import { getUsersAssignedTasks, getUsersReportedTasks } from '../persistance/RestGetRepository'
 import { updateTask } from '../persistance/RestPutRepository'
 

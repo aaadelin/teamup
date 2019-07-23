@@ -25,7 +25,7 @@
 
                 <div class="row">
                   <label for="description" class="col-md-3">Description </label>
-                  <input id="description" type="text" v-model="description" name="description" class="form-control col-md-8"/>
+                  <textarea id="description" type="text" v-model="description" name="description" class="form-control col-md-8"></textarea>
                 </div>
 
                 <br/>

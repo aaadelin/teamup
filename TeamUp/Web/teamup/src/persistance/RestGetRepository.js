@@ -1,6 +1,5 @@
 import axios from 'axios'
-
-let baseURL = 'http://192.168.0.150:8081/api'
+import { baseURL } from './Repository'
 
 export function logout () {
   let url = `${baseURL}/logout`
