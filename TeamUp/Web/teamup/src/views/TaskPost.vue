@@ -37,9 +37,10 @@
           <p></p>
 
           <div> <strong>Reporter: </strong> {{ reporter.firstName }} {{ reporter.lastName }} </div>
+
+          <p></p>
         </div>
 
-        <p></p>
         <div class="col">
 
           <span> <strong>Task status:</strong>  <span v-if="editMode">

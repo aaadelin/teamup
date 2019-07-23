@@ -118,6 +118,7 @@ public class RestPostController extends AbstractRestController {
                 JSONObject answer = new JSONObject();
                 answer.put("key", user.get().getHashKey());
                 answer.put("isAdmin", isAdmin);
+                answer.put("name", user.get().getFirstName() + " " + user.get().getLastName());
                 LOGGER.info(String.format("User has been successfully logged in and key sent :%s", user.get().getHashKey()));
                 return new ResponseEntity<>(answer.toString(), HttpStatus.OK);
             } else {

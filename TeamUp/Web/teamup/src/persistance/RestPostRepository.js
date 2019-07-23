@@ -14,6 +14,7 @@ export function login (username, password) {
   }).then(res => {
     localStorage.setItem('access_key', res.data.key)
     localStorage.setItem('isAdmin', res.data.isAdmin)
+    localStorage.setItem('name', res.data.name)
     location.reload()
   }).catch(rez => {
     console.log('retry login')

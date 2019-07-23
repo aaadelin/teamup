@@ -1,7 +1,7 @@
 <template>
     <div id="box" @click="openTaskPage">
       <div class="container" id="taskContainer">
-        <div class="container">
+        <div class="container" :id="task.id">
           <p> <b>{{ trimTitle(task.summary) }}</b></p>
           <p>Deadline: {{task.deadline}}</p>
           <div class="row">

@@ -80,6 +80,7 @@ export default {
     min-width: 250px;
     max-width: 250px;
     min-height: 92.5vh;
+    /*margin-right: 15px;*/
   }
 
   #sidebar.active {

@@ -32,11 +32,13 @@ import {
   faEdit
 } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
+import VueDraggable from 'vue-draggable'
 
 library.add(faCamera, faClock, faCalendar, faChevronLeft, faChevronRight, faCalendarCheck, faTrashAlt, faTimesCircle, faArrowUp, faArrowDown, faAngleUp, faAngleDoubleUp, faSortUp, faEdit)
 
 Vue.component('fas', FontAwesomeIcon)
 
+Vue.use(VueDraggable)
 Vue.use(datePicker)
 Vue.use(fontawesome)
 Vue.use(BootstrapVue)

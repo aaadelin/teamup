@@ -92,8 +92,9 @@ public class RestPutController extends AbstractRestController {
         if(userValidationUtils.isValid(headers)){
             if(taskOptional.isPresent()){
                 Optional<User> userOptional = userRepository.findByHashKey(headers.get("token"));
-                if(taskDTO.getAssignees().contains(userOptional.get().getId()) ||
-                        taskDTO.getReporterID() == userOptional.get().getId()){
+                if( userOptional.isPresent() && (
+                        taskOptional.get().getAssignees().contains(userOptional.get()) ||
+                        taskOptional.get().getReporter().getId() == userOptional.get().getId())){
 
                     Task task = dtOsConverter.getTaskFromDTOForUpdate(taskDTO);
                     taskRepository.save(task);

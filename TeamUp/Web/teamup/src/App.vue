@@ -7,7 +7,7 @@
 <!--      <router-link to="/about">About</router-link>-->
 <!--    </div>-->
     <router-view/>
-    <notifications group="notificationsGroup" />
+    <notifications class="notification" group="notificationsGroup" />
   </div>
 </template>
 
@@ -30,4 +30,9 @@ export default {
   text-align: center;
   color: #2c3e50;
 }
+
+  .notification{
+    margin-right: 10px;
+    margin-top:10px;
+  }
 </style>

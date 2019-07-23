@@ -26,6 +26,7 @@
             </b-nav-form>
             <b-nav-item v-if="access_key" to="/profile">
               <img width="30" height="30" class="rounded-circle" :src="image" alt="Profile"/>
+              {{ name }}
             </b-nav-item>
             <b-nav-item @click="logoutMethod" v-if="access_key" to="/logout">Log out</b-nav-item>
 
@@ -81,6 +82,9 @@ export default {
     },
     isAdmin () {
       return this.$store.state.isAdmin
+    },
+    name () {
+      return this.$store.state.name
     }
   },
   methods: {
@@ -91,8 +95,8 @@ export default {
     },
     async saveTask (data) {
       if (data !== null) {
-        let ansewer = await saveTask(data)
-        if (ansewer) {
+        let answer = await saveTask(data)
+        if (answer) {
           this.$notify({
             group: 'notificationsGroup',
             title: 'Success',
