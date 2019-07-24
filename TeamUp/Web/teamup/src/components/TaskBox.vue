@@ -1,5 +1,5 @@
 <template>
-    <div id="box" @click="openTaskPage">
+    <div id="box" @click="openTaskPage" data-toggle="tooltip" data-placement="top" :title="tooltipContent">
       <div class="container" id="taskContainer">
         <div class="container" :id="task.id">
           <p> <b>{{ trimTitle(task.summary) }}</b></p>
@@ -23,9 +23,14 @@
 
 <script>
 
+$(document.body).ready(function () {
+  $('[data-toggle="tooltip"]').tooltip()
+})
+
 export default {
   beforeMount () {
     this.calculateDeadlinePercent() // TODO remove this interval?
+    this.getTooltipContent()
     setInterval(() => {
       this.calculateDeadlinePercent()
     }, 5000)
@@ -37,7 +42,8 @@ export default {
   data () {
     return {
       deadlinePercent: 0,
-      progressClass: 'progress-bar'
+      progressClass: 'progress-bar',
+      tooltipContent: ''
     }
   },
   computed: {
@@ -97,6 +103,18 @@ export default {
           taskId: this.task.id
         }
       })
+    },
+    getTooltipContent () {
+      let description = ''
+      let words = this.task.description.split(' ')
+      for (let i = 0; i < (words.length > 15 ? 15 : words.length); i++) {
+        description += words[i] + ' '
+      }
+      if (words.length > 5) {
+        description += '...'
+      }
+
+      this.tooltipContent = description
     }
   }
 }
