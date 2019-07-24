@@ -110,8 +110,24 @@ export async function getProjects () {
   })
 }
 
-export async function getTaskById (id) {
+export async function getPostByTaskId (id) {
   let url = `${baseURL}/post/taskid=${id}`
+
+  return axios({
+    method: 'get',
+    url: url,
+    data: {
+    },
+    headers: {
+      'token': localStorage.getItem('access_key')
+    }
+  }).then(res => {
+    return res.data
+  })
+}
+
+export async function getTaskById (id) {
+  let url = `${baseURL}/task/${id}`
 
   return axios({
     method: 'get',

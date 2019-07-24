@@ -75,7 +75,11 @@
 <script>
 import TaskBox from '../components/TaskBox'
 import RightMenu from '../components/MySideMenu'
-import { getUsersAssignedTasks, getUsersReportedTasks } from '../persistance/RestGetRepository'
+import {
+  getTaskById,
+  getUsersAssignedTasks,
+  getUsersReportedTasks
+} from '../persistance/RestGetRepository'
 import { updateTask } from '../persistance/RestPutRepository'
 
 export default {
@@ -102,8 +106,10 @@ export default {
         reactivityEnabled: true,
         multipleDropzonesItemsDraggingEnabled: true,
         showDropzoneAreas: true,
-        onDrop: function (event) {
-          if (this.isDroppable(event)) {
+        onDrop: async function (event) {
+          let ans = await this.isDroppable(event)
+
+          if (ans) {
             let item = event.items[0]
             let parent = item.parentNode
             let target = event.droptarget
@@ -190,29 +196,43 @@ export default {
       }
       return true
     },
-    isDroppable (event) {
+    async isDroppable (event) {
       let target = event.droptarget
       let parent = target.parentElement
-
+      // if target is not the empty space in the column
       if (!target.classList.toString().includes('columnCategory')) {
         let foundParent = false
+        // trying to find the parent that will correspond to the column by going from parent to parent
         for (let i = 0; i < 100 && !foundParent; i++) {
           parent = target.parentElement
           if (target.classList.toString().includes('columnCategory')) {
+            // if found the column, the droptarget will be the task list, second child
             event.droptarget = target.childNodes[1]
             foundParent = true
           }
           target = parent
         }
 
+        // if the parent was not found
         if (!foundParent) {
           return false
+        } else {
+          target = event.droptarget
         }
       } else {
-        event.droptarget = target.childNodes[1]
+        // if the task is dropped in the empty area of the column
+        target = target.childNodes[1]
+        event.droptarget = target
       }
 
-      return true
+      let taskId = event.items[0].childNodes[0].childNodes[0].id
+      return getTaskById(taskId).then((task) => {
+        // getting the current column in which the task is in
+        let status = this.getCurrentCategories(task)
+        let targetId = target.id
+        // if the task is not dropped in the same column and the column is one before or after it is true, otherwise is false
+        return !(status.includes(targetId)) && this.isBeforeOrAfter(task.taskStatus, targetId)
+      })
     },
     changeStatus (event) {
       let taskId = event.items[0].childNodes[0].childNodes[0].id
@@ -238,6 +258,50 @@ export default {
       updateTask(task).then(rez => {
         this.getUsersTasks()
       })
+    },
+    isBeforeOrAfter (taskStatus, target) {
+      // getting the columns that a task can be dropped in depending on the category it is currently in
+      let status = []
+      switch (taskStatus) {
+        case 'OPEN':
+          status.push('in-progress-category')
+          break
+        case 'IN_PROGRESS':
+          status.push('todo-category')
+          status.push('under-review-category')
+          break
+        case 'UNDER_REVIEW':
+          status.push('in-progress-category')
+          status.push('done-category')
+          break
+        case 'APPROVED':
+          status.push('under-review-category')
+          status.push('todo-category')
+          break
+      }
+      console.log('2', status, target)
+      return status.includes(target)
+    },
+    getCurrentCategories (task) {
+      // getting the category the task is currently in
+      let status = []
+      switch (task.taskStatus) {
+        case 'OPEN':
+          status.push('todo-category')
+          break
+        case 'IN_PROGRESS':
+          status.push('in-progress-category')
+          break
+        case 'UNDER_REVIEW':
+          status.push('under-review-category')
+          break
+        case 'APPROVED':
+          status.push('done-category')
+          break
+        case 'REOPENED':
+          status.push('todo-category')
+      }
+      return status
     }
   },
   filters: {

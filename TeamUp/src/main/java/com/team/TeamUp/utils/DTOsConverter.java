@@ -27,6 +27,7 @@ public class DTOsConverter {
     private ProjectRepository projectRepository;
     private PostRepository postRepository;
     private CommentRepository commentRepository;
+    private TaskValidationUtils taskValidationUtils;
 
     public DTOsConverter(UserRepository userRepository,
                          TeamRepository teamRepository,
@@ -41,6 +42,8 @@ public class DTOsConverter {
         this.projectRepository = projectRepository;
         this.postRepository = postRepository;
         this.commentRepository = commentRepository;
+
+        this.taskValidationUtils = new TaskValidationUtils();
 
         LOGGER.info("Instance of class DtosConverter created");
     }
@@ -166,13 +169,15 @@ public class DTOsConverter {
         Task task = taskOptional.orElseThrow();
 
         if (taskDTO.getDescription() == null && taskDTO.getDeadline() == null && taskDTO.getTaskType() == null &&
-                taskDTO.getDifficulty() == 0 && taskDTO.getPriority() == 0 && taskDTO.getTaskStatus() != null) {
+                taskDTO.getDifficulty() == 0 && taskDTO.getPriority() == 0 && taskDTO.getTaskStatus() != null &&
+                taskValidationUtils.isTaskStatusChangeValid(taskOptional.get(), taskDTO)) {
             // Only the status is updated
             task.setTaskStatus(taskDTO.getTaskStatus());
             task.setLastChanged(LocalDateTime.now());
             return task;
         } else if (taskDTO.getDescription() != null && !taskDTO.getDescription().trim().equals("") && taskDTO.getDeadline() != null && taskDTO.getTaskType() != null &&
-                taskDTO.getDifficulty() != 0 && taskDTO.getPriority() != 0 && taskDTO.getTaskStatus() != null) {
+                taskDTO.getDifficulty() != 0 && taskDTO.getPriority() != 0 && taskDTO.getTaskStatus() != null
+                && taskValidationUtils.isTaskStatusChangeValid(taskOptional.get(), taskDTO)) {
 
             task.setDescription(taskDTO.getDescription());
             task.setDeadline(taskDTO.getDeadline());

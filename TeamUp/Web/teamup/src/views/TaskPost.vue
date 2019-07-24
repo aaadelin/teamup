@@ -133,7 +133,7 @@
 <script>
 import {
   getMyID,
-  getTaskById,
+  getPostByTaskId,
   getTaskStatus,
   getTaskTypes,
   getUserById,
@@ -186,7 +186,7 @@ export default {
     async loadData () {
       let data
       try {
-        data = await getTaskById(this.$route.query.taskId)
+        data = await getPostByTaskId(this.$route.query.taskId)
       } catch (e) {
         this.$notify({
           group: 'notificationsGroup',
@@ -206,7 +206,7 @@ export default {
       this.currentDifficulty = this.task.difficulty
       this.currentPriority = this.task.priority
 
-      this.taskStatuses = await getTaskStatus()
+      this.taskStatuses = await this.getTaskStatusPosibilities()
       this.taskTypes = await getTaskTypes()
       this.comments = data.comments
       let me = await getMyID()
@@ -276,6 +276,58 @@ export default {
           window.location.reload()
         }, 500)
       }
+    },
+    async getTaskStatusPosibilities () {
+      let statuses = await getTaskStatus()
+      let indexOfCurrentStatus = statuses.indexOf(this.currentStatus)
+      let available = []
+      switch (indexOfCurrentStatus) {
+        case 0:
+          available.push(statuses[0])
+          available.push(statuses[1])
+          break
+        case statuses.length - 1:
+          available.push(statuses[statuses.length - 1])
+          available.push(statuses[statuses.length - 2])
+          break
+        case statuses.length - 2:
+          available.push(statuses[1])
+          available.push(statuses[statuses.length - 2])
+          break
+        case statuses.length - 3:
+          available.push(statuses[statuses.length - 4])
+          available.push(statuses[statuses.length - 3])
+          available.push(statuses[statuses.length - 1])
+          break
+        default:
+          available.push(statuses[indexOfCurrentStatus - 1])
+          available.push(statuses[indexOfCurrentStatus])
+          available.push(statuses[indexOfCurrentStatus + 1])
+      }
+      return available
+    },
+    isBeforeOrAfter (taskStatus, target) {
+      // getting the columns that a task can be dropped in depending on the category it is currently in
+      let status = []
+      switch (taskStatus) {
+        case 'OPEN':
+          status.push('in-progress-category')
+          break
+        case 'IN_PROGRESS':
+          status.push('todo-category')
+          status.push('under-review-category')
+          break
+        case 'UNDER_REVIEW':
+          status.push('in-progress-category')
+          status.push('done-category')
+          break
+        case 'APPROVED':
+          status.push('under-review-category')
+          status.push('todo-category')
+          break
+      }
+      console.log('2', status, target)
+      return status.includes(target)
     }
   }
 }
