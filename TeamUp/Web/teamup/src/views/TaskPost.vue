@@ -10,8 +10,8 @@
         <div class="col">
 
           <span> <strong>Description: </strong>
-            <span v-if="editMode && canEditAll"> <textarea @keyup="hasChanged" v-model="currentDescription" cols="30" rows="4"></textarea> </span>
-            <span @click="editMode = canEditAll" v-else>{{ task.description }}</span>
+            <span v-if="editMode && canEditAll"> <textarea @keyup="hasChanged" v-model="currentDescription" cols="50" rows="4"></textarea> </span>
+            <span @dblclick="editMode = canEditAll" v-else>{{ task.description }}</span>
           </span>
 
           <p></p>
@@ -21,11 +21,11 @@
 
           <p></p>
 
-          <span class="row justify-content-center"> <strong>Deadline:</strong>
+          <span class="row justify-content-center"> <strong>Deadline: </strong>
               <date-picker v-if="editMode && canEditAll" v-model="currentDeadline" id="deadline" name="deadline"
                            :config="options" @dp-change="hasChanged"
                            class="form-control col col-4"></date-picker>
-            <span @click="editMode = canEditAll" v-else>
+            <span @dblclick="editMode = canEditAll" v-else>
               {{task.deadline}}
             </span>
           </span>
@@ -43,26 +43,26 @@
 
         <div class="col">
 
-          <span> <strong>Task status:</strong>  <span v-if="editMode">
+          <span> <strong>Task status: </strong>  <span v-if="editMode">
             <select @change="hasChanged" v-model="currentStatus" >
                 <option v-for="(taskStatus, index) in taskStatuses" :key="index">
                   {{ taskStatus }}
                 </option>
             </select>
           </span>
-          <span @click="editMode = canEditStatus || canEditAll" v-else>{{ task.taskStatus }}</span>
+          <span @dblclick="editMode = canEditStatus || canEditAll" v-else>{{ task.taskStatus }}</span>
           </span>
 
           <p></p>
 
-          <span> <strong>Task type:</strong>  <span v-if="editMode && canEditAll">
+          <span> <strong>Task type: </strong>  <span v-if="editMode && canEditAll">
             <select @change="hasChanged" v-model="currentType" >
                 <option v-for="(taskType, index) in taskTypes" :key="index">
                   {{ taskType }}
                 </option>
             </select>
           </span>
-          <span @click="editMode = canEditAll" v-else>{{ task.taskType }}</span></span>
+          <span @dblclick="editMode = canEditAll" v-else>{{ task.taskType }}</span></span>
 
           <p></p>
 
@@ -73,7 +73,7 @@
                 </option>
             </select>
           </span>
-          <span @click="editMode = canEditAll" v-else>{{ task.difficulty }}</span>
+          <span @dblclick="editMode = canEditAll" v-else>{{ task.difficulty }}</span>
           </span>
 
           <p></p>
@@ -85,7 +85,7 @@
                 </option>
             </select>
             </span>
-            <span @click="editMode = canEditAll" v-else>{{ task.priority }}</span>
+            <span @dblclick="editMode = canEditAll" v-else>{{ task.priority }}</span>
           </span>
 
           <p></p>
@@ -188,7 +188,6 @@ export default {
       try {
         data = await getTaskById(this.$route.query.taskId)
       } catch (e) {
-        console.log(e)
         this.$notify({
           group: 'notificationsGroup',
           title: 'No task found',
@@ -197,7 +196,6 @@ export default {
         })
 
         setTimeout(() => {
-          // this.$router.push({ path: '/tasks' })
         }, 500)
       }
       this.task = data.taskDTO

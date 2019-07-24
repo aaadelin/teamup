@@ -1,5 +1,7 @@
 package com.team.TeamUp.controller;
 
+import com.team.TeamUp.domain.Post;
+import com.team.TeamUp.domain.Task;
 import com.team.TeamUp.domain.Team;
 import com.team.TeamUp.domain.User;
 import com.team.TeamUp.domain.enums.UserStatus;
@@ -68,7 +70,11 @@ public class RestPostController extends AbstractRestController {
     public ResponseEntity<?> addTask(@RequestBody TaskDTO taskDTO, @RequestHeader Map<String, String> headers) {
         LOGGER.info(String.format("Entering method create task with task: %s and headers: %s", taskDTO, headers));
         if (userValidationUtils.isValid(headers)) {
-            taskRepository.save(dtOsConverter.getTaskFromDTO(taskDTO, headers.get("token")));
+            Task task = dtOsConverter.getTaskFromDTO(taskDTO, headers.get("token"));
+            taskRepository.save(task);
+            Post post = new Post();
+            post.setTask(task);
+            postRepository.save(post);
             LOGGER.info("Task has been successfully created and saved to database");
             return new ResponseEntity<>("OK", HttpStatus.OK);
         }

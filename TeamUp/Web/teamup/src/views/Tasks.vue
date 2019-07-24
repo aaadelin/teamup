@@ -59,7 +59,7 @@
           <span class="quantity">{{ statusFilter(['APPROVED', 'CLOSED']).length }}</span>
         </div>
         <div id="done-category" v-if="done_category">
-          <task-box v-for="task1 in statusFilter(['APPROVED', 'CLOSED'])"
+          <task-box v-for="task1 in statusFilter(['APPROVED'])"
                     v-bind:key="task1.id"
                     :task="task1"/>
         </div>
