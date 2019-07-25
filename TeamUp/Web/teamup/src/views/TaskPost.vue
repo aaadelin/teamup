@@ -326,7 +326,6 @@ export default {
           status.push('todo-category')
           break
       }
-      console.log('2', status, target)
       return status.includes(target)
     }
   }

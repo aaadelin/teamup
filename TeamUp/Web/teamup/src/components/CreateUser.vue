@@ -45,7 +45,14 @@
               <slot name="body">
               <div class="row">
                 <label for="password" class="col-md-3">Password </label>
-                <input id="password" type="password" v-model="password" name="password" class="form-control col-md-8"/>
+                <div class="input-group col-md-8 no-left-padding" id="show_hide_password">
+
+                  <input id="password" type="password" v-model="password" name="password" class="form-control"/>
+
+                  <div class="input-group-addon" @click="showHidePass('password')">
+                    <a><i id="eye-password" class="fa fa-eye" aria-hidden="true"></i></a>
+                  </div>
+                </div>
               </div>
               </slot>
 
@@ -54,7 +61,14 @@
               <slot name="body">
               <div class="row">
                 <label for="password2" class="col-md-3">Password again</label>
-                <input id="password2" type="password" v-model="passwordAgain" name="password2" class="form-control col-md-8"/>
+                <div class="input-group col-md-8 no-left-padding" id="show_hide_password_again">
+
+                    <input id="password2" class="form-control" type="password" v-model="passwordAgain" name="password2"/>
+
+                    <div class="input-group-addon" @click="showHidePass('password2')">
+                      <a><i id="eye-password2" class="fa fa-eye" aria-hidden="true"></i></a>
+                    </div>
+                </div>
               </div>
               </slot>
 
@@ -107,9 +121,6 @@
 <script>
 import 'pc-bootstrap4-datetimepicker/build/css/bootstrap-datetimepicker.css'
 import { getTeams, getUserStatuses } from '../persistance/RestGetRepository'
-// import Datepicker from 'vuejs-datetimepicker'
-// import datePicker from 'vue-bootstrap-datetimepicker'
-// Import date picker css
 
 export default {
   async beforeMount () {
@@ -190,12 +201,29 @@ export default {
       }
 
       this.dataReady = true
+    },
+    showHidePass (inputID) {
+      let item = document.getElementById(inputID)
+      let eye = document.getElementById('eye-' + inputID)
+      if (item.type === 'password') {
+        item.type = 'text'
+        eye.classList.remove('fa-eye')
+        eye.classList.add('fa-eye-slash')
+      } else {
+        item.type = 'password'
+        eye.classList.remove('fa-eye-slash')
+        eye.classList.add('fa-eye')
+      }
     }
   }
 }
 </script>
 
 <style scoped>
+
+  .no-left-padding{
+    padding: 0;
+  }
 
   .modal-mask {
     position: fixed;
@@ -258,4 +286,14 @@ export default {
     -webkit-transform: scale(1.1);
     transform: scale(1.1);
   }
+
+  .input-group-addon{
+    padding: 7px;
+    padding-left: 12px;
+    padding-right: 12px;
+    height: 38px;
+    background-color: rgba(0,0,0,0.19);
+    cursor: pointer;
+  }
+
 </style>

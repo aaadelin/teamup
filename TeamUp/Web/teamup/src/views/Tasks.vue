@@ -203,7 +203,7 @@ export default {
       if (!target.classList.toString().includes('columnCategory')) {
         let foundParent = false
         // trying to find the parent that will correspond to the column by going from parent to parent
-        for (let i = 0; i < 100 && !foundParent; i++) {
+        for (let i = 0; i < 100 && !foundParent && target.parentElement !== null; i++) {
           parent = target.parentElement
           if (target.classList.toString().includes('columnCategory')) {
             // if found the column, the droptarget will be the task list, second child
@@ -279,7 +279,6 @@ export default {
           status.push('todo-category')
           break
       }
-      console.log('2', status, target)
       return status.includes(target)
     },
     getCurrentCategories (task) {
