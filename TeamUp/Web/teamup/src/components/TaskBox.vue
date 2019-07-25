@@ -1,22 +1,22 @@
 <template>
     <div id="box" @click="openTaskPage" data-toggle="tooltip" data-placement="top" :title="tooltipContent">
       <div class="container" id="taskContainer">
-        <div class="container" :id="task.id">
+        <span class="container" :id="task.id">
           <p> <b>{{ trimTitle(task.summary) }}</b></p>
           <p>Deadline: {{task.deadline}}</p>
-          <div class="row">
-            <div class="col-1">
+          <span class="row">
+            <span class="col-1">
               <i v-if="task.priority === 3" class="fas fa-angle-double-up"></i>
               <i v-if="task.priority === 2" class="fas fa-angle-up"></i>
               <i v-if="task.priority === 1" class="fas fa-sort-up"></i>
-            </div>
-            <div class="col-10">
-              <div class="progress">
-                <div :class="progressClass" role="progressbar" :style="{width: deadlinePercent + '%'}" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">{{ deadlinePercent }}%</div>
-              </div>
-            </div>
-          </div>
-        </div>
+            </span>
+            <span class="col-10">
+              <span class="progress">
+                <span :class="progressClass" role="progressbar" :style="{width: deadlinePercent + '%'}" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">{{ deadlinePercent }}%</span>
+              </span>
+            </span>
+          </span>
+        </span>
       </div>
     </div>
 </template>
@@ -129,8 +129,8 @@ export default {
   }
 
   #taskContainer{
-    padding-top: 40px;
-    padding-bottom: 40px;
+    padding-top: 20px;
+    padding-bottom: 20px;
     background-color: rgb(255, 255, 255);
     border-radius: 5px;
   }

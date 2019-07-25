@@ -18,10 +18,10 @@
       <div class="row" v-drag-and-drop:options="draggable_options">
 
       <div class="col columnCategory">
-        <div class="header" @click="todo_category = !todo_category">
+        <span class="header" @click="todo_category = !todo_category">
           <b class="category">TO DO </b>
           <span class="quantity">{{ statusFilter(['OPEN', 'REOPENED']).length }}</span>
-        </div>
+        </span>
         <div id="todo-category" v-if="todo_category">
           <task-box v-for="task1 in statusFilter(['OPEN', 'REOPENED'])"
                     v-bind:key="task1.id"
@@ -98,6 +98,7 @@ export default {
       navName: 'Options',
       reportedTasks: false,
       menu: [],
+      oldDraggedTask: null,
 
       draggable_options: {
         dropzoneSelector: 'div',
@@ -117,9 +118,14 @@ export default {
             parent.removeChild(item)
             target.appendChild(item)
             this.changeStatus(event)
+          } else {
+            event.drop()
           }
         },
         onDragstart: function (event) {
+          if (event.items.length === 0) {
+            event.items.push(this.oldDraggedTask)
+          }
           if (!this.isDraggable(event)) {
             event.drop()
           }
@@ -194,6 +200,7 @@ export default {
           return false
         }
       }
+      this.oldDraggedTask = event.items[0]
       return true
     },
     async isDroppable (event) {
