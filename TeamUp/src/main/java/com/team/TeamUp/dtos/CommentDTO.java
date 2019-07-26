@@ -3,6 +3,7 @@ package com.team.TeamUp.dtos;
 import com.fasterxml.jackson.annotation.JsonFormat;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 public class CommentDTO {
@@ -11,8 +12,10 @@ public class CommentDTO {
     private String title;
     private String content;
     private UserDTO creator;
+    private int parent;
     private LocalDateTime datePosted;
-    private List<CommentDTO> replies;
+    private int postId;
+    private List<CommentDTO> replies = new ArrayList<>();
 
     public int getId() {
         return id;
@@ -42,6 +45,14 @@ public class CommentDTO {
         return creator;
     }
 
+    public int getParent() {
+        return parent;
+    }
+
+    public void setParent(int parent) {
+        this.parent = parent;
+    }
+
     public void setCreator(UserDTO creator) {
         this.creator = creator;
     }
@@ -61,6 +72,14 @@ public class CommentDTO {
 
     public void setDatePosted(LocalDateTime datePosted) {
         this.datePosted = datePosted;
+    }
+
+    public int getPostId() {
+        return postId;
+    }
+
+    public void setPostId(int postId) {
+        this.postId = postId;
     }
 
     @Override

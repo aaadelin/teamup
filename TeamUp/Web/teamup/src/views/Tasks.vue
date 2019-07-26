@@ -30,10 +30,10 @@
       </div>
 
       <div class="col columnCategory">
-        <div class="header" @click="in_progress_category = !in_progress_category">
+        <span class="header" @click="in_progress_category = !in_progress_category">
           <b class="category">IN PROGRESS </b>
           <span class="quantity"> {{ statusFilter(['IN_PROGRESS']) .length }}</span>
-        </div>
+        </span>
         <div id="in-progress-category" v-if="in_progress_category">
           <task-box v-for="task1 in statusFilter(['IN_PROGRESS'])"
                     v-bind:key="task1.id"
@@ -42,10 +42,10 @@
       </div>
 
       <div class="col columnCategory">
-        <div class="header" @click="under_review_category = !under_review_category">
+        <span class="header" @click="under_review_category = !under_review_category">
           <b class="category">UNDER REVIEW </b>
           <span class="quantity"> {{ statusFilter(['UNDER_REVIEW']) .length }}</span>
-        </div>
+        </span>
         <div id="under-review-category" v-if="under_review_category">
           <task-box v-for="task1 in statusFilter(['UNDER_REVIEW'])"
                     v-bind:key="task1.id"
@@ -54,10 +54,10 @@
       </div>
 
       <div class="col columnCategory">
-        <div class="header" @click="done_category = !done_category">
+        <span class="header" @click="done_category = !done_category">
           <b class="category">DONE </b>
           <span class="quantity">{{ statusFilter(['APPROVED', 'CLOSED']).length }}</span>
-        </div>
+        </span>
         <div id="done-category" v-if="done_category">
           <task-box v-for="task1 in statusFilter(['APPROVED'])"
                     v-bind:key="task1.id"
@@ -283,7 +283,7 @@ export default {
           break
         case 'APPROVED':
           status.push('under-review-category')
-          status.push('todo-category')
+          // status.push(' todo-category')
           break
       }
       return status.includes(target)
@@ -329,7 +329,9 @@ export default {
   /*For the page*/
 
   .header{
+    display: block;
     cursor: pointer;
+    /*width: 330px;*/
   }
 
   /*#content{*/

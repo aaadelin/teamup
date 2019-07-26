@@ -111,19 +111,22 @@
         </transition>
       </div>
 
-      <ul>
-        <li v-for="comment in comments" v-bind:key="comment.id"> {{ comment }} </li>
-      </ul>
-<!--      TODO add comment-->
+<!--      <ul>-->
+<!--        <li v-for="comment in comments" v-bind:key="comment.id"> {{ comment }} </li>-->
+<!--      </ul>-->
       <div>
         <div class="add-comment col justify-content-lg-start">
           <p class="row">Add a comment:</p>
-          <comment-form/>
+          <comment-form
+            :post-id="postId"
+          />
           <h4>Comments: </h4>
-          <div class="comment" v-for="comment in comments" :key="comment.id">
-            <h4><strong>{{ comment.creator.name }}</strong> {{comment.title}} </h4>
-            <p>{{ comment.content }}</p>
-            <p>Reply</p>
+          <div class="row">
+            <div v-for="comment in comments" :key="comment.id">
+              <h4><strong>{{ comment.creator.name }}</strong> {{comment.title}} </h4>
+              <p>{{ comment.content }}</p>
+              <p>Reply</p>
+            </div>
           </div>
         </div>
       </div>
@@ -156,14 +159,13 @@ export default {
         taskStatus: null
       },
       comments: [],
-      title: '',
-      comment: '',
       user: localStorage.getItem('access_key'),
       canEditAll: false,
       canEditStatus: false,
       taskStatuses: [],
       taskTypes: [],
       edited: false,
+      postId: -1,
 
       reporter: { name: '' },
       assignees: [],
@@ -198,6 +200,7 @@ export default {
         setTimeout(() => {
         }, 500)
       }
+      this.postId = data.id
       this.task = data.taskDTO
       this.currentStatus = this.task.taskStatus
       this.currentDescription = this.task.description
@@ -219,9 +222,6 @@ export default {
       this.reporter = await getUserById(this.task.reporterID)
 
       this.assignees = await getUsersByIds(this.task.assignees)
-    },
-    addComment () {
-      console.log(this.title)
     },
     hasChanged () {
       if (this.canEditStatus) {
@@ -369,6 +369,7 @@ export default {
     flex-direction: row-reverse;
     padding-right: 30px;
     height: 30px;
+    margin-bottom: 10px;
   }
 
   p, .p {

@@ -132,6 +132,13 @@ export default {
   async beforeMount () {
     if (this.$store.state.access_key) {
       await this.getDataArrays()
+
+      // at escape pressed the div must disappear
+      document.addEventListener('keyup', ev => {
+        if (ev.code === 'Escape' && this.isVisible) {
+          this.cancel()
+        }
+      })
     }
   },
   components: {

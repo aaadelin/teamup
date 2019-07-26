@@ -51,3 +51,19 @@ export async function saveUser (data) {
     return false
   })
 }
+
+export async function saveComment (data) {
+  let url = `${baseURL}/comment`
+  return axios({
+    url: url,
+    method: 'post',
+    headers: {
+      'token': localStorage.getItem('access_key')
+    },
+    data: data
+  }).then(rez => {
+    return true
+  }).catch(rez => {
+    return false
+  })
+}

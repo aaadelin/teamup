@@ -329,10 +329,16 @@ public class DTOsConverter {
         Comment comment = commentRepository.findById(commentDTO.getId()).orElseGet(Comment::new);
         comment.setTitle(commentDTO.getTitle());
         comment.setContent(commentDTO.getContent());
-        comment.setCreator(userRepository.findById(commentDTO.getId()).orElseThrow());
+        comment.setCreator(userRepository.findById(commentDTO.getCreator().getId()).orElseThrow());
+        Optional<Comment> commentOptional = commentRepository.findById(commentDTO.getParent());
+        commentOptional.ifPresent(comment::setParent);
+        Optional<Post> postOptional = postRepository.findById(commentDTO.getPostId());
+        postOptional.ifPresent(comment::setPost);
         comment.setReplies(commentDTO.getReplies().stream().map(this::getCommentFromDTO).collect(Collectors.toList()));
+        if(commentDTO.getDatePosted() == null){
+            commentDTO.setDatePosted(LocalDateTime.now());
+        }
         comment.setDatePosted(commentDTO.getDatePosted());
-
         LOGGER.info(String.format("Instance of type Comment created: %s", comment));
         return comment;
     }
@@ -346,7 +352,9 @@ public class DTOsConverter {
         commentDTO.setCreator(this.getDTOFromUser(comment.getCreator()));
         commentDTO.setReplies(comment.getReplies().stream().map(this::getDTOFromComment).collect(Collectors.toList()));
         commentDTO.setDatePosted(comment.getDatePosted());
-
+        int parentId = comment.getParent() != null?comment.getParent().getId() : 0;
+        commentDTO.setParent(parentId);
+        commentDTO.setPostId(comment.getPost().getId());
         LOGGER.info(String.format("Instance of type CommentDTO created: %s", commentDTO));
         return commentDTO;
     }

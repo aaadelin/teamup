@@ -13,15 +13,15 @@ public class TaskValidationUtils {
         switch (originalStatus){
             case OPEN:
             case REOPENED:
-                return taskDTO.getTaskStatus().equals(IN_PROGRESS);
+                return taskDTO.getTaskStatus().equals(IN_PROGRESS) || taskDTO.getTaskStatus().equals(REOPENED);
             case IN_PROGRESS:
-                return taskDTO.getTaskStatus().equals(OPEN) || taskDTO.getTaskStatus().equals(UNDER_REVIEW);
+                return taskDTO.getTaskStatus().equals(OPEN) || taskDTO.getTaskStatus().equals(UNDER_REVIEW) || taskDTO.getTaskStatus().equals(IN_PROGRESS);
             case UNDER_REVIEW:
-                return taskDTO.getTaskStatus().equals(IN_PROGRESS) || taskDTO.getTaskStatus().equals(APPROVED);
+                return taskDTO.getTaskStatus().equals(IN_PROGRESS) || taskDTO.getTaskStatus().equals(APPROVED) || taskDTO.getTaskStatus().equals(UNDER_REVIEW);
             case APPROVED:
-                return taskDTO.getTaskStatus().equals(UNDER_REVIEW) || taskDTO.getTaskStatus().equals(CLOSED);
+                return taskDTO.getTaskStatus().equals(UNDER_REVIEW) || taskDTO.getTaskStatus().equals(CLOSED) || taskDTO.getTaskStatus().equals(APPROVED); // TODO from approved to reopened
             case CLOSED:
-                return taskDTO.getTaskStatus().equals(REOPENED);
+                return taskDTO.getTaskStatus().equals(REOPENED) || taskDTO.getTaskStatus().equals(CLOSED);
         }
         return false;
     }

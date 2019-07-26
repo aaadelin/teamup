@@ -14,6 +14,8 @@
 </template>
 
 <script>
+import { saveComment } from '../persistance/RestPostRepository'
+
 export default {
   name: 'CommentForm',
   data () {
@@ -27,11 +29,21 @@ export default {
       type: Number,
       required: false,
       default: null
+    },
+    postId: {
+      required: true,
+      default: -1
     }
   },
   methods: {
     addComment () {
-      console.log(this.parentComponent)
+      let comment = {
+        title: this.title,
+        content: this.comment,
+        postId: this.postId
+      }
+
+      saveComment(comment)
     }
   }
 }

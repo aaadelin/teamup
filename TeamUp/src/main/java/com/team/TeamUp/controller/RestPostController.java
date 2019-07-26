@@ -1,14 +1,8 @@
 package com.team.TeamUp.controller;
 
-import com.team.TeamUp.domain.Post;
-import com.team.TeamUp.domain.Task;
-import com.team.TeamUp.domain.Team;
-import com.team.TeamUp.domain.User;
+import com.team.TeamUp.domain.*;
 import com.team.TeamUp.domain.enums.UserStatus;
-import com.team.TeamUp.dtos.ProjectDTO;
-import com.team.TeamUp.dtos.TaskDTO;
-import com.team.TeamUp.dtos.TeamDTO;
-import com.team.TeamUp.dtos.UserDTO;
+import com.team.TeamUp.dtos.*;
 import com.team.TeamUp.persistance.*;
 import com.team.TeamUp.utils.TokenUtils;
 import com.team.TeamUp.utils.UserValidationUtils;
@@ -90,6 +84,25 @@ public class RestPostController extends AbstractRestController {
             User user = userRepository.findByHashKey(headers.get("token")).orElseGet(User::new);
             Team newTeam = dtOsConverter.getTeamFromDTO(team, user.getStatus());
             teamRepository.save(newTeam);
+            return new ResponseEntity<>("OK", HttpStatus.OK);
+        }
+        LOGGER.error("User not eligible");
+        return new ResponseEntity<>("FORBIDDEN", HttpStatus.FORBIDDEN);
+    }
+
+    @RequestMapping(value = "/comment", method = RequestMethod.POST)
+    public ResponseEntity<?> addComment(@RequestBody CommentDTO commentDTO, @RequestHeader Map<String, String> headers) {
+        LOGGER.info(String.format("Entering method add comment with comment: %s and headers: %s", commentDTO, headers));
+        if (userValidationUtils.isValid(headers)) {
+            User user = userRepository.findByHashKey(headers.get("token")).orElseGet(User::new);
+            commentDTO.setCreator(dtOsConverter.getDTOFromUser(user));
+            Comment newComment = dtOsConverter.getCommentFromDTO(commentDTO);
+            commentRepository.save(newComment);
+
+            Post post = newComment.getPost();
+            post.addComment(newComment);
+            postRepository.save(post);
+
             return new ResponseEntity<>("OK", HttpStatus.OK);
         }
         LOGGER.error("User not eligible");
