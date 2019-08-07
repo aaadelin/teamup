@@ -32,7 +32,7 @@
 
                 <div class="row">
                   <label for="deadline" class="col-md-3">Deadline </label>
-                  <date-picker v-model="deadline" id="deadline" name="deadline" :config="options" class="form-control col-md-8"/>
+                  <date-picker id="deadline" v-model="deadline"  name="deadline" :config="options" class="form-control col-md-8"/>
 <!--                  <Datepicker format="YYYY-MM-DD H:i:s" v-model="deadline" id="deadline" name="deadline" class="form-control col-md-8"/>-->
                 </div>
 
@@ -94,7 +94,7 @@
 
                 <div id="assignees" class="row justify-content-center">
                   <ul>
-                    <li v-for="item in assignees" :key="item.id"> {{ item.firstName }} {{ item.lastName }} </li>
+                    <li v-for="item in assignees" :key="item.id"> {{ item.firstName }} {{ item.lastName }} <button class="btn btn-danger btn-circle" @click="removeFromAssignees(item.id)">-</button></li>
                   </ul>
                 </div>
 
@@ -293,6 +293,14 @@ export default {
       if (!this.assignees.includes(me)) {
         this.assignees.push(me)
       }
+    },
+    removeFromAssignees (id) {
+      for (let i = 0; i < this.assignees.length; i++) {
+        if(this.assignees[i].id === id){
+          this.assignees.splice(i, 1)
+          break
+        }
+      }
     }
   }
 }
@@ -360,5 +368,15 @@ export default {
   .modal-leave-active .modal-container {
     -webkit-transform: scale(1.1);
     transform: scale(1.1);
+  }
+
+  .btn-circle {
+    width: 20px;
+    height: 20px;
+    text-align: center;
+    padding: 6px 0;
+    font-size: 5px;
+    line-height: 1.428571429;
+    border-radius: 10px;
   }
 </style>
