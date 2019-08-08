@@ -168,11 +168,19 @@ public class DTOsConverter {
         Optional<Task> taskOptional = taskRepository.findById(taskDTO.getId());
         Task task = taskOptional.orElseThrow();
 
-        if (taskDTO.getAssignees().contains(user.getId()) && taskDTO.getReporterID() != user.getId()) { //if can change only the status, not a reporter
+        if (taskDTO.getDescription() == null && taskDTO.getDeadline() == null && taskDTO.getTaskType() == null &&
+                taskDTO.getDifficulty() == 0 && taskDTO.getPriority() == 0 && taskDTO.getTaskStatus() != null &&
+                (task.getAssignees().contains(user) || task.getReporter().getId() == user.getId()) &&
+                taskValidationUtils.isTaskStatusChangeValid(taskOptional.get(), taskDTO)) {
+            // Only the status is updated
             task.setTaskStatus(taskDTO.getTaskStatus());
             task.setLastChanged(LocalDateTime.now());
             return task;
-        } else if (taskDTO.getReporterID() == user.getId() || user.getStatus().equals(UserStatus.ADMIN)){ // is the reporter, or the admin, can change everything
+        } else if (taskDTO.getDescription() != null && !taskDTO.getDescription().trim().equals("") &&
+                taskDTO.getDeadline() != null && taskDTO.getTaskType() != null &&
+                taskDTO.getDifficulty() != 0 && taskDTO.getPriority() != 0 && taskDTO.getTaskStatus() != null
+                && taskValidationUtils.isTaskStatusChangeValid(taskOptional.get(), taskDTO) && taskDTO.getReporterID() == user.getId()) {
+
             task.setDescription(taskDTO.getDescription());
             task.setDeadline(taskDTO.getDeadline());
             task.setTaskType(taskDTO.getTaskType());
