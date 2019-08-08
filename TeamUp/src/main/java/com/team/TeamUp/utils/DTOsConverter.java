@@ -162,23 +162,17 @@ public class DTOsConverter {
         return task;
     }
 
-    public Task getTaskFromDTOForUpdate(TaskDTO taskDTO) {
+    public Task getTaskFromDTOForUpdate(TaskDTO taskDTO, User user) {
         LOGGER.info(String.format("Method to update Task from TaskDto called with parameter: %s", taskDTO));
 
         Optional<Task> taskOptional = taskRepository.findById(taskDTO.getId());
         Task task = taskOptional.orElseThrow();
 
-        if (taskDTO.getDescription() == null && taskDTO.getDeadline() == null && taskDTO.getTaskType() == null &&
-                taskDTO.getDifficulty() == 0 && taskDTO.getPriority() == 0 && taskDTO.getTaskStatus() != null &&
-                taskValidationUtils.isTaskStatusChangeValid(taskOptional.get(), taskDTO)) {
-            // Only the status is updated
+        if (taskDTO.getAssignees().contains(user.getId()) && taskDTO.getReporterID() != user.getId()) { //if can change only the status, not a reporter
             task.setTaskStatus(taskDTO.getTaskStatus());
             task.setLastChanged(LocalDateTime.now());
             return task;
-        } else if (taskDTO.getDescription() != null && !taskDTO.getDescription().trim().equals("") && taskDTO.getDeadline() != null && taskDTO.getTaskType() != null &&
-                taskDTO.getDifficulty() != 0 && taskDTO.getPriority() != 0 && taskDTO.getTaskStatus() != null
-                && taskValidationUtils.isTaskStatusChangeValid(taskOptional.get(), taskDTO)) {
-
+        } else if (taskDTO.getReporterID() == user.getId() || user.getStatus().equals(UserStatus.ADMIN)){ // is the reporter, or the admin, can change everything
             task.setDescription(taskDTO.getDescription());
             task.setDeadline(taskDTO.getDeadline());
             task.setTaskType(taskDTO.getTaskType());
@@ -190,6 +184,7 @@ public class DTOsConverter {
             }
             task.setTaskStatus(taskDTO.getTaskStatus());
             task.setLastChanged(LocalDateTime.now());
+            task.setAssignees(taskDTO.getAssignees().stream().map(assigneeId -> userRepository.findById(assigneeId).orElseThrow()).collect(Collectors.toList()));
             return task;
         } else {
             throw new IllegalArgumentException();

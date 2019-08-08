@@ -92,11 +92,23 @@
 
           <span>
             <strong>Assignees: </strong>
+            <select  v-if="editMode && canEditAll" @click="addPersons" v-model="userToAdd">
+              <option v-for="user in users" :key="user.id" :value="user">{{user.firstName}} {{user.lastName}} ({{user.department}})</option>
+            </select>
+<!--            <button v-if="editMode && canEditAll" class="btn btn-success btn-circle" @click="addPersons">+</button>-->
 <!--            TODO add menu to add more persons-->
+            <span>
             <ul style="list-style-type: none">
-<!--              TODO add remove button-->
-              <li v-for="assignee in assignees" :key="assignee.id" style="cursor: pointer" @click="seeUsersProfile(assignee.id)"> {{assignee.firstName}} {{assignee.lastName}}</li>
+              <li v-for="assignee in assignees" :key="assignee.id">
+                <div class="row justify-content-center">
+                  <div style="cursor: pointer; margin-right: 5px;" @click="seeUsersProfile(assignee.id)">
+                    {{assignee.firstName}} {{assignee.lastName}}
+                  </div>
+                  <button v-if="editMode && canEditAll" class="btn btn-danger btn-circle" @click="removeFromAssignees(assignee)">-</button>
+                </div>
+              </li>
             </ul>
+            </span>
           </span>
 
         </div>
@@ -134,22 +146,22 @@
 </template>
 
 <script>
-import {
-  getMyID,
-  getPostByTaskId,
-  getTaskStatus,
-  getTaskTypes,
-  getUserById,
-  getUsersByIds
-} from '../persistance/RestGetRepository'
+  import {
+    getMyID,
+    getPostByTaskId,
+    getTaskStatus,
+    getTaskTypes,
+    getUserById, getUsers,
+    getUsersByIds
+  } from '../persistance/RestGetRepository'
 import { updateTask } from '../persistance/RestPutRepository'
 import CommentForm from '../components/CommentForm'
 
 export default {
   name: 'TaskPost',
   components: { CommentForm },
-  async beforeMount () {
-    await this.loadData()
+  beforeMount () {
+    this.loadData()
   },
   data () {
     return {
@@ -164,8 +176,10 @@ export default {
       canEditStatus: false,
       taskStatuses: [],
       taskTypes: [],
+      users: [],
       edited: false,
       postId: -1,
+      userToAdd: null,
 
       reporter: { name: '' },
       assignees: [],
@@ -175,6 +189,7 @@ export default {
       currentType: null,
       currentDifficulty: null,
       currentPriority: null,
+      currentAssignees: [],
       editMode: false,
       options: {
         format: 'YYYY-MM-DD HH:mm:ss',
@@ -186,9 +201,9 @@ export default {
   },
   methods: {
     async loadData () {
-      let data
+      let taskPostData
       try {
-        data = await getPostByTaskId(this.$route.query.taskId)
+        taskPostData = await getPostByTaskId(this.$route.query.taskId)
       } catch (e) {
         this.$notify({
           group: 'notificationsGroup',
@@ -198,10 +213,11 @@ export default {
         })
 
         setTimeout(() => {
+          // TODO Redirecting
         }, 500)
       }
-      this.postId = data.id
-      this.task = data.taskDTO
+      this.postId = taskPostData.id
+      this.task = taskPostData.taskDTO
       this.currentStatus = this.task.taskStatus
       this.currentDescription = this.task.description
       this.currentDeadline = this.task.deadline
@@ -211,7 +227,7 @@ export default {
 
       this.taskStatuses = await this.getTaskStatusPosibilities()
       this.taskTypes = await getTaskTypes()
-      this.comments = data.comments
+      this.comments = taskPostData.comments
       let me = await getMyID()
       if (this.task.reporterID === me) {
         this.canEditAll = true
@@ -220,8 +236,11 @@ export default {
         this.canEditStatus = true
       }
       this.reporter = await getUserById(this.task.reporterID)
-
       this.assignees = await getUsersByIds(this.task.assignees)
+      this.currentAssignees.push(...this.assignees)
+      getUsers().then(answer => {
+        this.users = answer.filter(elem => elem.status !== 'ADMIN')
+      })
     },
     hasChanged () {
       if (this.canEditStatus) {
@@ -230,7 +249,8 @@ export default {
       if (this.canEditAll) {
         this.edited = this.task.description !== this.currentDescription || this.task.deadline !== this.currentDeadline ||
           this.task.taskStatus !== this.currentStatus || this.task.difficulty !== parseInt(this.currentDifficulty) ||
-          this.task.priority !== parseInt(this.currentPriority) || this.currentType !== this.task.taskType
+          this.task.priority !== parseInt(this.currentPriority) || this.currentType !== this.task.taskType ||
+          this.currentAssignees !== this.assignees
       }
     },
     revertEdit () {
@@ -240,6 +260,13 @@ export default {
       this.currentDifficulty = this.task.difficulty
       this.currentPriority = this.task.priority
       this.task.taskType = this.currentType
+
+      for (let i = 0; i < this.currentAssignees.length; i++) {
+        if (!this.assignees.map(el => el.id).includes(this.currentAssignees[i].id)){
+          this.assignees.push(this.currentAssignees[i])
+        }
+      }
+
       this.editMode = false
       this.edited = false
     },
@@ -252,7 +279,7 @@ export default {
           id: this.$route.query.taskId,
           taskStatus: this.currentStatus,
           reporterID: this.task.reporterID,
-          assignees: this.task.assignees,
+          assignees: this.assignees.map(assignee => assignee.id),
           description: this.currentDescription,
           deadline: this.currentDeadline,
           taskType: this.currentType,
@@ -327,6 +354,21 @@ export default {
           break
       }
       return status.includes(target)
+    },
+    removeFromAssignees (assignee) {
+      for (let i = 0; i < this.assignees.length; i++) {
+        if (this.assignees[i].id === assignee.id) {
+          this.assignees.splice(i, 1)
+          break
+        }
+      }
+      this.hasChanged()
+    },
+    addPersons () {
+      if(this.userToAdd !== null && !this.assignees.map(user => user.id).includes(this.userToAdd.id)){
+        this.assignees.push(this.userToAdd)
+        this.hasChanged()
+      }
     }
   }
 }
@@ -378,5 +420,15 @@ export default {
     font-weight: 300;
     line-height: 1.7em;
     color: #999;
+  }
+
+  .btn-circle {
+    width: 20px;
+    height: 20px;
+    text-align: center;
+    padding: 0 0 0 0;
+    font-size: 15px;
+    line-height: 1.428571429;
+    border-radius: 10px;
   }
 </style>

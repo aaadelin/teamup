@@ -296,7 +296,7 @@ export default {
     },
     removeFromAssignees (id) {
       for (let i = 0; i < this.assignees.length; i++) {
-        if(this.assignees[i].id === id){
+        if (this.assignees[i].id === id) {
           this.assignees.splice(i, 1)
           break
         }

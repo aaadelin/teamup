@@ -96,7 +96,7 @@ public class RestPutController extends AbstractRestController {
                         taskOptional.get().getAssignees().contains(userOptional.get()) ||
                         taskOptional.get().getReporter().getId() == userOptional.get().getId())){
 
-                    Task task = dtOsConverter.getTaskFromDTOForUpdate(taskDTO);
+                    Task task = dtOsConverter.getTaskFromDTOForUpdate(taskDTO, userOptional.get());
                     taskRepository.save(task);
                     LOGGER.info(String.format("Task with id %s has been successfully updated in database", task.getId()));
                     return new ResponseEntity<>("OK", HttpStatus.OK);
