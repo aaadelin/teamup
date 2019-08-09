@@ -12,6 +12,7 @@ public class TaskValidationUtils {
         TaskStatus originalStatus = original.getTaskStatus();
         switch (originalStatus){
             case OPEN:
+                return taskDTO.getTaskStatus().equals(OPEN) || taskDTO.getTaskStatus().equals(IN_PROGRESS);
             case REOPENED:
                 return taskDTO.getTaskStatus().equals(IN_PROGRESS) || taskDTO.getTaskStatus().equals(REOPENED);
             case IN_PROGRESS:

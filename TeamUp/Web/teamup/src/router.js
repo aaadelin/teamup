@@ -47,9 +47,18 @@ router.beforeEach((to, from, next) => {
   const loggedIn = localStorage.getItem('access_key')
 
   if (authRequired && !loggedIn) {
+    if (!to.path.includes('logout')) {
+      localStorage.setItem('wantedToAccess', to.path)
+    }
     return next('/login')
   } else if (loggedIn && to.path === '/login') {
-    return next('/')
+    let wantedUrl = localStorage.getItem('wantedToAccess')
+    if (wantedUrl !== null) {
+      localStorage.removeItem('wantedToAccess')
+      return next(wantedUrl)
+    } else {
+      return next('/')
+    }
   }
 
   next()

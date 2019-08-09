@@ -233,16 +233,19 @@ export async function getUserById (id) {
 }
 
 export async function getUsersByIds (ids) {
-  let url = `${baseURL}/users/${ids}`
-
-  return axios({
-    url: url,
-    headers: {
-      'token': localStorage.getItem('access_key')
-    }
-  }).then(res => {
-    return res.data
-  }).catch(rez => {
-    return null
-  })
+  if(ids.length !== 0){
+    let url = `${baseURL}/users/${ids}`
+    console.log(url)
+    return axios({
+      url: url,
+      headers: {
+        'token': localStorage.getItem('access_key')
+      }
+    }).then(res => {
+      return res.data
+    }).catch(rez => {
+      return null
+    })
+  }
+  return []
 }
