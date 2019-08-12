@@ -126,6 +126,22 @@ export async function getPostByTaskId (id) {
   })
 }
 
+export async function getCommentsByPostId (id) {
+  let url = `${baseURL}/post/${id}/comments`
+
+  return axios({
+    method: 'get',
+    url: url,
+    data: {
+    },
+    headers: {
+      'token': localStorage.getItem('access_key')
+    }
+  }).then(res => {
+    return res.data
+  })
+}
+
 export async function getTaskById (id) {
   let url = `${baseURL}/task/${id}`
 

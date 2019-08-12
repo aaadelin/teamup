@@ -15,6 +15,7 @@ export function login (username, password) {
     localStorage.setItem('isAdmin', res.data.isAdmin)
     localStorage.setItem('name', res.data.name)
     location.reload()
+    return true
   }).catch(rez => {
     return false
   })

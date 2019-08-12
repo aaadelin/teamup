@@ -1,6 +1,7 @@
 package com.team.TeamUp.utils;
 
 import com.team.TeamUp.domain.*;
+import com.team.TeamUp.domain.enums.TaskStatus;
 import com.team.TeamUp.domain.enums.UserStatus;
 import com.team.TeamUp.dtos.*;
 import com.team.TeamUp.persistance.*;
@@ -196,6 +197,11 @@ public class DTOsConverter {
                 task.setPriority(taskDTO.getPriority());
             }
             task.setTaskStatus(taskDTO.getTaskStatus());
+            if(task.getTaskStatus().equals(TaskStatus.CLOSED)){
+                task.setDoneAt(LocalDateTime.now());
+            }else{
+                task.setDoneAt(null);
+            }
             task.setLastChanged(LocalDateTime.now());
             task.setAssignees(taskDTO.getAssignees().stream().map(assigneeId -> userRepository.findById(assigneeId).orElseThrow()).collect(Collectors.toList()));
             return task;

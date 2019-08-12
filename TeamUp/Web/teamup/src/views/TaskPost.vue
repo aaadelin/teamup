@@ -131,6 +131,7 @@
           <p class="row">Add a comment:</p>
           <comment-form
             :post-id="postId"
+            @reloadComments="reloadComments"
           />
           <h4>Comments: </h4>
           <div class="row">
@@ -147,11 +148,13 @@
 
 <script>
 import {
+  getCommentsByPostId,
   getMyID,
   getPostByTaskId,
   getTaskStatus,
   getTaskTypes,
-  getUserById, getUsers,
+  getUserById,
+  getUsers,
   getUsersByIds
 } from '../persistance/RestGetRepository'
 import { updateTask } from '../persistance/RestPutRepository'
@@ -241,6 +244,9 @@ export default {
       getUsers().then(answer => {
         this.users = answer.filter(elem => elem.status !== 'ADMIN')
       })
+    },
+    async reloadComments () {
+      this.comments = await getCommentsByPostId(this.postId)
     },
     hasChanged () {
       if (this.canEditStatus) {

@@ -53,7 +53,6 @@ export default {
       const { username, password } = this
       if (username && password) {
         this.credentialsOK = await login(username, password)
-        console.log(this.credentialsOK)
       }
     },
     showHidePass () {
