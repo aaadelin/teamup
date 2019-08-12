@@ -9,7 +9,7 @@
 
             <div class="modal-header">
               <slot name="header">
-                Create a new Issue
+                Create a new User
               </slot>
 
             </div>
@@ -18,7 +18,7 @@
               <slot name="body">
                 <div class="row">
                   <label for="firstName" class="col-md-3">First name </label>
-                  <input id="firstName" type="text" v-model="firstName" name="firstName" class="form-control col-md-8"/>
+                  <input id="firstName" @change="createUserName" type="text" v-model="firstName" name="firstName" class="form-control col-md-8"  :class="{ 'is-invalid': dataFailed && !firstName }"/>
                 </div>
               </slot>
 
@@ -27,7 +27,7 @@
               <slot name="body">
               <div class="row">
                 <label for="lastName" class="col-md-3">Last name </label>
-                <input id="lastName" type="text" v-model="lastName" name="lastName" class="form-control col-md-8"/>
+                <input id="lastName" @change="createUserName" type="text" v-model="lastName" name="lastName" class="form-control col-md-8"  :class="{ 'is-invalid': dataFailed && !lastName }"/>
               </div>
               </slot>
 
@@ -36,7 +36,7 @@
               <slot name="body">
               <div class="row">
                 <label for="username" class="col-md-3">Username </label>
-                <input id="username" type="text" v-model="username" name="username" class="form-control col-md-8"/>
+                <input id="username" type="text" v-model="username" name="username" class="form-control col-md-8"  :class="{ 'is-invalid': dataFailed && !username }"/>
               </div>
               </slot>
 
@@ -47,7 +47,7 @@
                 <label for="password" class="col-md-3">Password </label>
                 <div class="input-group col-md-8 no-left-padding" id="show_hide_password">
 
-                  <input id="password" type="password" v-model="password" name="password" class="form-control"/>
+                  <input id="password" type="password" v-model="password" name="password" class="form-control" :class="{ 'is-invalid': (dataFailed && !password) || (password && passwordAgain && password !== passwordAgain) }"/>
 
                   <div class="input-group-addon" @click="showHidePass('password')">
                     <a><i id="eye-password" class="fa fa-eye" aria-hidden="true"></i></a>
@@ -63,7 +63,7 @@
                 <label for="password2" class="col-md-3">Password again</label>
                 <div class="input-group col-md-8 no-left-padding" id="show_hide_password_again">
 
-                    <input id="password2" class="form-control" type="password" v-model="passwordAgain" name="password2"/>
+                    <input id="password2" class="form-control" type="password" v-model="passwordAgain" name="password2"  :class="{ 'is-invalid': (dataFailed && !password) || (password && passwordAgain && password !== passwordAgain) }"/>
 
                     <div class="input-group-addon" @click="showHidePass('password2')">
                       <a><i id="eye-password2" class="fa fa-eye" aria-hidden="true"></i></a>
@@ -121,6 +121,7 @@
 <script>
 import 'pc-bootstrap4-datetimepicker/build/css/bootstrap-datetimepicker.css'
 import { getTeams, getUserStatuses } from '../persistance/RestGetRepository'
+import { saveUser } from '../persistance/RestPostRepository'
 
 export default {
   async beforeMount () {
@@ -143,6 +144,7 @@ export default {
       status: '',
       team: '',
       localStorage: localStorage,
+      dataFailed: false,
 
       statuses: [],
       teams: [],
@@ -150,14 +152,38 @@ export default {
     }
   },
   methods: {
-    finished () {
+    async finished () {
       let data = this.createData()
-      this.clearData()
-      this.$emit('fin', data)
+
+      if (data !== null) {
+        let ansewer = await saveUser(data)
+        if (ansewer) {
+          this.dataFailed = false
+          this.$notify({
+            group: 'notificationsGroup',
+            title: 'Success',
+            type: 'success',
+            text: 'Task saved!'
+          })
+          this.clearData()
+          this.$emit('done')
+        } else {
+          this.dataFailed = true
+          this.$notify({
+            group: 'notificationsGroup',
+            title: 'Error',
+            type: 'error',
+            text: 'An error occurred'
+          })
+        }
+      } else {
+        this.dataFailed = true
+      }
     },
     cancel () {
+      this.dataFailed = false
       this.clearData()
-      this.$emit('cancel')
+      this.$emit('done')
     },
     createData () {
       if (this.firstName !== '' && this.lastName !== '' && this.username !== '' &&
@@ -186,8 +212,8 @@ export default {
       this.firstName = ''
       this.lastName = ''
       this.username = ''
-      this.password = ''
-      this.passwordAgain = ''
+      this.password = Math.random().toString(36).slice(-8)
+      this.passwordAgain = this.password
     },
     async getDataArrays () {
       this.teams = await getTeams()
@@ -201,6 +227,8 @@ export default {
       }
 
       this.dataReady = true
+      this.password = Math.random().toString(34).slice(-8)
+      this.passwordAgain = this.password
     },
     showHidePass (inputID) {
       let item = document.getElementById(inputID)
@@ -213,6 +241,11 @@ export default {
         item.type = 'password'
         eye.classList.remove('fa-eye-slash')
         eye.classList.add('fa-eye')
+      }
+    },
+    createUserName () {
+      if (this.firstName && this.lastName) {
+        this.username = this.firstName.slice(0, 1).toLocaleLowerCase() + this.lastName.toLocaleLowerCase()
       }
     }
   }

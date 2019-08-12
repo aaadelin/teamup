@@ -146,14 +146,14 @@
 </template>
 
 <script>
-  import {
-    getMyID,
-    getPostByTaskId,
-    getTaskStatus,
-    getTaskTypes,
-    getUserById, getUsers,
-    getUsersByIds
-  } from '../persistance/RestGetRepository'
+import {
+  getMyID,
+  getPostByTaskId,
+  getTaskStatus,
+  getTaskTypes,
+  getUserById, getUsers,
+  getUsersByIds
+} from '../persistance/RestGetRepository'
 import { updateTask } from '../persistance/RestPutRepository'
 import CommentForm from '../components/CommentForm'
 
@@ -262,7 +262,7 @@ export default {
       this.task.taskType = this.currentType
 
       for (let i = 0; i < this.currentAssignees.length; i++) {
-        if (!this.assignees.map(el => el.id).includes(this.currentAssignees[i].id)){
+        if (!this.assignees.map(el => el.id).includes(this.currentAssignees[i].id)) {
           this.assignees.push(this.currentAssignees[i])
         }
       }
@@ -365,7 +365,7 @@ export default {
       this.hasChanged()
     },
     addPersons () {
-      if(this.userToAdd !== null && !this.assignees.map(user => user.id).includes(this.userToAdd.id)){
+      if (this.userToAdd !== null && !this.assignees.map(user => user.id).includes(this.userToAdd.id)) {
         this.assignees.push(this.userToAdd)
         this.hasChanged()
       }

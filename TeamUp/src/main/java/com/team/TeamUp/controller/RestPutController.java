@@ -47,7 +47,7 @@ public class RestPutController extends AbstractRestController {
                 LOGGER.info(String.format("User with id %s has not been found to update", user.getId()));
                 return new ResponseEntity<>("NOT FOUND", HttpStatus.NOT_FOUND);
             } else {
-                User realUser = dtOsConverter.getUserFromDTO(user);
+                User realUser = dtOsConverter.getUserFromDTO(user, UserStatus.ADMIN);
                 userRepository.save(realUser);
                 LOGGER.info(String.format("User with id %s has been successfully updated in database", user.getId()));
                 return new ResponseEntity<>("OK", HttpStatus.OK);

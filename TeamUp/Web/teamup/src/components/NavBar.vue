@@ -44,13 +44,11 @@
     <div>
       <create-task class="overflow-auto"
       :is-visible="addTaskIsVisible"
-      @fin="saveTask"
-      @cancel="closeTask"/>
+      @done="closeTask"/>
 
     <create-user class="overflow-auto"
       :is-visible="addUserIsVisible"
-      @fin="saveUser"
-      @cancel="closeAddUser"/>
+      @done="closeUser"/>
     </div>
   </div>
 </template>
@@ -59,7 +57,6 @@
 import { getMyID, getUsersPhoto, logout } from '../persistance/RestGetRepository'
 import CreateTask from './CreateTask'
 import CreateUser from './CreateUser'
-import { saveTask, saveUser } from '../persistance/RestPostRepository'
 // import CreateUser from './CreateUser'
 
 export default {
@@ -95,27 +92,6 @@ export default {
       localStorage.clear()
       location.reload()
     },
-    async saveTask (data) {
-      if (data !== null) {
-        let answer = await saveTask(data)
-        if (answer) {
-          this.$notify({
-            group: 'notificationsGroup',
-            title: 'Success',
-            type: 'success',
-            text: 'Task saved!'
-          })
-          this.closeTask()
-        } else {
-          this.$notify({
-            group: 'notificationsGroup',
-            title: 'Error',
-            type: 'error',
-            text: 'An error occurred'
-          })
-        }
-      }
-    },
     closeTask () {
       this.addTaskIsVisible = false
     },
@@ -125,29 +101,8 @@ export default {
       console.log(this.searchTerm)
       // TODO
     },
-    closeAddUser () {
+    closeUser () {
       this.addUserIsVisible = false
-    },
-    async saveUser (data) {
-      if (data !== null) {
-        let ansewer = await saveUser(data)
-        if (ansewer) {
-          this.$notify({
-            group: 'notificationsGroup',
-            title: 'Success',
-            type: 'success',
-            text: 'Task saved!'
-          })
-          this.closeTask()
-        } else {
-          this.$notify({
-            group: 'notificationsGroup',
-            title: 'Error',
-            type: 'error',
-            text: 'An error occurred'
-          })
-        }
-      }
     },
     getPhoto () {
       getMyID().then(rez => {

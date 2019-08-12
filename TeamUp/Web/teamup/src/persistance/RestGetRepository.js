@@ -233,7 +233,7 @@ export async function getUserById (id) {
 }
 
 export async function getUsersByIds (ids) {
-  if(ids.length !== 0){
+  if (ids.length !== 0) {
     let url = `${baseURL}/users/${ids}`
     console.log(url)
     return axios({

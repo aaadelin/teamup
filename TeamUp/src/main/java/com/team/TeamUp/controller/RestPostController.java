@@ -38,7 +38,7 @@ public class RestPostController extends AbstractRestController {
     public ResponseEntity<?> addUser(@RequestBody UserDTO user, @RequestHeader Map<String, String> headers) {
         LOGGER.info(String.format("Entering method create user with user: %s and headers: %s", user, headers));
         if (userValidationUtils.isValid(headers, UserStatus.ADMIN)) {
-            User userToSave = dtOsConverter.getUserFromDTO(user);
+            User userToSave = dtOsConverter.getUserFromDTO(user, UserStatus.ADMIN);
             userRepository.save(userToSave);
 
             LOGGER.info("User has been successfully created and saved in database");

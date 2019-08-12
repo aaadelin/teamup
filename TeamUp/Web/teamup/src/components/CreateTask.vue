@@ -18,21 +18,21 @@
               <slot name="body">
                 <div class="row">
                   <label for="summary" class="col-md-3">Summary </label>
-                  <input id="summary" type="text" v-model="summary" name="summary" class="form-control col-md-8"/>
+                  <input id="summary" type="text" v-model="summary" name="summary" class="form-control col-md-8" :class="{ 'is-invalid': dataFailed && !summary }"/>
                 </div>
 
                 <br/>
 
                 <div class="row">
                   <label for="description" class="col-md-3">Description </label>
-                  <textarea id="description" type="text" v-model="description" name="description" class="form-control col-md-8"></textarea>
+                  <textarea id="description" type="text" v-model="description" name="description" class="form-control col-md-8" :class="{ 'is-invalid': dataFailed && !description }"></textarea>
                 </div>
 
                 <br/>
 
                 <div class="row">
                   <label for="deadline" class="col-md-3">Deadline </label>
-                  <date-picker id="deadline" v-model="deadline"  name="deadline" :config="options" class="form-control col-md-8"/>
+                  <date-picker id="deadline" v-model="deadline"  name="deadline" :config="options" class="form-control col-md-8"  :class="{ 'is-invalid': dataFailed && !deadline }"/>
 <!--                  <Datepicker format="YYYY-MM-DD H:i:s" v-model="deadline" id="deadline" name="deadline" class="form-control col-md-8"/>-->
                 </div>
 
@@ -40,7 +40,7 @@
 
                 <div class="row">
                   <label for="project" class="col-md-3">Project </label>
-                  <select id="project" name="difficulty" v-model="project" class="form-control col-md-8">
+                  <select id="project" name="difficulty" v-model="project" class="form-control col-md-8"  :class="{ 'is-invalid': dataFailed && !project }">
                     <option v-for="proj in projects" :key="proj.id" :value="proj">{{ proj.name }}</option>
                   </select>
                 </div>
@@ -67,7 +67,7 @@
 
                 <div class="row">
                   <label for="tasktype" class="col-md-3">Task type </label>
-                  <select id="tasktype" name="tasktype" v-model="taskType" class="form-control col-md-8">
+                  <select id="tasktype" name="tasktype" v-model="taskType" class="form-control col-md-8"  :class="{ 'is-invalid': dataFailed && !taskType }">
                     <option v-for="(type, index) in taskTypes" :key="index">{{ type}}</option>
                   </select>
                 </div>
@@ -76,7 +76,7 @@
 
                 <div class="row">
                   <label for="department" class="col-md-3">Department </label>
-                  <select id="department" name="department" v-model="department" class="form-control col-md-8">
+                  <select id="department" name="department" v-model="department" class="form-control col-md-8"  :class="{ 'is-invalid': dataFailed && !department }">
                     <option v-for="(department, index) in departments" :key="index">{{ department }}</option>
                   </select>
                 </div>
@@ -124,6 +124,7 @@
 <script>
 import 'pc-bootstrap4-datetimepicker/build/css/bootstrap-datetimepicker.css'
 import { getDepartments, getMyID, getProjects, getTaskTypes, getUsers } from '../persistance/RestGetRepository'
+import { saveTask } from '../persistance/RestPostRepository'
 // import Datepicker from 'vuejs-datetimepicker'
 // import datePicker from 'vue-bootstrap-datetimepicker'
 // Import date picker css
@@ -168,6 +169,7 @@ export default {
       assigneesList: [],
       currentlySelected: null,
       dataReady: false,
+      dataFailed: false,
 
       options: {
         format: 'YYYY-MM-DD HH:mm:ss',
@@ -178,14 +180,38 @@ export default {
     }
   },
   methods: {
-    finished () {
+    async finished () {
       let data = this.createData()
-      this.clearData()
-      this.$emit('fin', data)
+
+      if (data !== null) {
+        let taskSaved = await saveTask(data)
+        if (taskSaved) {
+          this.dataFailed = false
+          this.clearData()
+          this.$emit('done')
+          this.$notify({
+            group: 'notificationsGroup',
+            title: 'Success',
+            type: 'success',
+            text: 'Task saved!'
+          })
+        } else {
+          this.dataFailed = true
+          this.$notify({
+            group: 'notificationsGroup',
+            title: 'Error',
+            type: 'error',
+            text: 'An error occurred'
+          })
+        }
+      } else {
+        this.dataFailed = true
+      }
     },
     cancel () {
+      this.dataFailed = false
       this.clearData()
-      this.$emit('cancel')
+      this.$emit('done')
     },
     createData () {
       let assigneesIds = []

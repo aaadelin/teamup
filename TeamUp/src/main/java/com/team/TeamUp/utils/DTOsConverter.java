@@ -79,7 +79,7 @@ public class DTOsConverter {
      * @param userDTO UserDTO instance to be converted to User domain model
      * @return user entity containing userDTO data
      */
-    public User getUserFromDTO(UserDTO userDTO) {
+    public User getUserFromDTO(UserDTO userDTO, UserStatus requesterStatus) {
         LOGGER.info(String.format("Method create User from UserDTO called with parameter %s", userDTO));
 
         Optional<User> userOptional = userRepository.findById(userDTO.getId());
@@ -101,7 +101,12 @@ public class DTOsConverter {
         if (userDTO.getPhoto() != null) {
             user.setPhoto(userDTO.getPhoto());
         }
-        user.setStatus(userDTO.getStatus());
+        //may be removed?
+        if(userDTO.getStatus()==UserStatus.ADMIN && requesterStatus==UserStatus.ADMIN){
+            user.setStatus(userDTO.getStatus());
+        }else{
+            user.setStatus(userDTO.getStatus());
+        }
         user.setPassword(TokenUtils.getMD5Token(userDTO.getPassword()));
 
         Optional<Team> team = teamRepository.findById(userDTO.getTeamID());
