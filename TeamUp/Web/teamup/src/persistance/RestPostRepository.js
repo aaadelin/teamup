@@ -8,7 +8,7 @@ export function login (username, password) {
   data.set('username', username)
   data.set('password', password)
 
-  axios.post(url, data, {
+  return axios.post(url, data, {
     headers: { 'token': localStorage.getItem('access_key') }
   }).then(res => {
     localStorage.setItem('access_key', res.data.key)
@@ -16,7 +16,7 @@ export function login (username, password) {
     localStorage.setItem('name', res.data.name)
     location.reload()
   }).catch(rez => {
-    console.log('retry login')
+    return false
   })
 }
 

@@ -1,5 +1,5 @@
 <template>
-  <div id="login" class="shadow p-3 mb-5 bg-white rounded">
+<div id="login" class="shadow p-3 mb-5 bg-white rounded">
     <div class="row justify-content-center">
       <div class="col">
         <div id="header">
@@ -9,18 +9,19 @@
           <form @submit.prevent="handleSubmit">
             <div class="form-group">
               <label for="username">Username</label>
-              <input id="username" type="text" v-model="username" name="username" class="form-control" :class="{ 'is-invalid': submitted && !username }" />
+              <input id="username" type="text" v-model="username" name="username" class="form-control" :class="{ 'is-invalid': (submitted && !username) || !credentialsOK }" />
               <div v-show="submitted && !username" class="invalid-feedback">Username is required</div>
             </div>
             <div class="form-group">
               <label for="password">Password</label>
               <div class="input-group" id="show_hide_password">
-              <input id="password" :type="passwordType" v-model="password" name="password" class="form-control" :class="{ 'is-invalid': submitted && !password }" />
+              <input id="password" :type="passwordType" v-model="password" name="password" class="form-control" :class="{ 'is-invalid': (submitted && !password) || !credentialsOK }" />
               <div class="input-group-addon" @click="showHidePass">
                 <a><i id="eye" class="fa fa-eye" aria-hidden="true"></i></a>
               </div>
               <div v-show="submitted && !password" class="invalid-feedback">Password is required</div>
             </div>
+              <div v-show="!credentialsOK" style="color: red; font-size: 12px">Username or password entered is incorrect. Please try again.</div>
             </div>
             <div class="form-group">
               <button class="btn btn-primary">Login</button>
@@ -42,15 +43,17 @@ export default {
       username: '',
       password: '',
       submitted: false,
-      passwordType: 'password'
+      passwordType: 'password',
+      credentialsOK: true
     }
   },
   methods: {
-    handleSubmit (e) {
+    async handleSubmit (e) {
       this.submitted = true
       const { username, password } = this
       if (username && password) {
-        login(username, password)
+        this.credentialsOK = await login(username, password)
+        console.log(this.credentialsOK)
       }
     },
     showHidePass () {
@@ -72,8 +75,10 @@ export default {
 
   #login{
     /*background-color: rgba(0,0,0,0.19);*/
-    margin-top: 15%;
     max-width: 500px;
+    left: 0;
+    right: 0;
+    margin: auto;
   }
 
   #header{

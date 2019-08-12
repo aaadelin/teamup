@@ -213,8 +213,8 @@ export default {
         })
 
         setTimeout(() => {
-          // TODO Redirecting
-        }, 500)
+          this.$router.push('/tasks')
+        }, 1000)
       }
       this.postId = taskPostData.id
       this.task = taskPostData.taskDTO
@@ -382,7 +382,7 @@ export default {
 
   .add-comment{
     padding: 30px;
-    min-width: 400px;
+    min-width: 350px;
     background-color: rgba(141, 185, 180, 0.59);
   }
 
