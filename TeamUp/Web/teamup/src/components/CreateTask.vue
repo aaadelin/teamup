@@ -226,8 +226,8 @@ export default {
         return {
           summary: this.summary,
           description: this.description,
-          createdAt: this.getDate(null),
-          lastChanged: this.getDate(null),
+          createdAt: null,
+          lastChanged: null,
           deadline: this.deadline,
           difficulty: this.difficulty,
           priority: this.priority,

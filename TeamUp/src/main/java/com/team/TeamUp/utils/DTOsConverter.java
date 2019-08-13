@@ -139,7 +139,7 @@ public class DTOsConverter {
         }
         task.setDescription(taskDTO.getDescription());
         task.setDoneAt(taskDTO.getDoneAt());
-        task.setLastChanged(taskDTO.getLastChanged());
+        task.setLastChanged(LocalDateTime.now());
         task.setDeadline(taskDTO.getDeadline());
         task.setTaskStatus(taskDTO.getTaskStatus());
         task.setCreatedAt(LocalDateTime.now());
