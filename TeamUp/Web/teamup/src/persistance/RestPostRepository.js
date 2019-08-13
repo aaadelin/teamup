@@ -1,6 +1,21 @@
 import axios from 'axios'
 import { baseURL } from './Repository'
 
+async function postDataToUrl (data, url) {
+  return axios({
+    url: url,
+    method: 'post',
+    headers: {
+      'token': localStorage.getItem('access_key')
+    },
+    data: data
+  }).then(rez => {
+    return true
+  }).catch(rez => {
+    return false
+  })
+}
+
 export function login (username, password) {
   let url = `${baseURL}/login`
 
@@ -23,48 +38,15 @@ export function login (username, password) {
 
 export async function saveTask (data) {
   let url = `${baseURL}/task`
-  return axios({
-    url: url,
-    method: 'post',
-    headers: {
-      'token': localStorage.getItem('access_key')
-    },
-    data: data
-  }).then(rez => {
-    return true
-  }).catch(rez => {
-    return false
-  })
+  return postDataToUrl(data, url)
 }
 
 export async function saveUser (data) {
   let url = `${baseURL}/user`
-  return axios({
-    url: url,
-    method: 'post',
-    headers: {
-      'token': localStorage.getItem('access_key')
-    },
-    data: data
-  }).then(rez => {
-    return true
-  }).catch(rez => {
-    return false
-  })
+  return postDataToUrl(data, url)
 }
 
 export async function saveComment (data) {
   let url = `${baseURL}/comment`
-  return axios({
-    url: url,
-    method: 'post',
-    headers: {
-      'token': localStorage.getItem('access_key')
-    },
-    data: data
-  }).then(rez => {
-    return true
-  }).catch(rez => {
-    return false
-  })
+  return postDataToUrl(data, url)
 }

@@ -1,6 +1,19 @@
 import axios from 'axios'
 import { baseURL } from './Repository'
 
+function fetchDataFromUrl (url, defaultParam = null) {
+  return axios({
+    url: url,
+    headers: {
+      'token': localStorage.getItem('access_key')
+    }
+  }).then(res => {
+    return res.data
+  }).catch(() => {
+    return defaultParam
+  })
+}
+
 export function logout () {
   let url = `${baseURL}/logout`
 
@@ -17,251 +30,84 @@ export function logout () {
 }
 
 export async function getMyID () {
-  return axios({
-    url: `${baseURL}/key`,
-    method: 'get',
-    headers: {
-      'token': localStorage.getItem('access_key')
-    }
-  }).then(rez => {
-    return rez.data
-  }).catch(rez => {
-    return null
-  })
+  let url = `${baseURL}/key`
+  return fetchDataFromUrl(url)
 }
 
 export async function getTaskTypes () {
   let url = `${baseURL}/task-types`
-
-  return axios({
-    url: url,
-    method: 'get',
-    headers: {
-      'token': localStorage.getItem('access_key')
-    }
-  }).then(rez => {
-    return rez.data
-  }).catch(rez => {
-    return []
-  })
+  return fetchDataFromUrl(url, [])
 }
 
 export async function getTaskStatus () {
   let url = `${baseURL}/task-status`
-
-  return axios({
-    url: url,
-    method: 'get',
-    headers: {
-      'token': localStorage.getItem('access_key')
-    }
-  }).then(rez => {
-    return rez.data
-  }).catch(rez => {
-    return []
-  })
+  return fetchDataFromUrl(url, [])
 }
 
 export async function getDepartments () {
   let url = `${baseURL}/departments`
-
-  return axios({
-    url: url,
-    method: 'get',
-    headers: {
-      'token': localStorage.getItem('access_key')
-    }
-  }).then(rez => {
-    return rez.data
-  }).catch(rez => {
-    return []
-  })
+  return fetchDataFromUrl(url, [])
 }
 
 export async function getUsers () {
   let url = `${baseURL}/users`
-
-  return axios({
-    url: url,
-    method: 'get',
-    headers: {
-      'token': localStorage.getItem('access_key')
-    }
-  }).then(rez => {
-    return rez.data
-  }).catch(rez => {
-    return []
-  })
+  return fetchDataFromUrl(url, [])
 }
 
 export async function getProjects () {
   let url = `${baseURL}/projects`
-
-  return axios({
-    url: url,
-    method: 'get',
-    headers: {
-      'token': localStorage.getItem('access_key')
-    }
-  }).then(rez => {
-    return rez.data
-  }).catch(rez => {
-    return []
-  })
+  return fetchDataFromUrl(url, [])
 }
 
 export async function getPostByTaskId (id) {
   let url = `${baseURL}/post/taskid=${id}`
-
-  return axios({
-    method: 'get',
-    url: url,
-    data: {
-    },
-    headers: {
-      'token': localStorage.getItem('access_key')
-    }
-  }).then(res => {
-    return res.data
-  })
+  return fetchDataFromUrl(url)
 }
 
 export async function getCommentsByPostId (id) {
   let url = `${baseURL}/post/${id}/comments`
-
-  return axios({
-    method: 'get',
-    url: url,
-    data: {
-    },
-    headers: {
-      'token': localStorage.getItem('access_key')
-    }
-  }).then(res => {
-    return res.data
-  })
+  return fetchDataFromUrl(url)
 }
 
 export async function getTaskById (id) {
   let url = `${baseURL}/task/${id}`
-
-  return axios({
-    method: 'get',
-    url: url,
-    data: {
-    },
-    headers: {
-      'token': localStorage.getItem('access_key')
-    }
-  }).then(res => {
-    return res.data
-  })
+  return fetchDataFromUrl(url)
 }
 
 export async function getUsersReportedTasks () {
   let url = `${baseURL}/user/${localStorage.getItem('access_key')}/reported-tasks`
-
-  return axios({
-    url: url,
-    headers: {
-      'token': localStorage.getItem('access_key')
-    }
-  }).then(res => {
-    return res.data
-  }).catch(rez => {
-    return null
-  })
+  return fetchDataFromUrl(url)
 }
 
 export async function getUsersAssignedTasks () {
   let url = `${baseURL}/user/${localStorage.getItem('access_key')}/assigned-tasks`
-
-  return axios({
-    url: url,
-    headers: {
-      'token': localStorage.getItem('access_key')
-    }
-  }).then(res => {
-    return res.data
-  }).catch(rez => {
-    return null
-  })
+  return fetchDataFromUrl(url)
 }
 
 export async function getTeams () {
   let url = `${baseURL}/teams`
-
-  return axios({
-    url: url,
-    headers: {
-      'token': localStorage.getItem('access_key')
-    }
-  }).then(res => {
-    return res.data
-  }).catch(rez => {
-    return null
-  })
+  return fetchDataFromUrl(url)
 }
 
 export async function getUserStatuses () {
   let url = `${baseURL}/user-status`
-
-  return axios({
-    url: url,
-    headers: {
-      'token': localStorage.getItem('access_key')
-    }
-  }).then(res => {
-    return res.data
-  }).catch(rez => {
-    return null
-  })
+  return fetchDataFromUrl(url)
 }
 
 export async function getUsersPhoto (id) {
   let url = `${baseURL}/user/${id}/photo`
-
-  return axios({
-    url: url,
-    headers: {
-      'token': localStorage.getItem('access_key')
-    }
-  }).then(res => {
-    return res.data
-  }).catch(rez => {
-    return null
-  })
+  return fetchDataFromUrl(url)
 }
 
 export async function getUserById (id) {
   let url = `${baseURL}/user/${id}`
-
-  return axios({
-    url: url,
-    headers: {
-      'token': localStorage.getItem('access_key')
-    }
-  }).then(res => {
-    return res.data
-  }).catch(rez => {
-    return null
-  })
+  return fetchDataFromUrl(url)
 }
 
 export async function getUsersByIds (ids) {
   if (ids.length !== 0) {
     let url = `${baseURL}/users/${ids}`
-    console.log(url)
-    return axios({
-      url: url,
-      headers: {
-        'token': localStorage.getItem('access_key')
-      }
-    }).then(res => {
-      return res.data
-    }).catch(rez => {
-      return null
-    })
+    return fetchDataFromUrl(url)
   }
   return []
 }

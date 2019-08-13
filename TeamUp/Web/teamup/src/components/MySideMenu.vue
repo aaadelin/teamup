@@ -80,7 +80,7 @@ export default {
     min-width: 250px;
     max-width: 250px;
     min-height: 92.5vh;
-    /*margin-right: 15px;*/
+    margin-right: 15px; /*to add a space between the sidebar and the tasks*/
   }
 
   #sidebar.active {
