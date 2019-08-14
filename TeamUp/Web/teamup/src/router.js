@@ -39,6 +39,11 @@ export const router = new Router({
       component: () => import('./views/Profile.vue')
     },
     {
+      path: '/search',
+      name: 'search',
+      component: () => import('./views/Search.vue')
+    },
+    {
       path: '*',
       name: '404',
       component: () => import('./views/404.vue')

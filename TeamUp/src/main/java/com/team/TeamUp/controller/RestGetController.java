@@ -411,5 +411,24 @@ public class RestGetController extends AbstractRestController {
         LOGGER.info("User not eligible");
         return new ResponseEntity<>("FORBIDDEN", HttpStatus.FORBIDDEN);
     }
+
+    @RequestMapping(value = "task/{id}/project", method = GET)
+    public ResponseEntity<?> getTasksProject(@PathVariable int id, @RequestHeader Map<String, String> headers){
+        LOGGER.info(String.format("Entering get task's project with task id %s and headers %s", id, headers));
+        if(userValidationUtils.isValid(headers)){
+            Optional<Task> taskOptional = taskRepository.findById(id);
+            if(taskOptional.isPresent()){
+                Project project = taskOptional.get().getProject();
+                LOGGER.info(String.format("Exited with project %s", project));
+                return new ResponseEntity<>(project, HttpStatus.OK);
+            }else{
+                LOGGER.info(String.format("No task found with id %s", id));
+                return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+            }
+        }else{
+            LOGGER.info("User not eligible");
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+        }
+    }
 }
 

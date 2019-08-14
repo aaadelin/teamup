@@ -40,7 +40,7 @@
 
                 <div class="row">
                   <label for="project" class="col-md-3">Project </label>
-                  <select id="project" name="difficulty" v-model="project" class="form-control col-md-8"  :class="{ 'is-invalid': dataFailed && !project }">
+                  <select id="project" name="difficulty" v-model="project" class="form-control col-md-8" @change="adjustMaxDate"  :class="{ 'is-invalid': dataFailed && !project }">
                     <option v-for="proj in projects" :key="proj.id" :value="proj">{{ proj.name }}</option>
                   </select>
                 </div>
@@ -170,12 +170,14 @@ export default {
       currentlySelected: null,
       dataReady: false,
       dataFailed: false,
+      maxCalendarDate: null,
 
       options: {
         format: 'YYYY-MM-DD HH:mm:ss',
         useCurrent: true,
         showClear: true,
-        showClose: true
+        showClose: true,
+        minDate: new Date()
       }
     }
   },
@@ -265,6 +267,10 @@ export default {
         appendLeadingZeroes(date.getHours()) + ':' +
         appendLeadingZeroes(date.getMinutes()) + ':' +
         appendLeadingZeroes(date.getSeconds())
+    },
+    adjustMaxDate () {
+      let projectDeadline = this.project.deadline.replace('T', ' ')
+      this.options.maxDate = projectDeadline
     },
     clearData () {
       this.summary = ''

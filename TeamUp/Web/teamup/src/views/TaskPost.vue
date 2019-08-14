@@ -96,7 +96,6 @@
               <option v-for="user in users" :key="user.id" :value="user">{{user.firstName}} {{user.lastName}} ({{user.department}})</option>
             </select>
 <!--            <button v-if="editMode && canEditAll" class="btn btn-success btn-circle" @click="addPersons">+</button>-->
-<!--            TODO add menu to add more persons-->
             <span>
             <ul style="list-style-type: none">
               <li v-for="assignee in assignees" :key="assignee.id">
@@ -150,7 +149,7 @@
 import {
   getCommentsByPostId,
   getMyID,
-  getPostByTaskId,
+  getPostByTaskId, getProjectByTaskId,
   getTaskStatus,
   getTaskTypes,
   getUserById,
@@ -228,6 +227,7 @@ export default {
       this.currentDifficulty = this.task.difficulty
       this.currentPriority = this.task.priority
 
+      this.options.minDate = (new Date() < this.currentDeadline ? new Date() : this.currentDeadline)
       this.taskStatuses = await this.getTaskStatusPosibilities()
       this.taskTypes = await getTaskTypes()
       this.comments = taskPostData.comments
@@ -244,6 +244,7 @@ export default {
       getUsers().then(answer => {
         this.users = answer.filter(elem => elem.status !== 'ADMIN')
       })
+      this.options.maxDate = (await getProjectByTaskId(this.task.id)).deadline
     },
     async reloadComments () {
       this.comments = await getCommentsByPostId(this.postId)

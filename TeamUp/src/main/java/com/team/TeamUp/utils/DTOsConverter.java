@@ -131,7 +131,7 @@ public class DTOsConverter {
         Optional<Task> taskOptional = taskRepository.findById(taskDTO.getId());
         Task task = taskOptional.orElseGet(Task::new);
         if (taskDTO.getSummary() != null && !taskDTO.getSummary().trim().equals("") ||
-                !taskDTO.getDescription().trim().equals("")) { //TODO validate ca deadline-ul sa nu depaseasca pe cel al proiectului
+                !taskDTO.getDescription().trim().equals("")) {
 
             task.setSummary(taskDTO.getSummary());
         } else {
@@ -140,7 +140,6 @@ public class DTOsConverter {
         task.setDescription(taskDTO.getDescription());
         task.setDoneAt(taskDTO.getDoneAt());
         task.setLastChanged(LocalDateTime.now());
-        task.setDeadline(taskDTO.getDeadline());
         task.setTaskStatus(taskDTO.getTaskStatus());
         task.setCreatedAt(LocalDateTime.now());
 
@@ -148,6 +147,12 @@ public class DTOsConverter {
         task.setProject(project.orElseThrow());
         Optional<User> reporter = userRepository.findByHashKey(reporterKey);
         task.setReporter(reporter.orElseThrow());
+
+        if(taskDTO.getDeadline().isBefore(task.getProject().getDeadline())){
+            task.setDeadline(taskDTO.getDeadline());
+        }else{
+            throw new IllegalArgumentException("Task deadline whould be before project deadline");
+        }
 
         if (taskDTO.getDifficulty() <= 3 && taskDTO.getDifficulty() >= 1) {
             task.setDifficulty(taskDTO.getDifficulty());

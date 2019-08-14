@@ -22,7 +22,7 @@
             <b-nav-item v-if="!access_key"  ><router-link to="/login">Log in</router-link></b-nav-item>
 
             <b-nav-form  v-if="access_key" @submit="openSearchPage">
-              <b-form-input size="sm" class="mr-sm-2" placeholder="Search" v-model="searchTerm"></b-form-input>
+              <b-form-input size="sm" class="mr-sm-2" placeholder="Search" @submit="openSearchPage" v-model="searchTerm"></b-form-input>
             </b-nav-form>
             <b-nav-item v-if="access_key" to="/profile">
               <img width="30" height="30" class="rounded-circle" :src="image" alt="Profile"/>
@@ -97,9 +97,13 @@ export default {
     },
     openSearchPage (event) {
       event.preventDefault()
-      console.log('Sent!')
-      console.log(this.searchTerm)
-      // TODO
+      this.$router.push({
+        path: 'search',
+        query: {
+          q: this.searchTerm
+        }
+      })
+      this.searchTerm = ''
     },
     closeUser () {
       this.addUserIsVisible = false

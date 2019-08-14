@@ -59,6 +59,16 @@ export async function getProjects () {
   return fetchDataFromUrl(url, [])
 }
 
+export async function getProjectById (id) {
+  let url = `${baseURL}/project/${id}`
+  return fetchDataFromUrl(url)
+}
+
+export async function getProjectByTaskId (id) {
+  let url = `${baseURL}/task/${id}/project`
+  return fetchDataFromUrl(url)
+}
+
 export async function getPostByTaskId (id) {
   let url = `${baseURL}/post/taskid=${id}`
   return fetchDataFromUrl(url)
