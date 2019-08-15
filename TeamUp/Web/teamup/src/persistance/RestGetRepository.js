@@ -121,3 +121,17 @@ export async function getUsersByIds (ids) {
   }
   return []
 }
+
+export async function getUsersTasks (userId, searchTerm = null, options = null) {
+  let url = `${baseURL}/user/${userId}/tasks`
+  if (options !== null || searchTerm !== null) {
+    url += '?'
+  }
+  if (options !== null) {
+    url += 'type=' + options
+  }
+  if (searchTerm !== null) {
+    url += 'term=' + searchTerm
+  }
+  return fetchDataFromUrl(url, { 'reported': [], 'assigned': [] })
+}

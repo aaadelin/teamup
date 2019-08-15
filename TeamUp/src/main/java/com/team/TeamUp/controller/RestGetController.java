@@ -8,7 +8,8 @@ import com.team.TeamUp.domain.enums.UserStatus;
 import com.team.TeamUp.dtos.*;
 import com.team.TeamUp.persistance.*;
 import com.team.TeamUp.utils.UserValidationUtils;
-import org.apache.tomcat.util.http.fileupload.IOUtils;
+import org.json.JSONArray;
+import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.io.ClassPathResource;
@@ -419,8 +420,9 @@ public class RestGetController extends AbstractRestController {
             Optional<Task> taskOptional = taskRepository.findById(id);
             if(taskOptional.isPresent()){
                 Project project = taskOptional.get().getProject();
-                LOGGER.info(String.format("Exited with project %s", project));
-                return new ResponseEntity<>(project, HttpStatus.OK);
+                ProjectDTO projectDTO = dtOsConverter.getDTOFromProject(project);
+                LOGGER.info(String.format("Exited with project %s", projectDTO));
+                return new ResponseEntity<>(projectDTO, HttpStatus.OK);
             }else{
                 LOGGER.info(String.format("No task found with id %s", id));
                 return new ResponseEntity<>(HttpStatus.NOT_FOUND);
@@ -429,6 +431,66 @@ public class RestGetController extends AbstractRestController {
             LOGGER.info("User not eligible");
             return new ResponseEntity<>(HttpStatus.FORBIDDEN);
         }
+    }
+    @RequestMapping(value = "user/{id}/tasks", method = GET)
+    public ResponseEntity<?> getTasksFor(@PathVariable int id,
+                                         @RequestParam(value = "type", required = false) String type,
+                                         @RequestParam(value = "term", required = false) String term,
+                                         @RequestHeader Map<String, String> headers){
+        LOGGER.info(String.format("Entering get user's tasks with user id %s, type value %s, term value %s and headers %s", id, type, term, headers));
+        if(userValidationUtils.isValid(headers)){
+            Optional<User> user = userRepository.findById(id);
+            if(type == null && user.isPresent()){
+
+                JSONObject arrays = new JSONObject();
+                arrays.put("reported", new JSONArray(getFilteredTasksByType(user.get(), term, "assignedby")));
+                arrays.put("assigned", new JSONArray(getFilteredTasksByType(user.get(), term, "assignedto")));
+
+                LOGGER.info(String.format("Exited with list of tasks assigned to and by user %s: %s", user.get(), arrays.toString()));
+                return new ResponseEntity<>(arrays.toString(), HttpStatus.OK);
+            }else if(user.isPresent()){
+                JSONObject arrays = new JSONObject();
+
+                if(type.toLowerCase().equals("assignedto")){
+                    arrays.put("reported", new JSONArray());
+                    arrays.put("assigned", new JSONArray(getFilteredTasksByType(user.get(), term, type)));
+                }else if(type.toLowerCase().equals("assignedby")){
+                    arrays.put("reported", new JSONArray(getFilteredTasksByType(user.get(), term, type)));
+                    arrays.put("assigned", new ArrayList<>());
+                }else{
+                    LOGGER.info(String.format("Type option not eligible. Send type: %s", type));
+                    return new ResponseEntity<>(HttpStatus.NOT_ACCEPTABLE);
+                }
+                LOGGER.info(String.format("Exited with list of tasks assigned to user %s: %s", user.get(), arrays.toString()));
+                return new ResponseEntity<>(arrays.toString(), HttpStatus.OK);
+            }else{
+                LOGGER.info(String.format("User with id %s is not eligible", id));
+                return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+            }
+        }
+        LOGGER.info("User not eligible or existing");
+        return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+    }
+
+    private List<TaskDTO> getFilteredTasksByType(User user, String term, String type){
+        List<Task> tasks = new ArrayList<>();
+        if(type != null && type.toLowerCase().equals("assignedto")){
+            tasks = taskRepository.findAllByAssigneesContaining(user);
+        }else if(type != null && type.toLowerCase().equals("assignedby")){
+            tasks = taskRepository.findAllByReporter(user);
+        }
+
+        if(term == null){
+            return tasks.stream()
+                        .map(task -> dtOsConverter.getDTOFromTask(task))
+                        .collect(Collectors.toList());
+        }
+
+        return tasks.stream()
+                     .filter(task -> task.getSummary().toLowerCase().contains(term.toLowerCase()) ||
+                             task.getDescription().toLowerCase().contains(term.toLowerCase()))
+                     .map(task -> dtOsConverter.getDTOFromTask(task))
+                     .collect(Collectors.toList());
     }
 }
 
