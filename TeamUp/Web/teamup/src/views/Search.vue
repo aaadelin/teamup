@@ -1,21 +1,25 @@
 <template>
   <div id="content" class="container" style="margin-top: 15px">
     Search term: {{ searchTerm }}
-    <div class="" style="background-color: #6d7fcc">
+    <div class="" style="background-color: #a5bbcc; padding: 15px;">
       <div>
 <!--        TODO div-uri la fiecare categorie prima categorie va afisa rezultatele si din urmatoatele categorii doar la apasarea unei sageti vor aaparea rezultatele (care se vor incarca atunci)-->
-        <h3>Tasks</h3>
-        <div class="row">
+        <div @click="showTasks = !showTasks" style="cursor: pointer" class="row">
+        <div v-if="!showTasks"><i class="fas fa-angle-right" ></i></div>
+        <div  v-if="showTasks"><i class="fas fa-angle-down" ></i></div>
+        <h3 class="col">Tasks</h3>
+        </div>
+        <div class="row" style="transition: height 2s" v-if="showTasks">
           <div class="col">
             <h5>Assigned to me</h5>
             <div>
-              <div v-for="task in assignedToTasks" :key="task.id"> {{ task.summary }}</div>
+              <task-search-box v-for="task in assignedToTasks" :key="task.id" :task="task" :word="searchTerm"> </task-search-box>
             </div>
           </div>
           <div class="col">
             <h5>Assigned by me</h5>
             <div>
-              <div v-for="task in reportedTasks" :key="task.id"> {{ task.summary }}</div>
+              <task-search-box v-for="task in reportedTasks" :key="task.id" :task="task" :word="searchTerm"> {{ task.summary }}</task-search-box>
             </div>
           </div>
         </div>
@@ -36,8 +40,10 @@
 
 <script>
 import { getMyID, getUsersTasks } from '../persistance/RestGetRepository'
+import TaskSearchBox from '../components/TaskSearchBox'
 
 export default {
+  components: { TaskSearchBox },
   beforeMount () {
     this.loadData()
   },
@@ -52,7 +58,11 @@ export default {
     return {
       searchTerm: this.$route.query.q,
       assignedToTasks: [],
-      reportedTasks: []
+      reportedTasks: [],
+
+      showTasks: false,
+      showProjects: false,
+      showUsers: false
     }
   },
   methods: {
