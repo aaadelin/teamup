@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import java.time.LocalDateTime;
+import java.util.Base64;
 import java.util.Map;
 import java.util.Optional;
 
@@ -114,6 +115,8 @@ public class RestPostController extends AbstractRestController {
         LOGGER.info(String.format("Entering method to login with requested parameters: %s", requestParameters));
         String username = requestParameters.get("username");
         String password = requestParameters.get("password");
+
+        password = new String(Base64.getDecoder().decode(password));
 
         LOGGER.info(String.format("Username: %s \n Password: %s", username, password));
         if (username != null && password != null) {

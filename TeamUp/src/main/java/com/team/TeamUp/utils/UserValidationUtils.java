@@ -4,11 +4,17 @@ import com.team.TeamUp.domain.User;
 import com.team.TeamUp.domain.enums.UserStatus;
 import com.team.TeamUp.dtos.ProjectDTO;
 import com.team.TeamUp.persistance.UserRepository;
+import org.apache.tomcat.util.codec.binary.Base64;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import javax.crypto.Cipher;
+import javax.crypto.spec.IvParameterSpec;
+import javax.crypto.spec.SecretKeySpec;
+import java.nio.charset.StandardCharsets;
+import java.security.Key;
 import java.util.Map;
 import java.util.Optional;
 
@@ -62,5 +68,29 @@ public class UserValidationUtils {
         }
         LOGGER.info("Headers did not contain necessary information");
         return false;
+    }
+
+    public String decryptPassword(String password) {
+        // TODO
+        String key = "aesEncryptionKey";
+//        String initVector = "encryptionIntVec";
+
+        try {
+            Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5PADDING");
+
+            Key key1 =  new SecretKeySpec(key.getBytes(), "AES");
+//            IvParameterSpec iv = new IvParameterSpec(initVector.getBytes());
+            byte[] initVector = new byte[cipher.getBlockSize()];
+            IvParameterSpec iv = new IvParameterSpec(initVector);
+
+            cipher.init(Cipher.DECRYPT_MODE, key1, iv);
+            byte[] original = cipher.doFinal(Base64.decodeBase64(password));
+
+            return new String(original);
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+
+        return null;
     }
 }

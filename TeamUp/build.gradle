@@ -20,6 +20,7 @@ dependencies {
 	compile 'org.json:json:20171018'
 //	compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.0'
 	compile group: 'javax.ws.rs', name: 'javax.ws.rs-api', version: '2.0'
+	compile group: 'javax.xml.crypto', name: 'jsr105-api', version: '1.0.1'
 	compile group: 'org.apache.logging.log4j', name: 'log4j', version: '2.8.2', ext: 'pom'
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 }
