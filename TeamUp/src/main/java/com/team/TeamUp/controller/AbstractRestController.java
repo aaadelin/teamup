@@ -2,8 +2,7 @@ package com.team.TeamUp.controller;
 
 import com.team.TeamUp.persistance.*;
 import com.team.TeamUp.utils.DTOsConverter;
-import com.team.TeamUp.utils.TokenUtils;
-import com.team.TeamUp.utils.UserValidationUtils;
+import com.team.TeamUp.validation.UserValidation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 
@@ -17,20 +16,20 @@ public abstract class AbstractRestController {
     protected PostRepository postRepository;
 
     protected DTOsConverter dtOsConverter;
-    protected UserValidationUtils userValidationUtils;
+    protected UserValidation userValidation;
 
     @Autowired
     public AbstractRestController(TeamRepository teamRepository, UserRepository userRepository,
-                             TaskRepository taskRepository, ProjectRepository projectRepository,
-                             CommentRepository commentRepository, PostRepository postRepository,
-                             UserValidationUtils userValidationUtils) {
+                                  TaskRepository taskRepository, ProjectRepository projectRepository,
+                                  CommentRepository commentRepository, PostRepository postRepository,
+                                  UserValidation userValidation) {
         this.teamRepository = teamRepository;
         this.userRepository = userRepository;
         this.taskRepository = taskRepository;
         this.projectRepository = projectRepository;
         this.postRepository = postRepository;
         this.commentRepository = commentRepository;
-        this.userValidationUtils = userValidationUtils;
+        this.userValidation = userValidation;
 
         this.dtOsConverter = new DTOsConverter(userRepository, teamRepository,
                 taskRepository, projectRepository, postRepository, commentRepository);

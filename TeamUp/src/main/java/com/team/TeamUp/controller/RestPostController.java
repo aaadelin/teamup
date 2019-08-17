@@ -5,7 +5,7 @@ import com.team.TeamUp.domain.enums.UserStatus;
 import com.team.TeamUp.dtos.*;
 import com.team.TeamUp.persistance.*;
 import com.team.TeamUp.utils.TokenUtils;
-import com.team.TeamUp.utils.UserValidationUtils;
+import com.team.TeamUp.validation.UserValidation;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,15 +30,15 @@ public class RestPostController extends AbstractRestController {
 
     public RestPostController(TeamRepository teamRepository, UserRepository userRepository, TaskRepository taskRepository,
                               ProjectRepository projectRepository, CommentRepository commentRepository, PostRepository postRepository,
-                              UserValidationUtils userValidationUtils) {
-        super(teamRepository, userRepository, taskRepository, projectRepository, commentRepository, postRepository, userValidationUtils);
+                              UserValidation userValidation) {
+        super(teamRepository, userRepository, taskRepository, projectRepository, commentRepository, postRepository, userValidation);
         LOGGER.info("Creating RestPostController");
     }
 
     @RequestMapping(value = "/user", method = RequestMethod.POST)
     public ResponseEntity<?> addUser(@RequestBody UserDTO user, @RequestHeader Map<String, String> headers) {
         LOGGER.info(String.format("Entering method create user with user: %s and headers: %s", user, headers));
-        if (userValidationUtils.isValid(headers, UserStatus.ADMIN)) {
+        if (userValidation.isValid(headers, UserStatus.ADMIN)) {
             User userToSave = dtOsConverter.getUserFromDTO(user, UserStatus.ADMIN);
             userRepository.save(userToSave);
 
@@ -52,7 +52,7 @@ public class RestPostController extends AbstractRestController {
     @RequestMapping(value = "/project", method = RequestMethod.POST)
     public ResponseEntity<?> addProject(@RequestBody ProjectDTO projectDTO, @RequestHeader Map<String, String> headers) {
         LOGGER.info(String.format("Entering method create project with project: %s and headers: %s", projectDTO, headers));
-        if (userValidationUtils.isValid(headers, UserStatus.ADMIN)) {
+        if (userValidation.isValid(headers, UserStatus.ADMIN)) {
             projectRepository.save(dtOsConverter.getProjectFromDTO(projectDTO));
             LOGGER.info("Project has been successfully created and saven in database");
             return new ResponseEntity<>("OK", HttpStatus.OK);
@@ -64,7 +64,7 @@ public class RestPostController extends AbstractRestController {
     @RequestMapping(value = "/task", method = RequestMethod.POST)
     public ResponseEntity<?> addTask(@RequestBody TaskDTO taskDTO, @RequestHeader Map<String, String> headers) {
         LOGGER.info(String.format("Entering method create task with task: %s and headers: %s", taskDTO, headers));
-        if (userValidationUtils.isValid(headers)) {
+        if (userValidation.isValid(headers)) {
             Task task = dtOsConverter.getTaskFromDTO(taskDTO, headers.get("token"));
             taskRepository.save(task);
             Post post = new Post();
@@ -81,7 +81,7 @@ public class RestPostController extends AbstractRestController {
     @RequestMapping(value = "/team", method = RequestMethod.POST)
     public ResponseEntity<?> addTeam(@RequestBody TeamDTO team, @RequestHeader Map<String, String> headers) {
         LOGGER.info(String.format("Entering method create team with team: %s and headers: %s", team, headers));
-        if (userValidationUtils.isValid(headers, UserStatus.ADMIN)) {
+        if (userValidation.isValid(headers, UserStatus.ADMIN)) {
             User user = userRepository.findByHashKey(headers.get("token")).orElseGet(User::new);
             Team newTeam = dtOsConverter.getTeamFromDTO(team, user.getStatus());
             teamRepository.save(newTeam);
@@ -94,7 +94,7 @@ public class RestPostController extends AbstractRestController {
     @RequestMapping(value = "/comment", method = RequestMethod.POST)
     public ResponseEntity<?> addComment(@RequestBody CommentDTO commentDTO, @RequestHeader Map<String, String> headers) {
         LOGGER.info(String.format("Entering method add comment with comment: %s and headers: %s", commentDTO, headers));
-        if (userValidationUtils.isValid(headers)) {
+        if (userValidation.isValid(headers)) {
             User user = userRepository.findByHashKey(headers.get("token")).orElseGet(User::new);
             commentDTO.setCreator(dtOsConverter.getDTOFromUser(user));
             Comment newComment = dtOsConverter.getCommentFromDTO(commentDTO);

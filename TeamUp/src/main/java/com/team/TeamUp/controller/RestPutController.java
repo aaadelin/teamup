@@ -10,7 +10,7 @@ import com.team.TeamUp.dtos.TaskDTO;
 import com.team.TeamUp.dtos.TeamDTO;
 import com.team.TeamUp.dtos.UserDTO;
 import com.team.TeamUp.persistance.*;
-import com.team.TeamUp.utils.UserValidationUtils;
+import com.team.TeamUp.validation.UserValidation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -33,15 +33,15 @@ public class RestPutController extends AbstractRestController {
 
     public RestPutController(TeamRepository teamRepository, UserRepository userRepository, TaskRepository taskRepository,
                              ProjectRepository projectRepository, CommentRepository commentRepository, PostRepository postRepository,
-                             UserValidationUtils userValidationUtils) {
-        super(teamRepository, userRepository, taskRepository, projectRepository, commentRepository, postRepository, userValidationUtils);
+                             UserValidation userValidation) {
+        super(teamRepository, userRepository, taskRepository, projectRepository, commentRepository, postRepository, userValidation);
         LOGGER.info("Creating RestPutController");
     }
 
     @RequestMapping(value = "/user", method = RequestMethod.PUT)
     public ResponseEntity<?> updateUser(@RequestBody UserDTO user, @RequestHeader Map<String, String> headers) {
         LOGGER.info(String.format("Entering update user method with user: %s and headers: %s", user, headers));
-        if (userValidationUtils.isValid(headers, UserStatus.ADMIN)) {
+        if (userValidation.isValid(headers, UserStatus.ADMIN)) {
             Optional<User> userOptional = userRepository.findById(user.getId());
             if (userOptional.isEmpty()) {
                 LOGGER.info(String.format("User with id %s has not been found to update", user.getId()));
@@ -60,7 +60,7 @@ public class RestPutController extends AbstractRestController {
     @RequestMapping(value = "/project", method = RequestMethod.PUT)
     public ResponseEntity<?> updateProject(@RequestBody ProjectDTO projectDTO, @RequestHeader Map<String, String> headers) {
         LOGGER.info(String.format("Entering update project with project: %s and headers: %s", projectDTO, headers));
-        if (userValidationUtils.isValid(headers, UserStatus.ADMIN) || userValidationUtils.isOwner(headers, projectDTO)) {
+        if (userValidation.isValid(headers, UserStatus.ADMIN) || userValidation.isOwner(headers, projectDTO)) {
             Optional<Project> projectOptional = projectRepository.findById(projectDTO.getId());
             if (projectOptional.isEmpty()) {
                 LOGGER.info(String.format("Project with id %s has not been found to update", projectDTO.getId()));
@@ -89,7 +89,7 @@ public class RestPutController extends AbstractRestController {
         LOGGER.info(String.format("Entering update task with task: %s and headers: %s", taskDTO, headers));
         Optional<Task> taskOptional = taskRepository.findById(taskDTO.getId());
 
-        if(userValidationUtils.isValid(headers)){
+        if(userValidation.isValid(headers)){
             if(taskOptional.isPresent()){
                 Optional<User> userOptional = userRepository.findByHashKey(headers.get("token"));
                 if( userOptional.isPresent() && (
@@ -117,7 +117,7 @@ public class RestPutController extends AbstractRestController {
     @RequestMapping(value = "/team", method = RequestMethod.PUT)
     public ResponseEntity<?> updateTeam(@RequestBody TeamDTO team, @RequestHeader Map<String, String> headers) {
         LOGGER.info(String.format("Entering update team with team: %s and headers: %s", team, headers));
-        if(userValidationUtils.isValid(headers)){
+        if(userValidation.isValid(headers)){
             User user = userRepository.findByHashKey(headers.get("token")).get();
             if (team.getLeaderID() == user.getId() || user.getStatus().equals(UserStatus.ADMIN)){ //only the leader or admin can change AND only the admin can change the leader
 

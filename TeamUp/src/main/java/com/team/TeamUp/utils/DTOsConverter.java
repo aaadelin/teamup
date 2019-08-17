@@ -5,11 +5,11 @@ import com.team.TeamUp.domain.enums.TaskStatus;
 import com.team.TeamUp.domain.enums.UserStatus;
 import com.team.TeamUp.dtos.*;
 import com.team.TeamUp.persistance.*;
+import com.team.TeamUp.validation.TaskValidation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -28,7 +28,7 @@ public class DTOsConverter {
     private ProjectRepository projectRepository;
     private PostRepository postRepository;
     private CommentRepository commentRepository;
-    private TaskValidationUtils taskValidationUtils;
+    private TaskValidation taskValidation;
 
     public DTOsConverter(UserRepository userRepository,
                          TeamRepository teamRepository,
@@ -44,7 +44,7 @@ public class DTOsConverter {
         this.postRepository = postRepository;
         this.commentRepository = commentRepository;
 
-        this.taskValidationUtils = new TaskValidationUtils();
+        this.taskValidation = new TaskValidation();
 
         LOGGER.info("Instance of class DtosConverter created");
     }
@@ -182,7 +182,7 @@ public class DTOsConverter {
         if (taskDTO.getDescription() == null && taskDTO.getDeadline() == null && taskDTO.getTaskType() == null &&
                 taskDTO.getDifficulty() == 0 && taskDTO.getPriority() == 0 && taskDTO.getTaskStatus() != null &&
                 (task.getAssignees().contains(user) || task.getReporter().getId() == user.getId()) &&
-                taskValidationUtils.isTaskStatusChangeValid(taskOptional.get(), taskDTO)) {
+                taskValidation.isTaskStatusChangeValid(taskOptional.get(), taskDTO)) {
             // Only the status is updated
             task.setTaskStatus(taskDTO.getTaskStatus());
             task.setLastChanged(LocalDateTime.now());
@@ -190,7 +190,7 @@ public class DTOsConverter {
         } else if (taskDTO.getDescription() != null && !taskDTO.getDescription().trim().equals("") &&
                 taskDTO.getDeadline() != null && taskDTO.getTaskType() != null &&
                 taskDTO.getDifficulty() != 0 && taskDTO.getPriority() != 0 && taskDTO.getTaskStatus() != null
-                && taskValidationUtils.isTaskStatusChangeValid(taskOptional.get(), taskDTO) && taskDTO.getReporterID() == user.getId()) {
+                && taskValidation.isTaskStatusChangeValid(taskOptional.get(), taskDTO) && taskDTO.getReporterID() == user.getId()) {
 
             task.setDescription(taskDTO.getDescription());
             task.setDeadline(taskDTO.getDeadline());
