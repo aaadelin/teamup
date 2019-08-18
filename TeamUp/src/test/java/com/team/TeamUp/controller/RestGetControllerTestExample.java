@@ -18,7 +18,7 @@ import java.util.Collections;
 
 @RunWith(SpringRunner.class)
 @WebMvcTest
-public class RestGetControllerTest {
+public class RestGetControllerTestExample {
 
     @Autowired
     MockMvc mockMvc;
@@ -43,10 +43,10 @@ public class RestGetControllerTest {
 
         Mockito.when(userRepository.findAll()).thenReturn(Collections.emptyList());
         Mockito.when(userValidation.isValid(Mockito.anyString())).thenReturn(true);
-        Mockito.when(userValidation.isValid(Mockito.anyMap())).thenReturn(true);
 
         MvcResult mvcResult = mockMvc.perform(
                 MockMvcRequestBuilders.get("/api/users")
+                .header("token", "")
                 .accept(MediaType.APPLICATION_JSON)
         ).andReturn();
 

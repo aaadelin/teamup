@@ -46,6 +46,14 @@ public class UserValidation {
         return false;
     }
 
+    public boolean isValid(String key, UserStatus userStatus){
+        LOGGER.info(String.format("Checking if user with key %s has status %s", key, userStatus));
+        Optional<User> userOptional = userRepository.findByHashKey(key);
+        boolean answer = userOptional.isPresent() && userOptional.get().getStatus().equals(userStatus);
+        LOGGER.info(String.format("Exiting with status: %s", answer));
+        return answer;
+    }
+
     public boolean isValid(Map<String, String> headers, UserStatus status) {
         LOGGER.info(String.format("Checking if headers (%s) send from user are valid and user has the specified status %s", headers, status));
         if (headers.containsKey("token")) {
