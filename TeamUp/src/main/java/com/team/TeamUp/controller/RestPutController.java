@@ -10,6 +10,7 @@ import com.team.TeamUp.dtos.TaskDTO;
 import com.team.TeamUp.dtos.TeamDTO;
 import com.team.TeamUp.dtos.UserDTO;
 import com.team.TeamUp.persistance.*;
+import com.team.TeamUp.utils.DTOsConverter;
 import com.team.TeamUp.validation.UserValidation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,8 +34,8 @@ public class RestPutController extends AbstractRestController {
 
     public RestPutController(TeamRepository teamRepository, UserRepository userRepository, TaskRepository taskRepository,
                              ProjectRepository projectRepository, CommentRepository commentRepository, PostRepository postRepository,
-                             UserValidation userValidation) {
-        super(teamRepository, userRepository, taskRepository, projectRepository, commentRepository, postRepository, userValidation);
+                             UserValidation userValidation, DTOsConverter dtOsConverter) {
+        super(teamRepository, userRepository, taskRepository, projectRepository, commentRepository, postRepository, userValidation, dtOsConverter);
         LOGGER.info("Creating RestPutController");
     }
 

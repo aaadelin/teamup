@@ -15,14 +15,14 @@ public abstract class AbstractRestController {
     protected CommentRepository commentRepository;
     protected PostRepository postRepository;
 
-    protected DTOsConverter dtOsConverter;
+    protected final DTOsConverter dtOsConverter;
     protected UserValidation userValidation;
 
     @Autowired
     public AbstractRestController(TeamRepository teamRepository, UserRepository userRepository,
                                   TaskRepository taskRepository, ProjectRepository projectRepository,
                                   CommentRepository commentRepository, PostRepository postRepository,
-                                  UserValidation userValidation) {
+                                  UserValidation userValidation, DTOsConverter dtOsConverter) {
         this.teamRepository = teamRepository;
         this.userRepository = userRepository;
         this.taskRepository = taskRepository;
@@ -30,9 +30,7 @@ public abstract class AbstractRestController {
         this.postRepository = postRepository;
         this.commentRepository = commentRepository;
         this.userValidation = userValidation;
-
-        this.dtOsConverter = new DTOsConverter(userRepository, teamRepository,
-                taskRepository, projectRepository, postRepository, commentRepository);
+        this.dtOsConverter = dtOsConverter;
     }
 
 }

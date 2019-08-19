@@ -4,6 +4,7 @@ import com.team.TeamUp.domain.*;
 import com.team.TeamUp.domain.enums.UserStatus;
 import com.team.TeamUp.dtos.*;
 import com.team.TeamUp.persistance.*;
+import com.team.TeamUp.utils.DTOsConverter;
 import com.team.TeamUp.utils.TokenUtils;
 import com.team.TeamUp.validation.UserValidation;
 import org.json.JSONObject;
@@ -30,8 +31,8 @@ public class RestPostController extends AbstractRestController {
 
     public RestPostController(TeamRepository teamRepository, UserRepository userRepository, TaskRepository taskRepository,
                               ProjectRepository projectRepository, CommentRepository commentRepository, PostRepository postRepository,
-                              UserValidation userValidation) {
-        super(teamRepository, userRepository, taskRepository, projectRepository, commentRepository, postRepository, userValidation);
+                              UserValidation userValidation, DTOsConverter dtOsConverter) {
+        super(teamRepository, userRepository, taskRepository, projectRepository, commentRepository, postRepository, userValidation, dtOsConverter);
         LOGGER.info("Creating RestPostController");
     }
 

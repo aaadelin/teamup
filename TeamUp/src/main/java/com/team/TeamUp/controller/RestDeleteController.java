@@ -2,6 +2,7 @@ package com.team.TeamUp.controller;
 
 import com.team.TeamUp.domain.enums.UserStatus;
 import com.team.TeamUp.persistance.*;
+import com.team.TeamUp.utils.DTOsConverter;
 import com.team.TeamUp.validation.UserValidation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,8 +23,8 @@ public class RestDeleteController extends AbstractRestController {
 
     public RestDeleteController(TeamRepository teamRepository, UserRepository userRepository, TaskRepository taskRepository,
                                 ProjectRepository projectRepository, CommentRepository commentRepository, PostRepository postRepository,
-                                UserValidation userValidation) {
-        super(teamRepository, userRepository, taskRepository, projectRepository, commentRepository, postRepository, userValidation);
+                                UserValidation userValidation, DTOsConverter dtOsConverter) {
+        super(teamRepository, userRepository, taskRepository, projectRepository, commentRepository, postRepository, userValidation, dtOsConverter);
         LOGGER.info("Creating RestDeleteController");
     }
 

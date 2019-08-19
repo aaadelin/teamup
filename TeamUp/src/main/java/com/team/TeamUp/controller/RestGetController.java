@@ -7,6 +7,7 @@ import com.team.TeamUp.domain.enums.TaskType;
 import com.team.TeamUp.domain.enums.UserStatus;
 import com.team.TeamUp.dtos.*;
 import com.team.TeamUp.persistance.*;
+import com.team.TeamUp.utils.DTOsConverter;
 import com.team.TeamUp.utils.TaskUtils;
 import com.team.TeamUp.validation.UserValidation;
 import org.json.JSONArray;
@@ -37,8 +38,8 @@ public class RestGetController extends AbstractRestController {
 
     public RestGetController(TeamRepository teamRepository, UserRepository userRepository, TaskRepository taskRepository,
                              ProjectRepository projectRepository, CommentRepository commentRepository, PostRepository postRepository,
-                             UserValidation userValidation) {
-        super(teamRepository, userRepository, taskRepository, projectRepository, commentRepository, postRepository, userValidation);
+                             UserValidation userValidation, DTOsConverter dtOsConverter) {
+        super(teamRepository, userRepository, taskRepository, projectRepository, commentRepository, postRepository, userValidation, dtOsConverter);
         LOGGER.info("Creating RestGetController");
         this.taskUtils = new TaskUtils();
     }
@@ -48,7 +49,7 @@ public class RestGetController extends AbstractRestController {
     @RequestMapping(value = "/users", method = GET)
     public ResponseEntity<?> getAllUsers(@RequestHeader Map<String, String> headers) {
         LOGGER.info(String.format("Entering get all users method with headers: %s", headers.toString()));
-        List<UserDTO> users = userRepository.findAll().stream().map(user -> dtOsConverter.getDTOFromUser(user)).collect(Collectors.toList());
+        List<UserDTO> users = userRepository.findAll().stream().map(dtOsConverter::getDTOFromUser).collect(Collectors.toList());
         LOGGER.info(String.format("Returning list: %s", users.toString()));
         return new ResponseEntity<>(users, HttpStatus.OK);
     }
@@ -56,7 +57,7 @@ public class RestGetController extends AbstractRestController {
     @RequestMapping(value = "/teams", method = GET)
     public ResponseEntity<?> getAllTeams(@RequestHeader Map<String, String> headers) {
         LOGGER.info(String.format("Entering get all teams method with headers: %s", headers.toString()));
-        List<TeamDTO> teams = teamRepository.findAll().stream().map(team -> dtOsConverter.getDTOFromTeam(team)).collect(Collectors.toList());
+        List<TeamDTO> teams = teamRepository.findAll().stream().map(dtOsConverter::getDTOFromTeam).collect(Collectors.toList());
         LOGGER.info(String.format("Returning list of teams: %s", teams.toString()));
         return new ResponseEntity<>(teams, HttpStatus.OK);
     }
@@ -64,7 +65,7 @@ public class RestGetController extends AbstractRestController {
     @RequestMapping(value = "/tasks", method = GET)
     public ResponseEntity<?> getAllTasks(@RequestHeader Map<String, String> headers) {
         LOGGER.info(String.format("Entering get all tasks method with headers: %s", headers.toString()));
-        List<TaskDTO> tasks = taskRepository.findAll().stream().map(task -> dtOsConverter.getDTOFromTask(task)).collect(Collectors.toList());
+        List<TaskDTO> tasks = taskRepository.findAll().stream().map(dtOsConverter::getDTOFromTask).collect(Collectors.toList());
         LOGGER.info(String.format("Returning list of tasks: %s", tasks.toString()));
         return new ResponseEntity<>(tasks, HttpStatus.OK);
     }
@@ -72,7 +73,7 @@ public class RestGetController extends AbstractRestController {
     @RequestMapping(value = "/projects", method = GET)
     public ResponseEntity<?> getAllProjects(@RequestHeader Map<String, String> headers) {
         LOGGER.info(String.format("Entering get all projects method with headers: %s", headers.toString()));
-        List<ProjectDTO> projects = projectRepository.findAll().stream().map(project -> dtOsConverter.getDTOFromProject(project)).collect(Collectors.toList());
+        List<ProjectDTO> projects = projectRepository.findAll().stream().map(dtOsConverter::getDTOFromProject).collect(Collectors.toList());
         LOGGER.info(String.format("Returning list of projects: %s", projects));
         return new ResponseEntity<>(projects, HttpStatus.OK);
     }
@@ -80,7 +81,7 @@ public class RestGetController extends AbstractRestController {
     @RequestMapping(value = "/posts", method = GET)
     public ResponseEntity<?> getAllPosts(@RequestHeader Map<String, String> headers) {
         LOGGER.info(String.format("Entering get all posts method with headers: %s", headers.toString()));
-        List<PostDTO> posts = postRepository.findAll().stream().map(post -> dtOsConverter.getDTOFromPost(post)).collect(Collectors.toList());
+        List<PostDTO> posts = postRepository.findAll().stream().map(dtOsConverter::getDTOFromPost).collect(Collectors.toList());
         LOGGER.info(String.format("Returning list of posts: %s", posts.toString()));
         return new ResponseEntity<>(posts, HttpStatus.OK);
     }
@@ -149,7 +150,7 @@ public class RestGetController extends AbstractRestController {
 
             List<TaskDTO> filteredTasks = allTasks.stream()
                     .filter(task -> task.getAssignees().contains(userOptional.get()))
-                    .map(task -> dtOsConverter.getDTOFromTask(task)).collect(Collectors.toList());
+                    .map(dtOsConverter::getDTOFromTask).collect(Collectors.toList());
             LOGGER.info(String.format("Returning list of tasks: %s", filteredTasks));
             return new ResponseEntity<>(filteredTasks, HttpStatus.OK);
         }
@@ -167,7 +168,7 @@ public class RestGetController extends AbstractRestController {
 
             List<TaskDTO> filteredTasks = allTasks.stream()
                     .filter(task -> task.getReporter().equals(userOptional.get()))
-                    .map(task -> dtOsConverter.getDTOFromTask(task)).collect(Collectors.toList());
+                    .map(dtOsConverter::getDTOFromTask).collect(Collectors.toList());
             LOGGER.info(String.format("Returning list of tasks: %s", filteredTasks));
             return new ResponseEntity<>(filteredTasks, HttpStatus.OK);
         }
