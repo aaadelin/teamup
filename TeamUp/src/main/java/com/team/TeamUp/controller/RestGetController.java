@@ -14,6 +14,7 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -34,6 +35,7 @@ import static org.springframework.web.bind.annotation.RequestMethod.GET;
 public class RestGetController extends AbstractRestController {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(RestGetController.class);
+    @Autowired
     private TaskUtils taskUtils;
 
     public RestGetController(TeamRepository teamRepository, UserRepository userRepository, TaskRepository taskRepository,
@@ -41,7 +43,6 @@ public class RestGetController extends AbstractRestController {
                              UserValidation userValidation, DTOsConverter dtOsConverter) {
         super(teamRepository, userRepository, taskRepository, projectRepository, commentRepository, postRepository, userValidation, dtOsConverter);
         LOGGER.info("Creating RestGetController");
-        this.taskUtils = new TaskUtils();
     }
 
     //GET methods - for selecting
@@ -89,7 +90,7 @@ public class RestGetController extends AbstractRestController {
     @RequestMapping(value = "/comments", method = GET)
     public ResponseEntity<?> getAllComments(@RequestHeader Map<String, String> headers) {
         LOGGER.info(String.format("Entering get all comments method with headers: %s", headers.toString()));
-        List<Comment> comments = commentRepository.findAll(); //.stream().map(project -> dtOsConverter.getDTOFromProject(project)).collect(Collectors.toList());
+        List<CommentDTO> comments = commentRepository.findAll().stream().map(dtOsConverter::getDTOFromComment).collect(Collectors.toList());
         LOGGER.info(String.format("Returning list of comments: %s", comments.toString()));
         return new ResponseEntity<>(comments, HttpStatus.OK);
     }
@@ -132,7 +133,7 @@ public class RestGetController extends AbstractRestController {
         Optional<Post> post = postRepository.findById(postid);
         if (post.isPresent()) {
             PostDTO postDTO = dtOsConverter.getDTOFromPost(post.get());
-            LOGGER.info(String.format("Returning post: %s", postDTO));
+            LOGGER.info(String.format("Returning post comments: %s", postDTO.getComments()));
             return new ResponseEntity<>(postDTO.getComments(), HttpStatus.OK);
         } else {
             LOGGER.info(String.format("No post found with id %d", postid));
@@ -291,11 +292,11 @@ public class RestGetController extends AbstractRestController {
     @RequestMapping(value = "/logout", method = GET)
     public ResponseEntity<?> logout(@RequestHeader Map<String, String> headers) {
         LOGGER.info(String.format("Entering logout method with headers: %s", headers.toString()));
-        String key = headers.get("key");
+        String key = headers.get("token");
         Optional<User> userOptional = userRepository.findByHashKey(key);
 
         if (userOptional.isPresent()) {
-            User user = userOptional.get();
+        User user = userOptional.get();
             user.setActive(false);
             user.setLastActive(LocalDateTime.now());
 
@@ -379,7 +380,7 @@ public class RestGetController extends AbstractRestController {
             LOGGER.info(String.format("Exited with list of tasks assigned to user %s: %s", user.get(), arrays.toString()));
             return new ResponseEntity<>(arrays.toString(), HttpStatus.OK);
         } else {
-            LOGGER.info(String.format("User with id %s is not eligible", id));
+            LOGGER.info(String.format("User with id %s is not present", id));
             return new ResponseEntity<>(HttpStatus.FORBIDDEN);
         }
     }

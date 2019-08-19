@@ -1,4 +1,4 @@
-package com.team.TeamUp.controller;
+package com.team.TeamUp.controller.unit;
 
 import com.team.TeamUp.persistance.*;
 import com.team.TeamUp.validation.UserValidation;

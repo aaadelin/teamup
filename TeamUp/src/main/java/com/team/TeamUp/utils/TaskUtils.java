@@ -5,11 +5,13 @@ import com.team.TeamUp.domain.User;
 import com.team.TeamUp.dtos.TaskDTO;
 import com.team.TeamUp.persistance.TaskRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+@Component
 public class TaskUtils {
 
     @Autowired

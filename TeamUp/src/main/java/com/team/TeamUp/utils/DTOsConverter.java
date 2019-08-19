@@ -8,6 +8,7 @@ import com.team.TeamUp.persistance.*;
 import com.team.TeamUp.validation.TaskValidation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -18,6 +19,7 @@ import java.util.stream.Collectors;
 /**
  * Utility class used to convert from DTOs to Domain entities and backwards.
  */
+@Component
 public class DTOsConverter {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DTOsConverter.class);
@@ -396,6 +398,10 @@ public class DTOsConverter {
         postDTO.setId(post.getId());
         postDTO.setTaskDTO(getDTOFromTask(post.getTask()));
         postDTO.setComments(post.getComments().stream().map(this::getDTOFromComment).collect(Collectors.toList()));
+
+        if(postDTO.getComments() == null){
+            postDTO.setComments(new ArrayList<>());
+        }
 
         LOGGER.info(String.format("Instance of type PostDTO created: %s", postDTO));
         return postDTO;

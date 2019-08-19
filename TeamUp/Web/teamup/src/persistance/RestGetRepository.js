@@ -19,7 +19,7 @@ export function logout () {
 
   axios.get(url, {
     headers: {
-      'key': localStorage.getItem('access_key')
+      'token': localStorage.getItem('access_key')
     }
   }).then(res => {
     localStorage.clear()
