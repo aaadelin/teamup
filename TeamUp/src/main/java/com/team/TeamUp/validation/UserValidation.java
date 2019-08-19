@@ -14,6 +14,7 @@ import javax.crypto.Cipher;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 import java.security.Key;
+import java.time.LocalDateTime;
 import java.util.Map;
 import java.util.Optional;
 
@@ -76,4 +77,24 @@ public class UserValidation {
         LOGGER.info("Headers did not contain necessary information");
         return false;
     }
+
+    public boolean isUserLoggedIn(String key){
+        Optional<User> userOptional = userRepository.findByHashKey(key);
+        return userOptional.isPresent() && !isLoggedOut(userOptional.get());
+    }
+
+    private boolean isLoggedOut(User user){
+        if(!user.isActive() || user.getLastActive() == null){
+            return true;
+        }
+        if(user.getLastActive().isBefore(LocalDateTime.now().minusMinutes(user.getMinutesUntilLogout()))){ //if user hasn't been active in last 4 hours (didn't make any request)
+            user.setActive(false);
+            userRepository.save(user);
+            return true;
+        }
+        user.setLastActive(LocalDateTime.now());
+        userRepository.save(user);
+        return false;
+    }
+
 }

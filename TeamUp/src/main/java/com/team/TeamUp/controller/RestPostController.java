@@ -39,76 +39,55 @@ public class RestPostController extends AbstractRestController {
     @RequestMapping(value = "/user", method = RequestMethod.POST)
     public ResponseEntity<?> addUser(@RequestBody UserDTO user, @RequestHeader Map<String, String> headers) {
         LOGGER.info(String.format("Entering method create user with user: %s and headers: %s", user, headers));
-        if (userValidation.isValid(headers, UserStatus.ADMIN)) {
-            User userToSave = dtOsConverter.getUserFromDTO(user, UserStatus.ADMIN);
-            userRepository.save(userToSave);
+        User userToSave = dtOsConverter.getUserFromDTO(user, UserStatus.ADMIN);
+        userRepository.save(userToSave);
 
-            LOGGER.info("User has been successfully created and saved in database");
-            return new ResponseEntity<>("OK", HttpStatus.OK);
-        }
-        LOGGER.error("User not eligible");
-        return new ResponseEntity<>("Error: Forbidden", HttpStatus.FORBIDDEN);
+        LOGGER.info("User has been successfully created and saved in database");
+        return new ResponseEntity<>("OK", HttpStatus.OK);
     }
 
     @RequestMapping(value = "/project", method = RequestMethod.POST)
     public ResponseEntity<?> addProject(@RequestBody ProjectDTO projectDTO, @RequestHeader Map<String, String> headers) {
         LOGGER.info(String.format("Entering method create project with project: %s and headers: %s", projectDTO, headers));
-        if (userValidation.isValid(headers, UserStatus.ADMIN)) {
-            projectRepository.save(dtOsConverter.getProjectFromDTO(projectDTO));
-            LOGGER.info("Project has been successfully created and saven in database");
-            return new ResponseEntity<>("OK", HttpStatus.OK);
-        }
-        LOGGER.error("User not eligible");
-        return new ResponseEntity<>("FORBIDDEN", HttpStatus.FORBIDDEN);
+        projectRepository.save(dtOsConverter.getProjectFromDTO(projectDTO));
+        LOGGER.info("Project has been successfully created and saven in database");
+        return new ResponseEntity<>("OK", HttpStatus.OK);
     }
 
     @RequestMapping(value = "/task", method = RequestMethod.POST)
     public ResponseEntity<?> addTask(@RequestBody TaskDTO taskDTO, @RequestHeader Map<String, String> headers) {
-        LOGGER.info(String.format("Entering method create task with task: %s and headers: %s", taskDTO, headers));
-        if (userValidation.isValid(headers)) {
-            Task task = dtOsConverter.getTaskFromDTO(taskDTO, headers.get("token"));
-            taskRepository.save(task);
-            Post post = new Post();
-            post.setTask(task);
-            postRepository.save(post);
-            LOGGER.info("Task has been successfully created and saved to database");
-            return new ResponseEntity<>("OK", HttpStatus.OK);
-        }
-        LOGGER.error("User not eligible");
-        return new ResponseEntity<>("FORBIDDEN", HttpStatus.FORBIDDEN);
+        LOGGER.info(String.format("Entering method create task with task: %s and headers: %s", taskDTO, headers));Task task = dtOsConverter.getTaskFromDTO(taskDTO, headers.get("token"));
+        taskRepository.save(task);
+        Post post = new Post();
+        post.setTask(task);
+        postRepository.save(post);
+        LOGGER.info("Task has been successfully created and saved to database");
+        return new ResponseEntity<>("OK", HttpStatus.OK);
     }
 
 
     @RequestMapping(value = "/team", method = RequestMethod.POST)
     public ResponseEntity<?> addTeam(@RequestBody TeamDTO team, @RequestHeader Map<String, String> headers) {
         LOGGER.info(String.format("Entering method create team with team: %s and headers: %s", team, headers));
-        if (userValidation.isValid(headers, UserStatus.ADMIN)) {
-            User user = userRepository.findByHashKey(headers.get("token")).orElseGet(User::new);
-            Team newTeam = dtOsConverter.getTeamFromDTO(team, user.getStatus());
-            teamRepository.save(newTeam);
-            return new ResponseEntity<>("OK", HttpStatus.OK);
-        }
-        LOGGER.error("User not eligible");
-        return new ResponseEntity<>("FORBIDDEN", HttpStatus.FORBIDDEN);
+        User user = userRepository.findByHashKey(headers.get("token")).orElseGet(User::new);
+        Team newTeam = dtOsConverter.getTeamFromDTO(team, user.getStatus());
+        teamRepository.save(newTeam);
+        return new ResponseEntity<>("OK", HttpStatus.OK);
     }
 
     @RequestMapping(value = "/comment", method = RequestMethod.POST)
     public ResponseEntity<?> addComment(@RequestBody CommentDTO commentDTO, @RequestHeader Map<String, String> headers) {
         LOGGER.info(String.format("Entering method add comment with comment: %s and headers: %s", commentDTO, headers));
-        if (userValidation.isValid(headers)) {
-            User user = userRepository.findByHashKey(headers.get("token")).orElseGet(User::new);
-            commentDTO.setCreator(dtOsConverter.getDTOFromUser(user));
-            Comment newComment = dtOsConverter.getCommentFromDTO(commentDTO);
-            commentRepository.save(newComment);
+        User user = userRepository.findByHashKey(headers.get("token")).orElseGet(User::new);
+        commentDTO.setCreator(dtOsConverter.getDTOFromUser(user));
+        Comment newComment = dtOsConverter.getCommentFromDTO(commentDTO);
+        commentRepository.save(newComment);
 
-            Post post = newComment.getPost();
-            post.addComment(newComment);
-            postRepository.save(post);
+        Post post = newComment.getPost();
+        post.addComment(newComment);
+        postRepository.save(post);
 
-            return new ResponseEntity<>("OK", HttpStatus.OK);
-        }
-        LOGGER.error("User not eligible");
-        return new ResponseEntity<>("FORBIDDEN", HttpStatus.FORBIDDEN);
+        return new ResponseEntity<>("OK", HttpStatus.OK);
     }
 
     @RequestMapping(value = "/login", method = RequestMethod.POST)

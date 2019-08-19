@@ -18,6 +18,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -66,6 +67,7 @@ public class RestGetControllerUnitTest {
     @Before
     public void setup() {
         when(userValidation.isValid(Mockito.anyString())).thenReturn(true);
+        when(userValidation.isUserLoggedIn(anyString())).thenReturn(true);
     }
 
     @Test

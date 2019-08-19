@@ -22,6 +22,7 @@ import java.util.List;
 public class AuthenticationFilter implements Filter {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(RestGetController.class);
+
     private final UserValidation userValidation;
 
     @Autowired
@@ -36,8 +37,13 @@ public class AuthenticationFilter implements Filter {
         String tokenHeader = req.getHeader("token");
 
         if (isAuthorized(req.getRequestURI(), req.getMethod(), tokenHeader)) {
-            LOGGER.info(String.format("User with token %s is eligible to access %s", tokenHeader, req.getRequestURI()));
-            chain.doFilter(request, response);
+            if((userValidation.isUserLoggedIn(tokenHeader) || req.getRequestURI().equals("/api/login"))){
+                LOGGER.info(String.format("User with token %s is eligible to access %s", tokenHeader, req.getRequestURI()));
+                chain.doFilter(request, response);
+            }else{
+                LOGGER.info("User is or has just been logged out");
+                res.sendError(405);
+            }
         } else {
             LOGGER.info("User not eligible");
             res.sendError(403);

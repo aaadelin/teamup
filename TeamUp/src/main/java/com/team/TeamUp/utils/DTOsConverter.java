@@ -104,12 +104,8 @@ public class DTOsConverter {
         if (userDTO.getPhoto() != null) {
             user.setPhoto(userDTO.getPhoto());
         }
-        //may be removed?
-        if(userDTO.getStatus()==UserStatus.ADMIN && requesterStatus==UserStatus.ADMIN){
-            user.setStatus(userDTO.getStatus());
-        }else{
-            user.setStatus(userDTO.getStatus());
-        }
+
+        user.setStatus(userDTO.getStatus());
         user.setPassword(TokenUtils.getMD5Token(userDTO.getPassword()));
 
         Optional<Team> team = teamRepository.findById(userDTO.getTeamID());

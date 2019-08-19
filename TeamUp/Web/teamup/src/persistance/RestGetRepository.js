@@ -9,7 +9,12 @@ function fetchDataFromUrl (url, defaultParam = null) {
     }
   }).then(res => {
     return res.data
-  }).catch(() => {
+  }).catch((err) => {
+    if (err.toLocaleString().includes("405")){
+      console.log("logged out")
+      localStorage.clear()
+      location.reload()
+    }
     return defaultParam
   })
 }

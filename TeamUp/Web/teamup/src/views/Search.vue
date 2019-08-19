@@ -60,7 +60,7 @@ export default {
       assignedToTasks: [],
       reportedTasks: [],
 
-      showTasks: false,
+      showTasks: true,
       showProjects: false,
       showUsers: false
     }

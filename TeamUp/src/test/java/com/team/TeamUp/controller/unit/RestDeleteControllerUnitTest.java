@@ -23,6 +23,7 @@ import java.util.Optional;
 
 import static org.junit.Assert.*;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
 @RunWith(SpringRunner.class)
@@ -58,6 +59,7 @@ public class RestDeleteControllerUnitTest {
         when(userValidation.isValid("2", UserStatus.ADMIN)).thenReturn(false);
         when(userRepository.findById(10)).thenReturn(Optional.of(new User()));
         when(userRepository.findById(11)).thenReturn(Optional.empty());
+        when(userValidation.isUserLoggedIn(anyString())).thenReturn(true);
     }
 
     @Test

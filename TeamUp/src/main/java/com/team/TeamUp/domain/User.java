@@ -36,6 +36,8 @@ public class User {
     private String hashKey;
 
     private UserStatus status;
+    @Column(columnDefinition = "integer default 60")
+    private int minutesUntilLogout;
 
     @JsonBackReference(value = "userTeamGroups")
     @ManyToOne
@@ -139,6 +141,14 @@ public class User {
 
     public void setNewPhoto(String newPhoto) {
         this.newPhoto = newPhoto;
+    }
+
+    public int getMinutesUntilLogout() {
+        return minutesUntilLogout;
+    }
+
+    public void setMinutesUntilLogout(int minutesUntilLogout) {
+        this.minutesUntilLogout = minutesUntilLogout;
     }
 
     @Override

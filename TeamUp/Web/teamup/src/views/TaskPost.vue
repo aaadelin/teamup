@@ -227,7 +227,7 @@ export default {
       this.currentDifficulty = this.task.difficulty
       this.currentPriority = this.task.priority
 
-      this.options.minDate = (new Date() < this.currentDeadline ? new Date() : this.currentDeadline)
+      this.options.minDate = new Date()
       this.taskStatuses = await this.getTaskStatusPosibilities()
       this.taskTypes = await getTaskTypes()
       this.comments = taskPostData.comments
