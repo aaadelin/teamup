@@ -35,18 +35,13 @@ public class RestDeleteController extends AbstractRestController {
     @RequestMapping(value = "/user/{id}", method = RequestMethod.DELETE)
     public ResponseEntity<?> deleteUser(@PathVariable int id, @RequestHeader Map<String, String> headers) {
         LOGGER.info(String.format("Entering delete user method with user id: %s \n and headers: %s", id, headers.toString()));
-        if (userValidation.isValid(headers, UserStatus.ADMIN)) {
-            try {
-                userRepository.deleteById(id);
-                LOGGER.info(String.format("User with id %s has been successfully deleted", id));
-                return new ResponseEntity<>("OK", HttpStatus.OK);
-            } catch (Exception ignore) {
-                LOGGER.info(String.format("User with id %s has not been found", id));
-                return new ResponseEntity<>("Not found", HttpStatus.NOT_FOUND);
-            }
+        if (userRepository.findById(id).isPresent()){
+            userRepository.deleteById(id);
+            LOGGER.info(String.format("User with id %s has been successfully deleted", id));
+            return new ResponseEntity<>("OK", HttpStatus.OK);
         }
-        LOGGER.error("User not eligible");
-        return new ResponseEntity<>("FORBIDDEN", HttpStatus.FORBIDDEN);
+        LOGGER.info(String.format("User with id %s has not been found", id));
+        return new ResponseEntity<>("Not found", HttpStatus.NOT_FOUND);
     }
 
 }

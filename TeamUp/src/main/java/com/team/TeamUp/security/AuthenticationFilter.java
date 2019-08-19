@@ -55,7 +55,7 @@ public class AuthenticationFilter implements Filter {
                 "/api/user"
         );
         List<String> adminAuthenticationDELETE = List.of(
-                "/api/user/**"
+                "\\/api\\/user\\/\\d+"
         );
         if (checkMatching(openURIs, uri)) {
             return true;
@@ -77,7 +77,7 @@ public class AuthenticationFilter implements Filter {
                         return userValidation.isValid(token);
                     }
                 case "DELETE":
-                    if (adminAuthenticationDELETE.stream().anyMatch(protectedUri -> protectedUri.equals(uri))) {
+                    if (adminAuthenticationDELETE.stream().anyMatch(uri::matches)) {
                         return userValidation.isValid(token, UserStatus.ADMIN);
                     } else {
                         return userValidation.isValid(token);
