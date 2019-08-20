@@ -16,6 +16,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ClassPathResource;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -64,9 +65,51 @@ public class RestGetController extends AbstractRestController {
     }
 
     @RequestMapping(value = "/tasks", method = GET)
-    public ResponseEntity<?> getAllTasks(@RequestHeader Map<String, String> headers) {
-        LOGGER.info(String.format("Entering get all tasks method with headers: %s", headers.toString()));
-        List<TaskDTO> tasks = taskRepository.findAll().stream().map(dtOsConverter::getDTOFromTask).collect(Collectors.toList());
+    public ResponseEntity<?> getAllTasks(@RequestHeader Map<String, String> headers,
+                                         @RequestParam(value = "start", required = false) Integer startPage,
+                                         @RequestParam(value = "status", required = false) TaskStatus status,
+                                         @RequestParam(value = "last", required = false) Long last) {
+        LOGGER.info(String.format("Entering get all tasks method with headers: %s and startPage: %s", headers.toString(), startPage));
+        List<TaskDTO> tasks = new ArrayList<>();
+
+        //returning all tasks
+        if(startPage == null && status == null && last == null) {
+            tasks = taskUtils.getAllTasksConvertedToDTOs();
+        }
+
+        //returning all tasks from a page
+        if (startPage != null && status == null && last == null){
+            tasks = taskRepository.findAll(PageRequest.of(startPage, 10))
+                    .stream()
+                    .map(dtOsConverter::getDTOFromTask)
+                    .sorted((o1, o2) -> o2.getId() - o1.getId())
+                    .collect(Collectors.toList());
+        }
+
+        //returning all tasks with status STATUS
+        if(startPage == null && status != null && last == null) {
+            tasks = taskRepository.findAllByTaskStatus(status)
+                    .stream()
+                    .map(dtOsConverter::getDTOFromTask)
+                    .sorted((o1, o2) -> o2.getId() - o1.getId())
+                    .collect(Collectors.toList());
+        }
+
+        // returning last LAST tasks
+        if(startPage == null && status == null && last != null){
+            tasks = taskUtils.getLastNTasks(last);
+            return new ResponseEntity<>(tasks, HttpStatus.OK);
+        }
+
+        //returning tasks with status STATUS from page STARTPAGE
+        if(status != null && startPage != null ){
+            tasks = taskRepository.findAllByTaskStatus(status, PageRequest.of(startPage, 10))
+                    .stream()
+                    .map(dtOsConverter::getDTOFromTask)
+                    .collect(Collectors.toList());
+        }
+
+
         LOGGER.info(String.format("Returning list of tasks: %s", tasks.toString()));
         return new ResponseEntity<>(tasks, HttpStatus.OK);
     }
@@ -383,6 +426,74 @@ public class RestGetController extends AbstractRestController {
             LOGGER.info(String.format("User with id %s is not present", id));
             return new ResponseEntity<>(HttpStatus.FORBIDDEN);
         }
+    }
+
+    @RequestMapping(value = "/tasks/assigned", method = GET)
+    public ResponseEntity<?> getAssignedTasks(@RequestHeader Map<String, String> headers,
+                                              @RequestParam(value = "start") Integer startPage,
+                                              @RequestParam(value = "status", required = false) TaskStatus status,
+                                              @RequestParam(value = "statuses", required = false) List<TaskStatus> statuses){
+        Optional<User> userOptional = userRepository.findByHashKey(headers.get("token"));
+        if(userOptional.isPresent()){
+            List<TaskDTO> taskDTOS;
+            if(statuses == null){
+                taskDTOS = taskRepository.findAllByTaskStatusAndAssigneesContaining(status,
+                        userOptional.get(),
+                        PageRequest.of(startPage, 10))
+                        .stream().map(dtOsConverter::getDTOFromTask).collect(Collectors.toList());
+            }else{
+                taskDTOS = taskRepository.findAllByTaskStatusInAndAssigneesContaining(statuses,
+                        userOptional.get(),
+                        PageRequest.of(startPage, 10))
+                        .stream().map(dtOsConverter::getDTOFromTask).collect(Collectors.toList());
+            }
+            return new ResponseEntity<>(taskDTOS, HttpStatus.OK);
+        }
+        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+    }
+
+    @RequestMapping(value = "/tasks/reported", method = GET)
+    public ResponseEntity<?> getReportedTasks(@RequestHeader Map<String, String> headers,
+                                               @RequestParam(value = "start") Integer startPage,
+                                               @RequestParam(value = "status") TaskStatus status){
+        Optional<User> userOptional = userRepository.findByHashKey(headers.get("token"));
+        if(userOptional.isPresent()){
+            List<TaskDTO> taskDTOS = taskRepository.findAllByTaskStatusAndReporter(status,
+                                                                                   userOptional.get(),
+                                                                                   PageRequest.of(startPage, 10))
+                    .stream().map(dtOsConverter::getDTOFromTask).collect(Collectors.toList());
+            return new ResponseEntity<>(taskDTOS, HttpStatus.OK);
+        }
+        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+    }
+
+    @RequestMapping(value = "/tasks/assigned-reported", method = GET)
+    public ResponseEntity<?> getAssignedAndReportedTasks(@RequestHeader Map<String, String> headers,
+                                                         @RequestParam(value = "start") Integer startPage,
+                                                         @RequestParam(value = "status", required = false) TaskStatus status,
+                                                         @RequestParam(value = "statuses", required = false) TaskStatus[] statuses){
+
+        Optional<User> userOptional = userRepository.findByHashKey(headers.get("token"));
+        if(userOptional.isPresent()){
+            List<TaskDTO> taskDTOS = new ArrayList<>();
+            if(status != null){
+                 taskDTOS = taskRepository.findTasksWithStatusAssignedToOrReportedBy(
+                        userOptional.get().getId(),
+                        status.ordinal(),
+                        PageRequest.of(startPage, 10))
+                        .stream()
+                        .map(dtOsConverter::getDTOFromTask).collect(Collectors.toList());
+            }else if (statuses != null){
+                taskDTOS = taskRepository.findTasksWithStatusesAssignedToOrReportedBy(
+                        userOptional.get().getId(),
+                        Arrays.stream(statuses).map(Enum::ordinal).collect(Collectors.toList()),
+                        PageRequest.of(startPage, 10))
+                        .stream()
+                        .map(dtOsConverter::getDTOFromTask).collect(Collectors.toList());
+            }
+            return new ResponseEntity<>(taskDTOS, HttpStatus.OK);
+        }
+        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
 }
 

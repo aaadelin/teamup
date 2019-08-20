@@ -1,6 +1,8 @@
 package com.team.TeamUp.domain;
 
 import com.fasterxml.jackson.annotation.JsonManagedReference;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
@@ -28,6 +30,9 @@ public class Project {
     @OneToMany
     @JoinColumn(name = "ID")
     private List<Task> tasks;
+
+    @Column (columnDefinition = "varchar(50) default '0.0.1'")
+    private String version;
 
     public Project() {
     }

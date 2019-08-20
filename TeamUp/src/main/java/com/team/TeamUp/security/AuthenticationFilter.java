@@ -41,7 +41,7 @@ public class AuthenticationFilter implements Filter {
                 LOGGER.info(String.format("User with token %s is eligible to access %s", tokenHeader, req.getRequestURI()));
                 chain.doFilter(request, response);
             }else{
-                LOGGER.info("User is or has just been logged out");
+                LOGGER.info("User is or just has been logged out");
                 res.sendError(405);
             }
         } else {

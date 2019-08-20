@@ -10,8 +10,8 @@ function fetchDataFromUrl (url, defaultParam = null) {
   }).then(res => {
     return res.data
   }).catch((err) => {
-    if (err.toLocaleString().includes("405")){
-      console.log("logged out")
+    if (err.toLocaleString().includes('405')) {
+      console.log('logged out')
       localStorage.clear()
       location.reload()
     }
@@ -89,13 +89,59 @@ export async function getTaskById (id) {
   return fetchDataFromUrl(url)
 }
 
-export async function getUsersReportedTasks () {
+export async function getUsersReportedTasks (pages) {
   let url = `${baseURL}/user/${localStorage.getItem('access_key')}/reported-tasks`
   return fetchDataFromUrl(url)
 }
 
-export async function getUsersAssignedTasks () {
-  let url = `${baseURL}/user/${localStorage.getItem('access_key')}/assigned-tasks`
+export async function getUsersAssignedTasks (pages) {
+  let todoTasks = await getUsersAssignedTasksWithStatuses(pages[0], 'OPEN,REOPENED')
+  let inProgressTasks = await getUsersAssignedTasksWithStatus(pages[1], 'IN_PROGRESS')
+  let underReviewTasks = await getUsersAssignedTasksWithStatus(pages[2], 'UNDER_REVIEW')
+  let approvedTasks = await getUsersAssignedTasksWithStatus(pages[3], 'APPROVED')
+
+  let tasks = [todoTasks, inProgressTasks, underReviewTasks, approvedTasks]
+  if(todoTasks == null || inProgressTasks == null || underReviewTasks == null || approvedTasks == null){
+    return null
+  }
+  return tasks
+}
+
+export async function getUsersAssignedAndReportedTasks (pages) {
+  let todoTasks = await getUsersReportedAndAssignedTasksWithStatuses(pages[0], 'OPEN,REOPENED')
+  let inProgressTasks = await getUsersReportedAndAssignedTasksWithStatus(pages[1], 'IN_PROGRESS')
+  let underReviewTasks = await getUsersReportedAndAssignedTasksWithStatus(pages[2], 'UNDER_REVIEW')
+  let approvedTasks = await getUsersReportedAndAssignedTasksWithStatus(pages[3], 'APPROVED')
+
+  let tasks = [todoTasks, inProgressTasks, underReviewTasks, approvedTasks]
+  if(todoTasks == null || inProgressTasks == null || underReviewTasks == null || approvedTasks == null){
+    return null
+  }
+  return tasks
+}
+
+export async function getUsersAssignedTasksWithStatus (page, status) {
+  let url = `${baseURL}/tasks/assigned?start=${page}&status=${status}`
+  return fetchDataFromUrl(url)
+}
+
+export async function getUsersAssignedTasksWithStatuses (page, statuses) {
+  let url = `${baseURL}/tasks/assigned?start=${page}&statuses=${statuses}`
+  return fetchDataFromUrl(url)
+}
+
+export async function getUsersReportedTasksWithStatus (page, status) {
+  let url = `${baseURL}/tasks/reported?start=${page}&status=${status}`
+  return fetchDataFromUrl(url)
+}
+
+export async function getUsersReportedAndAssignedTasksWithStatus (page, status) {
+  let url = `${baseURL}/tasks/assigned-reported?start=${page}&status=${status}`
+  return fetchDataFromUrl(url)
+}
+
+export async function getUsersReportedAndAssignedTasksWithStatuses (page, statuses) {
+  let url = `${baseURL}/tasks/assigned-reported?start=${page}&statuses=${statuses}`
   return fetchDataFromUrl(url)
 }
 

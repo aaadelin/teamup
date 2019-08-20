@@ -20,49 +20,53 @@
       <div class="col columnCategory">
         <span class="header" @click="todo_category = !todo_category">
           <b class="category">TO DO </b>
-          <span class="quantity">{{ statusFilter(['OPEN', 'REOPENED']).length }}</span>
+          <span class="quantity">{{ tasks[0].length }}{{ pages[0] !== -1 && tasks[0].length === 10 ? '+':'' }}</span>
         </span>
         <div id="todo-category" v-if="todo_category">
-          <task-box v-for="task1 in statusFilter(['OPEN', 'REOPENED'])"
+          <task-box v-for="task1 in tasks[0]"
                     v-bind:key="task1.id"
                     :task="task1"/>
         </div>
+        <div style="color: #6d7fcc; cursor: pointer" v-if="pages[0] !== -1 && tasks[0].length === 10" @click="loadMore('todo')">Load more...</div>
       </div>
 
       <div class="col columnCategory">
         <span class="header" @click="in_progress_category = !in_progress_category">
           <b class="category">IN PROGRESS </b>
-          <span class="quantity"> {{ statusFilter(['IN_PROGRESS']) .length }}</span>
+          <span class="quantity">{{ tasks[1].length }}{{ pages[1] !== -1 && tasks[1].length === 10  ? '+':'' }}</span>
         </span>
         <div id="in-progress-category" v-if="in_progress_category">
-          <task-box v-for="task1 in statusFilter(['IN_PROGRESS'])"
+          <task-box v-for="task1 in tasks[1]"
                     v-bind:key="task1.id"
                     :task="task1"/>
         </div>
+        <div style="color: #6d7fcc; cursor: pointer" v-if="pages[1] !== -1 && tasks[1].length === 10" @click="loadMore('in-progress')">Load more...</div>
       </div>
 
       <div class="col columnCategory">
         <span class="header" @click="under_review_category = !under_review_category">
           <b class="category">UNDER REVIEW </b>
-          <span class="quantity"> {{ statusFilter(['UNDER_REVIEW']) .length }}</span>
+          <span class="quantity"> {{ tasks[2].length }}{{ pages[2] !== -1 && tasks[2].length === 10  ? '+':'' }}</span>
         </span>
         <div id="under-review-category" v-if="under_review_category">
-          <task-box v-for="task1 in statusFilter(['UNDER_REVIEW'])"
+          <task-box v-for="task1 in tasks[2]"
                     v-bind:key="task1.id"
                     :task="task1"/>
         </div>
+        <div style="color: #6d7fcc; cursor: pointer" v-if="pages[2] !== -1 && tasks[2].length === 10" @click="loadMore('under-review')">Load more...</div>
       </div>
 
       <div class="col columnCategory">
         <span class="header" @click="done_category = !done_category">
           <b class="category">DONE </b>
-          <span class="quantity">{{ statusFilter(['APPROVED', 'CLOSED']).length }}</span>
+          <span class="quantity">{{ tasks[3].length }}{{ pages[3] !== -1 && tasks[3].length === 10  ? '+':'' }}</span>
         </span>
         <div id="done-category" v-if="done_category">
-          <task-box v-for="task1 in statusFilter(['APPROVED'])"
+          <task-box v-for="task1 in tasks[3]"
                     v-bind:key="task1.id"
                     :task="task1"/>
         </div>
+        <div style="color: #6d7fcc; cursor: pointer" v-if="pages[3] !== -1 && tasks[3].length === 10" @click="loadMore('done')">Load more...</div>
       </div>
       <div></div>
     </div>
@@ -76,9 +80,13 @@
 import TaskBox from '../components/TaskBox'
 import RightMenu from '../components/MySideMenu'
 import {
-  getTaskById,
-  getUsersAssignedTasks,
-  getUsersReportedTasks
+    getTaskById,
+    getUsersAssignedAndReportedTasks,
+    getUsersAssignedTasks,
+    getUsersAssignedTasksWithStatus,
+    getUsersAssignedTasksWithStatuses,
+    getUsersReportedAndAssignedTasksWithStatus,
+    getUsersReportedAndAssignedTasksWithStatuses
 } from '../persistance/RestGetRepository'
 import { updateTask } from '../persistance/RestPutRepository'
 
@@ -99,6 +107,7 @@ export default {
       reportedTasks: false,
       menu: [],
       oldDraggedTask: null,
+      pages: [0, 0, 0, 0],
 
       draggable_options: {
         dropzoneSelector: 'div',
@@ -135,17 +144,19 @@ export default {
     }
   },
   methods: {
-
-    statusFilter (status) {
-      return this.tasks.filter((task) => status.includes(task.taskStatus))
-    },
     async changeVisibleTasks () {
       this.reportedTasks = !this.reportedTasks
+      this.pages = [0, 0, 0, 0]
       await this.getUsersTasks()
     },
     async getUsersTasks () {
       this.tasks = []
-      this.tasks = await getUsersAssignedTasks()
+
+      if (this.reportedTasks) {
+        this.tasks = await getUsersAssignedAndReportedTasks(this.pages)
+      } else {
+        this.tasks = await getUsersAssignedTasks(this.pages)
+      }
 
       if (this.tasks === null) {
         this.$notify({
@@ -155,24 +166,61 @@ export default {
           text: 'An error occurred'
         })
       }
-
-      if (this.reportedTasks) {
-        let reported = await getUsersReportedTasks()
-
-        if (reported === null) {
-          this.$notify({
-            group: 'notificationsGroup',
-            title: 'Error getting reported tasks',
-            type: 'error',
-            text: 'An error occurred'
-          })
-        }
-
-        for (let i = 0; i < reported.length; i++) {
-          if (!this.getIds(this.tasks).includes(reported[i].id)) {
-            this.tasks.push(reported[i])
+    },
+    async loadMore (category) {
+      let newTasks = null
+      switch (category) {
+        case 'todo':
+          this.pages[0]++
+          if (this.reportedTasks) {
+            newTasks = await getUsersReportedAndAssignedTasksWithStatuses(this.pages[0], 'OPEN,REOPENED')
+          } else {
+            newTasks = await getUsersAssignedTasksWithStatuses(this.pages[0], 'OPEN,REOPENED')
           }
-        }
+          if (newTasks.length < 10) {
+            this.pages[0] = -1
+          }
+          this.tasks[0].push(...newTasks)
+          break
+        case 'in-progress':
+          this.pages[1]++
+          if (this.reportedTasks) {
+            newTasks = await getUsersReportedAndAssignedTasksWithStatus(this.pages[1], 'IN_PROGRESS')
+          } else {
+            newTasks = await getUsersAssignedTasksWithStatus(this.pages[1], 'IN_PROGRESS')
+          }
+          if (newTasks.length < 10) {
+            this.pages[1] = -1
+          }
+          this.tasks[1].push(...newTasks)
+          break
+        case 'under-review':
+          this.pages[2]++
+
+          if (this.reportedTasks) {
+            newTasks = await getUsersReportedAndAssignedTasksWithStatus(this.pages[2], 'UNDER_REVIEW')
+          } else {
+            newTasks = await getUsersAssignedTasksWithStatus(this.pages[2], 'UNDER_REVIEW')
+          }
+          if (newTasks.length < 10) {
+            this.pages[2] = -1
+          }
+          this.tasks[2].push(...newTasks)
+          break
+
+        case 'done':
+          this.pages[3]++
+
+          if (this.reportedTasks) {
+            newTasks = await getUsersReportedAndAssignedTasksWithStatus(this.pages[3], 'APPROVED')
+          } else {
+            newTasks = await getUsersAssignedTasksWithStatus(this.pages[3], 'APPROVED')
+          }
+          if (newTasks.length < 10) {
+            this.pages[3] = -1
+          }
+          this.tasks[3].push(...newTasks)
+          break
       }
     },
     getIds (tasks) {

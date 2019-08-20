@@ -53,12 +53,12 @@ export const router = new Router({
 
 router.beforeEach((to, from, next) => {
   const publicPages = ['/login', '/']
-  const authRequired = !publicPages.includes(to.path)
+  const authRequired = !publicPages.includes(to.fullPath)
   const loggedIn = localStorage.getItem('access_key')
 
   if (authRequired && !loggedIn) {
-    if (!to.path.includes('logout')) {
-      localStorage.setItem('wantedToAccess', to.path)
+    if (!to.fullPath.includes('logout')) {
+      localStorage.setItem('wantedToAccess', to.fullPath)
     }
     return next('/login')
   } else if (loggedIn && to.path === '/login') {

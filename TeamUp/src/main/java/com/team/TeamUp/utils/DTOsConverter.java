@@ -104,7 +104,7 @@ public class DTOsConverter {
         if (userDTO.getPhoto() != null) {
             user.setPhoto(userDTO.getPhoto());
         }
-
+        user.setMinutesUntilLogout(60);
         user.setStatus(userDTO.getStatus());
         user.setPassword(TokenUtils.getMD5Token(userDTO.getPassword()));
 

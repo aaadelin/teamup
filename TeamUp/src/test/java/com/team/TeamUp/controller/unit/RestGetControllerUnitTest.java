@@ -178,6 +178,7 @@ public class RestGetControllerUnitTest {
     public void getAllTasksData() throws Exception {
         when(taskRepository.findAll()).thenReturn(List.of(new Task(), new Task()));
 
+        //TODO
         MvcResult mvcResult = mockMvc.perform(
                 MockMvcRequestBuilders.get("/api/tasks")
                         .header("token", "")
@@ -835,6 +836,21 @@ public class RestGetControllerUnitTest {
                         .accept(MediaType.APPLICATION_JSON)
         ).andReturn();
         assertEquals(403, mvcResult.getResponse().getStatus());
+    }
+
+    @Test
+    public void getAssignedAndReportedTasks(){
+
+    }
+
+    @Test
+    public void getReportedTasks(){
+
+    }
+
+    @Test
+    public void getAssignedTasks(){
+
     }
 
 }
