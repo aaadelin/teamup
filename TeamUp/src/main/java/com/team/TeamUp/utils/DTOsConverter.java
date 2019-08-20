@@ -10,6 +10,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -103,6 +104,9 @@ public class DTOsConverter {
         user.setActive(userDTO.isActive());
         if (userDTO.getPhoto() != null) {
             user.setPhoto(userDTO.getPhoto());
+        }
+        if((userOptional.isPresent() && userOptional.get().getJoinedAt() == null) || userOptional.isEmpty()){
+            user.setJoinedAt(LocalDate.now());
         }
         user.setMinutesUntilLogout(60);
         user.setStatus(userDTO.getStatus());

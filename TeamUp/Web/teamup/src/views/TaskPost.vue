@@ -228,7 +228,7 @@ export default {
       this.currentPriority = this.task.priority
 
       this.options.minDate = new Date()
-      this.taskStatuses = await this.getTaskStatusPosibilities()
+      this.taskStatuses = await this.getTaskStatusPossibilities()
       this.taskTypes = await getTaskTypes()
       this.comments = taskPostData.comments
       let me = await getMyID()
@@ -311,7 +311,7 @@ export default {
         }, 500)
       }
     },
-    async getTaskStatusPosibilities () {
+    async getTaskStatusPossibilities () {
       let statuses = await getTaskStatus()
       let indexOfCurrentStatus = statuses.indexOf(this.currentStatus)
       let available = []

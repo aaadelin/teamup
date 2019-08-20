@@ -101,7 +101,7 @@ export async function getUsersAssignedTasks (pages) {
   let approvedTasks = await getUsersAssignedTasksWithStatus(pages[3], 'APPROVED')
 
   let tasks = [todoTasks, inProgressTasks, underReviewTasks, approvedTasks]
-  if(todoTasks == null || inProgressTasks == null || underReviewTasks == null || approvedTasks == null){
+  if (todoTasks == null || inProgressTasks == null || underReviewTasks == null || approvedTasks == null) {
     return null
   }
   return tasks
@@ -114,7 +114,7 @@ export async function getUsersAssignedAndReportedTasks (pages) {
   let approvedTasks = await getUsersReportedAndAssignedTasksWithStatus(pages[3], 'APPROVED')
 
   let tasks = [todoTasks, inProgressTasks, underReviewTasks, approvedTasks]
-  if(todoTasks == null || inProgressTasks == null || underReviewTasks == null || approvedTasks == null){
+  if (todoTasks == null || inProgressTasks == null || underReviewTasks == null || approvedTasks == null) {
     return null
   }
   return tasks

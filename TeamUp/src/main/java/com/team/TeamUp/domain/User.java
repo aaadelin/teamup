@@ -6,6 +6,7 @@ import com.team.TeamUp.domain.enums.Department;
 import com.team.TeamUp.domain.enums.UserStatus;
 
 import javax.persistence.*;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Objects;
 
@@ -34,6 +35,8 @@ public class User {
     private boolean isActive;
 
     private String hashKey;
+
+    private LocalDate joinedAt;
 
     private UserStatus status;
     @Column(columnDefinition = "integer default 60")
@@ -149,6 +152,14 @@ public class User {
 
     public void setMinutesUntilLogout(int minutesUntilLogout) {
         this.minutesUntilLogout = minutesUntilLogout;
+    }
+
+    public LocalDate getJoinedAt() {
+        return joinedAt;
+    }
+
+    public void setJoinedAt(LocalDate joinedAt) {
+        this.joinedAt = joinedAt;
     }
 
     @Override

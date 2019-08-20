@@ -3,7 +3,7 @@
   <form class="commentForm" @submit.prevent="addComment">
 
     <label class="row" for="title">Title:
-      <input id="title" type="text" v-model="title" class="form-control" name="title">
+      <input id="title" type="text" v-model="title" class="form-control" name="title" autocomplete="off">
     </label>
     <label class="row" for="comment">Comment:
       <textarea id="comment" type="text" v-model="comment" name="comment" class="form-control" rows="5" cols="40"></textarea>
@@ -44,6 +44,8 @@ export default {
       }
 
       await saveComment(comment)
+      this.title = ''
+      this.comment = ''
       this.$emit('reloadComments')
     }
   }

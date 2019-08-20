@@ -80,13 +80,13 @@
 import TaskBox from '../components/TaskBox'
 import RightMenu from '../components/MySideMenu'
 import {
-    getTaskById,
-    getUsersAssignedAndReportedTasks,
-    getUsersAssignedTasks,
-    getUsersAssignedTasksWithStatus,
-    getUsersAssignedTasksWithStatuses,
-    getUsersReportedAndAssignedTasksWithStatus,
-    getUsersReportedAndAssignedTasksWithStatuses
+  getTaskById,
+  getUsersAssignedAndReportedTasks,
+  getUsersAssignedTasks,
+  getUsersAssignedTasksWithStatus,
+  getUsersAssignedTasksWithStatuses,
+  getUsersReportedAndAssignedTasksWithStatus,
+  getUsersReportedAndAssignedTasksWithStatuses
 } from '../persistance/RestGetRepository'
 import { updateTask } from '../persistance/RestPutRepository'
 
@@ -98,7 +98,7 @@ export default {
   components: { RightMenu, TaskBox },
   data () {
     return {
-      tasks: [],
+      tasks: [[], [], [], []],
       todo_category: true,
       in_progress_category: true,
       under_review_category: true,
@@ -150,8 +150,6 @@ export default {
       await this.getUsersTasks()
     },
     async getUsersTasks () {
-      this.tasks = []
-
       if (this.reportedTasks) {
         this.tasks = await getUsersAssignedAndReportedTasks(this.pages)
       } else {
@@ -276,6 +274,8 @@ export default {
         }
       } else {
         // if the task is dropped in the empty area of the column
+          console.log(target)
+          console.log(target.childNodes[1])
         target = target.childNodes[1]
         event.droptarget = target
       }
