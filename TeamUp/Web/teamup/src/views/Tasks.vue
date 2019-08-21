@@ -81,8 +81,6 @@ import TaskBox from '../components/TaskBox'
 import RightMenu from '../components/MySideMenu'
 import {
   getTaskById,
-  getUsersAssignedAndReportedTasks,
-  getUsersAssignedTasks,
   getUsersAssignedTasksWithStatus,
   getUsersAssignedTasksWithStatuses,
   getUsersReportedAndAssignedTasksWithStatus,
@@ -151,9 +149,9 @@ export default {
     },
     async getUsersTasks () {
       if (this.reportedTasks) {
-        this.getAssignedAndReportedtasks()
+        this.getAssignedAndReportedTasks()
       } else {
-          this.getAssignedTasks()
+        this.getAssignedTasks()
       }
 
       if (this.tasks === null) {
@@ -166,39 +164,33 @@ export default {
       }
     },
     async getAssignedTasks () {
-        if (this.pages.includes(-1)){
-          if (this.pages[0] !== -1){
-            this.tasks[0] = await getUsersAssignedTasksWithStatuses(this.pages[0], 'OPEN,REOPENED')
-          }
-          if (this.pages[1] !== -1) {
-            this.tasks[1] = await getUsersAssignedTasksWithStatus(this.pages[1], 'IN_PROGRESS')
-          }
-          if (this.pages[2] !== -1) {
-            this.tasks[2] = await getUsersAssignedTasksWithStatus(this.pages[2], 'UNDER_REVIEW')
-          }
-          if (this.pages[3] !== -1) {
-            this.tasks[3]= await getUsersAssignedTasksWithStatus(this.pages[3], 'APPROVED')
-          }
-        } else {
-            this.tasks = await getUsersAssignedTasks(this.pages)
-        }
+      this.tasks = [[], [], [], []]
+      for (let i = 0; i <= this.pages[0]; i++) {
+        this.tasks[0].push(...await getUsersAssignedTasksWithStatuses(i, 'OPEN,REOPENED'))
+      }
+      for (let i = 0; i <= this.pages[1]; i++) {
+        this.tasks[1].push(...await getUsersAssignedTasksWithStatus(i, 'IN_PROGRESS'))
+      }
+      for (let i = 0; i <= this.pages[2]; i++) {
+        this.tasks[2].push(...await getUsersAssignedTasksWithStatus(i, 'UNDER_REVIEW'))
+      }
+      for (let i = 0; i <= this.pages[3]; i++) {
+        this.tasks[3].push(...await getUsersAssignedTasksWithStatus(i, 'APPROVED'))
+      }
     },
-    async getAssignedAndReportedtasks () {
-      if (this.pages.includes(-1)){
-        if (this.pages[0] !== -1){
-          this.tasks[0] = await getUsersReportedAndAssignedTasksWithStatuses(this.pages[0], 'OPEN,REOPENED')
-        }
-        if (this.pages[1] !== -1) {
-          this.tasks[1] = await getUsersReportedAndAssignedTasksWithStatus(this.pages[1], 'IN_PROGRESS')
-        }
-        if (this.pages[2] !== -1) {
-          this.tasks[2] = await getUsersReportedAndAssignedTasksWithStatus(this.pages[2], 'UNDER_REVIEW')
-        }
-        if (this.pages[3] !== -1) {
-          this.tasks[3]= await getUsersReportedAndAssignedTasksWithStatus(this.pages[3], 'APPROVED')
-        }
-      } else {
-        this.tasks = getUsersAssignedAndReportedTasks(this.pages)
+    async getAssignedAndReportedTasks () {
+      this.tasks = [[], [], [], []]
+      for (let i = 0; i <= this.pages[0]; i++) {
+        this.tasks[0].push(...await getUsersReportedAndAssignedTasksWithStatuses(i, 'OPEN,REOPENED'))
+      }
+      for (let i = 0; i <= this.pages[1]; i++) {
+        this.tasks[1].push(...await getUsersReportedAndAssignedTasksWithStatus(i, 'IN_PROGRESS'))
+      }
+      for (let i = 0; i <= this.pages[2]; i++) {
+        this.tasks[2].push(...await getUsersReportedAndAssignedTasksWithStatus(i, 'UNDER_REVIEW'))
+      }
+      for (let i = 0; i <= this.pages[3]; i++) {
+        this.tasks[3].push(...await getUsersReportedAndAssignedTasksWithStatus(i, 'APPROVED'))
       }
     },
     async loadMore (category) {
@@ -211,9 +203,9 @@ export default {
           } else {
             newTasks = await getUsersAssignedTasksWithStatuses(this.pages[0], 'OPEN,REOPENED')
           }
-          if (newTasks.length < 10) {
-            this.pages[0] = -1
-          }
+          // if (newTasks.length < 10) {
+          //   this.pages[0] = -1
+          // }
           this.tasks[0].push(...newTasks)
           break
         case 'in-progress':
@@ -223,9 +215,9 @@ export default {
           } else {
             newTasks = await getUsersAssignedTasksWithStatus(this.pages[1], 'IN_PROGRESS')
           }
-          if (newTasks.length < 10) {
-            this.pages[1] = -1
-          }
+          // if (newTasks.length < 10) {
+          //   this.pages[1] = -1
+          // }
           this.tasks[1].push(...newTasks)
           break
         case 'under-review':
@@ -236,9 +228,9 @@ export default {
           } else {
             newTasks = await getUsersAssignedTasksWithStatus(this.pages[2], 'UNDER_REVIEW')
           }
-          if (newTasks.length < 10) {
-            this.pages[2] = -1
-          }
+          // if (newTasks.length < 10) {
+          //   this.pages[2] = -1
+          // }
           this.tasks[2].push(...newTasks)
           break
         case 'done':
@@ -249,9 +241,9 @@ export default {
           } else {
             newTasks = await getUsersAssignedTasksWithStatus(this.pages[3], 'APPROVED')
           }
-          if (newTasks.length < 10) {
-            this.pages[3] = -1
-          }
+          // if (newTasks.length < 10) {
+          //   this.pages[3] = -1
+          // }
           this.tasks[3].push(...newTasks)
           break
       }
@@ -309,8 +301,6 @@ export default {
         }
       } else {
         // if the task is dropped in the empty area of the column
-        console.log(target)
-        console.log(target.childNodes[1])
         target = target.childNodes[1]
         event.droptarget = target
       }
