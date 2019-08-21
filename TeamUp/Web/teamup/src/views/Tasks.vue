@@ -151,9 +151,9 @@ export default {
     },
     async getUsersTasks () {
       if (this.reportedTasks) {
-        this.tasks = await getUsersAssignedAndReportedTasks(this.pages)
+        this.getAssignedAndReportedtasks()
       } else {
-        this.tasks = await getUsersAssignedTasks(this.pages)
+          this.getAssignedTasks()
       }
 
       if (this.tasks === null) {
@@ -163,6 +163,42 @@ export default {
           type: 'error',
           text: 'An error occurred'
         })
+      }
+    },
+    async getAssignedTasks () {
+        if (this.pages.includes(-1)){
+          if (this.pages[0] !== -1){
+            this.tasks[0] = await getUsersAssignedTasksWithStatuses(this.pages[0], 'OPEN,REOPENED')
+          }
+          if (this.pages[1] !== -1) {
+            this.tasks[1] = await getUsersAssignedTasksWithStatus(this.pages[1], 'IN_PROGRESS')
+          }
+          if (this.pages[2] !== -1) {
+            this.tasks[2] = await getUsersAssignedTasksWithStatus(this.pages[2], 'UNDER_REVIEW')
+          }
+          if (this.pages[3] !== -1) {
+            this.tasks[3]= await getUsersAssignedTasksWithStatus(this.pages[3], 'APPROVED')
+          }
+        } else {
+            this.tasks = await getUsersAssignedTasks(this.pages)
+        }
+    },
+    async getAssignedAndReportedtasks () {
+      if (this.pages.includes(-1)){
+        if (this.pages[0] !== -1){
+          this.tasks[0] = await getUsersReportedAndAssignedTasksWithStatuses(this.pages[0], 'OPEN,REOPENED')
+        }
+        if (this.pages[1] !== -1) {
+          this.tasks[1] = await getUsersReportedAndAssignedTasksWithStatus(this.pages[1], 'IN_PROGRESS')
+        }
+        if (this.pages[2] !== -1) {
+          this.tasks[2] = await getUsersReportedAndAssignedTasksWithStatus(this.pages[2], 'UNDER_REVIEW')
+        }
+        if (this.pages[3] !== -1) {
+          this.tasks[3]= await getUsersReportedAndAssignedTasksWithStatus(this.pages[3], 'APPROVED')
+        }
+      } else {
+        this.tasks = getUsersAssignedAndReportedTasks(this.pages)
       }
     },
     async loadMore (category) {
@@ -205,7 +241,6 @@ export default {
           }
           this.tasks[2].push(...newTasks)
           break
-
         case 'done':
           this.pages[3]++
 
