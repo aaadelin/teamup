@@ -274,8 +274,8 @@ export default {
         }
       } else {
         // if the task is dropped in the empty area of the column
-          console.log(target)
-          console.log(target.childNodes[1])
+        console.log(target)
+        console.log(target.childNodes[1])
         target = target.childNodes[1]
         event.droptarget = target
       }
