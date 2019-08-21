@@ -28,7 +28,7 @@
               <img width="30" height="30" class="rounded-circle" :src="image" alt="Profile"/>
               {{ name }}
             </b-nav-item>
-            <b-nav-item @click="logoutMethod" v-if="access_key" to="/logout">Log out</b-nav-item>
+            <b-nav-item @click="logoutMethod" v-if="access_key">Log out</b-nav-item>
 
             <b-nav-item-dropdown text="Administrate..." v-if="isAdmin === 'true'" right>
               <b-dropdown-item @click="addUserIsVisible = true">Add User</b-dropdown-item>
@@ -57,21 +57,18 @@
 import { getMyID, getUsersPhoto, logout } from '../persistance/RestGetRepository'
 import CreateTask from './CreateTask'
 import CreateUser from './CreateUser'
-// import CreateUser from './CreateUser'
-
 
 function keyPress (e) {
-    let eventObj =window.event ? event:e
-    if (eventObj.ctrlKey && eventObj.keyCode === 81) {
-      let search = document.getElementById('searchBox')
-      if (search !== null){
-          search.focus()
-      }
+  let eventObj = window.event ? event : e
+  if (eventObj.ctrlKey && eventObj.keyCode === 81) {
+    let search = document.getElementById('searchBox')
+    if (search !== null) {
+      search.focus()
     }
+  }
 }
 
 document.onkeydown = keyPress
-
 
 export default {
   beforeMount () {

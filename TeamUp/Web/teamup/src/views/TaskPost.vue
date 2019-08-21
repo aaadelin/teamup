@@ -126,19 +126,17 @@
 <!--        <li v-for="comment in comments" v-bind:key="comment.id"> {{ comment }} </li>-->
 <!--      </ul>-->
       <div>
-        <div class="add-comment col justify-content-lg-start">
-          <p class="row">Add a comment:</p>
+        <div class="add-comment col justify-content-lg-start" style="text-align: left">
+          <p class="row" style="color: black">Add a comment:</p>
           <comment-form
             :post-id="postId"
             @reloadComments="reloadComments"
           />
+          <br>
           <h4>Comments: </h4>
+          <br>
           <div class="row">
-            <div v-for="comment in comments" :key="comment.id">
-              <h4><strong>{{ comment.creator.name }}</strong> {{comment.title}} </h4>
-              <p>{{ comment.content }}</p>
-              <p>Reply</p>
-            </div>
+            <simple-comment v-for="comment in comments" :key="comment.id" :comment="comment"></simple-comment>
           </div>
         </div>
       </div>
@@ -158,10 +156,11 @@ import {
 } from '../persistance/RestGetRepository'
 import { updateTask } from '../persistance/RestPutRepository'
 import CommentForm from '../components/CommentForm'
+import SimpleComment from '../components/SimpleComment'
 
 export default {
   name: 'TaskPost',
-  components: { CommentForm },
+  components: { SimpleComment, CommentForm },
   beforeMount () {
     this.loadData()
   },
@@ -390,7 +389,7 @@ export default {
   .add-comment{
     padding: 30px;
     min-width: 350px;
-    background-color: rgba(141, 185, 180, 0.59);
+    background-color: rgba(225, 225, 225, 0.24);
   }
 
   .edit-post{
