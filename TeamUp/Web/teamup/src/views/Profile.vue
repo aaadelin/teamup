@@ -34,7 +34,7 @@
 
 <script>
 
-import { getUserById, getUsersPhoto } from '../persistance/RestGetRepository'
+    import {getUserById, getUsersPhoto, getUserStatistics} from '../persistance/RestGetRepository'
 import UserProfileTimeLine from '../components/UserProfileTimeLine'
 import { diffYears } from '../utils/DateUtils'
 
@@ -43,6 +43,7 @@ export default {
   async mounted () {
     this.getPhoto()
     this.getUser()
+    this.getUserStatistics()
   },
   name: 'Profile',
   data () {
@@ -80,6 +81,9 @@ export default {
         this.$router.push('404')
       }
       this.canEdit = this.user.id === this.userId
+    },
+    async getUserStatistics () {
+      this.series = await getUserStatistics(this.userId)
     }
   },
   computed: {

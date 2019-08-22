@@ -1,5 +1,5 @@
 <template>
-    <div class='taskDetails containeri'>
+    <div class='taskDetails container'>
       <h2> {{ task.summary }} </h2>
       <div class="edit-post" v-if="canEditAll || canEditStatus">
         <div @click="editMode = !editMode">
@@ -7,7 +7,7 @@
         </div>
       </div>
       <div class="row">
-        <div class="col">
+        <div class="col container-fluid" style="text-align: left">
 
           <span> <strong>Description: </strong>
             <span v-if="editMode && canEditAll"> <textarea @keyup="hasChanged" v-model="currentDescription" cols="50" rows="4"></textarea> </span>
@@ -16,12 +16,12 @@
 
           <p></p>
 
-          <span> <strong>Created at: </strong>
+          <span style="text-align: left"> <strong>Created at: </strong>
             {{ task.createdAt }} </span>
 
           <p></p>
 
-          <span class="row justify-content-center"> <strong>Deadline: </strong>
+          <span class="row" style="text-align: left; padding-left: 15px"> <strong>Deadline: </strong>
               <date-picker v-if="editMode && canEditAll" v-model="currentDeadline" id="deadline" name="deadline"
                            :config="options" @dp-change="hasChanged"
                            class="form-control col col-4"></date-picker>
@@ -41,7 +41,7 @@
           <p></p>
         </div>
 
-        <div class="col">
+        <div class="col container-fluid" style="text-align: left">
 
           <span> <strong>Task status: </strong>  <span v-if="editMode">
             <select @change="hasChanged" v-model="currentStatus" >
@@ -97,9 +97,9 @@
             </select>
 <!--            <button v-if="editMode && canEditAll" class="btn btn-success btn-circle" @click="addPersons">+</button>-->
             <span>
-            <ul style="list-style-type: none">
+            <ul class="col-3" style="list-style-type: none; text-align: left; margin-left: 20px">
               <li v-for="assignee in assignees" :key="assignee.id">
-                <div class="row justify-content-center">
+                <div class="row">
                   <div style="cursor: pointer; margin-right: 5px;" @click="seeUsersProfile(assignee.id)">
                     {{assignee.firstName}} {{assignee.lastName}}
                   </div>

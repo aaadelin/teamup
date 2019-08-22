@@ -524,16 +524,48 @@ public class RestGetController extends AbstractRestController {
     @RequestMapping(value = "/user/{id}/history", method = GET)
     public ResponseEntity<?> getUsersHistory(@PathVariable int id,
                                              @RequestParam(name = "page", required = false) Integer page){
+        LOGGER.info(String.format("Entered method to get user's history with user id: %s and page %s", id, page));
         Optional<User> userOptional = userRepository.findById(id);
         if(userOptional.isPresent()){
             List<UserEvent> events;
             if(page != null){
+                LOGGER.info("Getting all user s history");
                  events = eventRepository.findAllByCreatorOrderByTimeDesc(userOptional.get(), PageRequest.of(page, 10));
             }else {
+                LOGGER.info(String.format("Getting user's history from page %s", page));
                 events = eventRepository.findAllByCreatorOrderByTimeDesc(userOptional.get());
             }
+            LOGGER.info(String.format("Exiting with history: %s", events));
             return new ResponseEntity<>(events, HttpStatus.OK);
         }
+        LOGGER.info("User not found");
+        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+    }
+
+    @RequestMapping(value = "/user/{id}/statistics", method = GET)
+    public ResponseEntity<?> getUsersStatistics(@PathVariable int id,
+                                                @RequestParam(name = "lastDays", required = false) Integer lastDays){
+        LOGGER.info(String.format("Entered get user's statistics with id %s and number of last days: %s", id, lastDays));
+        Optional<User> userOptional = userRepository.findById(id);
+        if(userOptional.isPresent()){
+            List<Task> statistics;
+            if(lastDays != null){
+                LOGGER.info("Getting statistics from all time");
+                statistics = taskRepository.findAllByTaskStatusInAndAssigneesContaining(Arrays.asList(TaskStatus.values()), userOptional.get(), PageRequest.of(0, 10000));
+            }else {
+                LOGGER.info(String.format("Getting statistics from last %s days", lastDays));
+                statistics = taskRepository.findTasksWithStatusesAssignedToOrReportedBy(id, List.of(0, 1, 2, 3, 4), PageRequest.of(0, 10000));
+            }
+            // TODO
+            long todoCount = statistics.stream().filter(task ->task.getTaskStatus().equals(TaskStatus.OPEN) || task.getTaskStatus().equals(TaskStatus.REOPENED)).count();
+            long inProgressCount = statistics.stream().filter(task ->task.getTaskStatus().equals(TaskStatus.IN_PROGRESS)).count();
+            long underReviewCount = statistics.stream().filter(task ->task.getTaskStatus().equals(TaskStatus.UNDER_REVIEW)).count();
+            long done = statistics.stream().filter(task ->task.getTaskStatus().equals(TaskStatus.APPROVED)).count();
+            List<Long> counts = List.of(todoCount, inProgressCount, underReviewCount, done);
+            LOGGER.info(String.format("Exiting with statistics: %s", counts));
+            return new ResponseEntity<>(counts, HttpStatus.OK);
+        }
+        LOGGER.info("User not found");
         return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
 }

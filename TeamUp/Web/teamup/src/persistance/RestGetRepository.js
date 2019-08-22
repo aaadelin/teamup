@@ -196,3 +196,13 @@ export async function getUserHistoryByPage (id, page) {
   let url = `${baseURL}/user/${id}/history?page=${page}`
   return fetchDataFromUrl(url)
 }
+
+export async function getUserStatistics (id) {
+  let url = `${baseURL}/user/${id}/statistics`
+  return fetchDataFromUrl(url, [])
+}
+
+export async function getUserStatisticsByDate (id, date) {
+  let url = `${baseURL}/user/${id}/statistics?lastDays=${date}`
+  return fetchDataFromUrl(url)
+}
