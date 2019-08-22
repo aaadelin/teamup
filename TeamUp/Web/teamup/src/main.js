@@ -13,6 +13,7 @@ import Notifications from 'vue-notification'
 import BootstrapVue from 'bootstrap-vue'
 import datePicker from 'vue-bootstrap-datetimepicker'
 import fontawesome from '@fortawesome/fontawesome-free'
+import VueApexCharts from 'vue-apexcharts'
 
 import { library } from '@fortawesome/fontawesome-svg-core'
 import {
@@ -33,12 +34,17 @@ import {
   faSortUp,
   faEdit,
   faEyeSlash,
-  faEye
+  faEye,
+  faMinus,
+  faPlus,
+  faExchangeAlt
 } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 import VueDraggable from 'vue-draggable'
 
-library.add(faCamera, faClock, faCalendar, faChevronLeft, faChevronRight, faCalendarCheck, faTrashAlt, faTimesCircle, faArrowUp, faArrowDown, faAngleUp, faAngleDoubleUp, faSortUp, faEdit, faEyeSlash, faEye, faAngleRight, faAngleDown)
+library.add(faCamera, faClock, faCalendar, faChevronLeft, faChevronRight, faCalendarCheck, faTrashAlt,
+  faTimesCircle, faArrowUp, faArrowDown, faAngleUp, faAngleDoubleUp, faSortUp, faEdit, faEyeSlash, faEye,
+  faAngleRight, faAngleDown, faMinus, faPlus, faExchangeAlt)
 
 Vue.component('fas', FontAwesomeIcon)
 
@@ -48,6 +54,7 @@ Vue.use(fontawesome)
 Vue.use(BootstrapVue)
 Vue.use(VueAxios)
 Vue.use(Notifications)
+Vue.component('apexchart', VueApexCharts)
 
 global.jQuery = jQuery
 global.$ = jQuery

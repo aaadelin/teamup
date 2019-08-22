@@ -5,7 +5,7 @@
        highlightClassName="highlight"
        :searchWords="keywords"
        :auto-escape="true"
-      :textToHighlight="task.summary"/>
+      :textToHighlight="summary"/>
   </strong>
     <br>
     <vue-highlight-words class="my-highlight"
@@ -39,6 +39,9 @@ export default {
   computed: {
     keywords () {
       return this.word.split(' ')
+    },
+    summary () {
+      return this.task.summary + ' [' + this.task.taskStatus + ']'
     }
   },
   methods: {

@@ -14,6 +14,7 @@ public abstract class AbstractRestController {
     protected ProjectRepository projectRepository;
     protected CommentRepository commentRepository;
     protected PostRepository postRepository;
+    protected UserEventRepository eventRepository;
 
     protected final DTOsConverter dtOsConverter;
     protected UserValidation userValidation;
@@ -22,7 +23,8 @@ public abstract class AbstractRestController {
     public AbstractRestController(TeamRepository teamRepository, UserRepository userRepository,
                                   TaskRepository taskRepository, ProjectRepository projectRepository,
                                   CommentRepository commentRepository, PostRepository postRepository,
-                                  UserValidation userValidation, DTOsConverter dtOsConverter) {
+                                  UserValidation userValidation, DTOsConverter dtOsConverter,
+                                  UserEventRepository eventRepository) {
         this.teamRepository = teamRepository;
         this.userRepository = userRepository;
         this.taskRepository = taskRepository;
@@ -31,6 +33,7 @@ public abstract class AbstractRestController {
         this.commentRepository = commentRepository;
         this.userValidation = userValidation;
         this.dtOsConverter = dtOsConverter;
+        this.eventRepository = eventRepository;
     }
 
 }

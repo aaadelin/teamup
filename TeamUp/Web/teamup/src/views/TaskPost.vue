@@ -1,5 +1,5 @@
 <template>
-    <div class='taskDetails'>
+    <div class='taskDetails containeri'>
       <h2> {{ task.summary }} </h2>
       <div class="edit-post" v-if="canEditAll || canEditStatus">
         <div @click="editMode = !editMode">
@@ -142,7 +142,7 @@
       </div>
     </div>
 </template>
-
+git
 <script>
 import {
   getCommentsByPostId,
@@ -382,8 +382,8 @@ export default {
 
 <style scoped>
 
-  .taskDetails{
-    padding: 15px;
+  .container{
+    padding: 20px;
   }
 
   .add-comment{

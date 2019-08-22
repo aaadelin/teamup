@@ -1,7 +1,7 @@
 <template xmlns:v-drag-and-drop="http://www.w3.org/1999/xhtml">
   <div id="tasks">
     <right-menu :name="navName" :menu="menu"/>
-  <div id="content">
+  <div id="content" class="container-fluid" style="width: 100%">
     <div id="tasksContainer">
       </div>
       <div class="row justify-content-end">

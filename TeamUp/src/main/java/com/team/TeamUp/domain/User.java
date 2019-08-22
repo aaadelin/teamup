@@ -8,6 +8,7 @@ import com.team.TeamUp.domain.enums.UserStatus;
 import javax.persistence.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Objects;
 
 @Entity
@@ -46,6 +47,9 @@ public class User {
     @ManyToOne
     @JoinColumn(name = "TEAM_ID")
     private Team team;
+
+    @OneToMany(mappedBy = "creator")
+    private List<UserEvent> history;
 
     public User() {
     }
@@ -152,6 +156,14 @@ public class User {
 
     public void setMinutesUntilLogout(int minutesUntilLogout) {
         this.minutesUntilLogout = minutesUntilLogout;
+    }
+
+    public List<UserEvent> getHistory() {
+        return history;
+    }
+
+    public void setHistory(List<UserEvent> history) {
+        this.history = history;
     }
 
     public LocalDate getJoinedAt() {

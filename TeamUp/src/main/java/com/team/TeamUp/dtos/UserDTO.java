@@ -1,8 +1,10 @@
 package com.team.TeamUp.dtos;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.team.TeamUp.domain.enums.Department;
 import com.team.TeamUp.domain.enums.UserStatus;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 public class UserDTO {
@@ -28,6 +30,8 @@ public class UserDTO {
     private Department department;
 
     private UserStatus status;
+
+    private LocalDate joinedAt;
 
     public UserDTO() {
     }
@@ -72,6 +76,7 @@ public class UserDTO {
         this.lastName = lastName;
     }
 
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     public LocalDateTime getLastActive() {
         return lastActive;
     }
@@ -118,6 +123,14 @@ public class UserDTO {
 
     public void setDepartment(Department department) {
         this.department = department;
+    }
+
+    public LocalDate getJoinedAt() {
+        return joinedAt;
+    }
+
+    public void setJoinedAt(LocalDate joinedAt) {
+        this.joinedAt = joinedAt;
     }
 
     @Override

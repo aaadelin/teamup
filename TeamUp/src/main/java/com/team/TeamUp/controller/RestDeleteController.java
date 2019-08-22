@@ -23,8 +23,8 @@ public class RestDeleteController extends AbstractRestController {
 
     public RestDeleteController(TeamRepository teamRepository, UserRepository userRepository, TaskRepository taskRepository,
                                 ProjectRepository projectRepository, CommentRepository commentRepository, PostRepository postRepository,
-                                UserValidation userValidation, DTOsConverter dtOsConverter) {
-        super(teamRepository, userRepository, taskRepository, projectRepository, commentRepository, postRepository, userValidation, dtOsConverter);
+                                UserValidation userValidation, DTOsConverter dtOsConverter, UserEventRepository userEventRepository) {
+        super(teamRepository, userRepository, taskRepository, projectRepository, commentRepository, postRepository, userValidation, dtOsConverter, userEventRepository);
         LOGGER.info("Creating RestDeleteController");
     }
 

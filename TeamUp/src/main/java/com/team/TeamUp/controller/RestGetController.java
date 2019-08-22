@@ -17,6 +17,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -43,8 +44,12 @@ public class RestGetController extends AbstractRestController {
 
     public RestGetController(TeamRepository teamRepository, UserRepository userRepository, TaskRepository taskRepository,
                              ProjectRepository projectRepository, CommentRepository commentRepository, PostRepository postRepository,
-                             UserValidation userValidation, DTOsConverter dtOsConverter) {
-        super(teamRepository, userRepository, taskRepository, projectRepository, commentRepository, postRepository, userValidation, dtOsConverter);
+                             UserValidation userValidation, DTOsConverter dtOsConverter, UserEventRepository eventRepository) {
+        super(teamRepository, userRepository,
+                taskRepository, projectRepository,
+                commentRepository, postRepository,
+                userValidation, dtOsConverter,
+                eventRepository);
         LOGGER.info("Creating RestGetController");
     }
 
@@ -437,7 +442,7 @@ public class RestGetController extends AbstractRestController {
 
     @RequestMapping(value = "/tasks/assigned", method = GET)
     public ResponseEntity<?> getAssignedTasks(@RequestHeader Map<String, String> headers,
-                                              @RequestParam(value = "start") Integer startPage,
+                                              @RequestParam(value = "page") Integer startPage,
                                               @RequestParam(value = "status", required = false) TaskStatus status,
                                               @RequestParam(value = "statuses", required = false) List<TaskStatus> statuses){
         LOGGER.info(String.format("Entered method to get assigned tasks with parameters: \nheaders: %s \nstart page: %s\nstatus: %s \n statuses: %s", headers, startPage, status, statuses));
@@ -466,7 +471,7 @@ public class RestGetController extends AbstractRestController {
 
     @RequestMapping(value = "/tasks/reported", method = GET)
     public ResponseEntity<?> getReportedTasks(@RequestHeader Map<String, String> headers,
-                                               @RequestParam(value = "start") Integer startPage,
+                                               @RequestParam(value = "page") Integer startPage,
                                                @RequestParam(value = "status") TaskStatus status){
         LOGGER.info(String.format("Entered method to get reported tasks with parameters: \nheaders: %s \nstart page: %s\nstatus: %s \n statuses: %s", headers, startPage, status));
         Optional<User> userOptional = userRepository.findByHashKey(headers.get("token"));
@@ -484,7 +489,7 @@ public class RestGetController extends AbstractRestController {
 
     @RequestMapping(value = "/tasks/assigned-reported", method = GET)
     public ResponseEntity<?> getAssignedAndReportedTasks(@RequestHeader Map<String, String> headers,
-                                                         @RequestParam(value = "start") Integer startPage,
+                                                         @RequestParam(value = "page") Integer startPage,
                                                          @RequestParam(value = "status", required = false) TaskStatus status,
                                                          @RequestParam(value = "statuses", required = false) TaskStatus[] statuses){
 
@@ -513,6 +518,22 @@ public class RestGetController extends AbstractRestController {
             return new ResponseEntity<>(taskDTOS, HttpStatus.OK);
         }
         LOGGER.info("User not eligible");
+        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+    }
+
+    @RequestMapping(value = "/user/{id}/history", method = GET)
+    public ResponseEntity<?> getUsersHistory(@PathVariable int id,
+                                             @RequestParam(name = "page", required = false) Integer page){
+        Optional<User> userOptional = userRepository.findById(id);
+        if(userOptional.isPresent()){
+            List<UserEvent> events;
+            if(page != null){
+                 events = eventRepository.findAllByCreatorOrderByTimeDesc(userOptional.get(), PageRequest.of(page, 10));
+            }else {
+                events = eventRepository.findAllByCreatorOrderByTimeDesc(userOptional.get());
+            }
+            return new ResponseEntity<>(events, HttpStatus.OK);
+        }
         return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
 }

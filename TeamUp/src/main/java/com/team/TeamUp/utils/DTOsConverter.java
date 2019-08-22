@@ -68,6 +68,7 @@ public class DTOsConverter {
         userDTO.setActive(user.isActive());
         userDTO.setStatus(user.getStatus());
         userDTO.setPhoto(user.getPhoto());
+        userDTO.setJoinedAt(user.getJoinedAt());
         if (user.getTeam() != null) {
             userDTO.setTeamID(user.getTeam().getId());
             userDTO.setDepartment(user.getTeam().getDepartment());

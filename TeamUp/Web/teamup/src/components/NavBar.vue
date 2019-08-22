@@ -24,7 +24,7 @@
             <b-nav-form  v-if="access_key" @submit="openSearchPage">
               <b-form-input id="searchBox" size="sm" class="mr-sm-2" placeholder="Search" @submit="openSearchPage" v-model="searchTerm" autocomplete="off"></b-form-input>
             </b-nav-form>
-            <b-nav-item v-if="access_key" to="/profile">
+            <b-nav-item v-if="access_key" @click="openProfile">
               <img width="30" height="30" class="rounded-circle" :src="image" alt="Profile"/>
               {{ name }}
             </b-nav-item>
@@ -75,6 +75,13 @@ export default {
     if (this.access_key) {
       this.getPhoto()
     }
+
+    document.addEventListener('keyup', (e) => {
+      let eventObj = window.event ? event : e
+      if (eventObj.ctrlKey && eventObj.keyCode === 73 && localStorage.getItem('access_key') !== null) {
+        this.addTaskIsVisible = true
+      }
+    })
   },
   name: 'NavBar',
   components: { CreateTask, CreateUser },
@@ -124,6 +131,14 @@ export default {
         getUsersPhoto(rez).then(photo => {
           this.image = 'data:image/png;base64,' + (photo)
         })
+      })
+    },
+    async openProfile () {
+      this.$router.push({
+        name: 'profile',
+        query: {
+          userId: await getMyID()
+        }
       })
     }
   }
