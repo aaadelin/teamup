@@ -91,6 +91,7 @@ import { updateTask } from '../persistance/RestPutRepository'
 export default {
   async beforeMount () {
     await this.getUsersTasks()
+    document.title = 'TeamUp | Tasks'
   },
   name: 'Tasks',
   components: { RightMenu, TaskBox },

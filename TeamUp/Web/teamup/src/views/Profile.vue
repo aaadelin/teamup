@@ -11,7 +11,7 @@
         <img width="200" height="200" class="rounded-circle" :src="image" alt="Profile" style="margin: 5px"/>
       </div>
       <div class="col-6" style="text-align: center">
-      <apexchart type=pie width=450 :options="chartOptions" :series="series" />
+      <apexchart type=pie width=450 :options="chartOptions" :series="series" @dataPointSelection="showTasksPopup"/>
       </div>
     </div>
     <div class="col" style="text-align: left">
@@ -29,21 +29,34 @@
       <user-profile-time-line :user="user"/>
     </div>
   </div>
+    <div>
+      <task-category class="overflow-auto"
+      :is-visible="showTasks"
+      :task-category="taskCategory"
+      @close="showTasks=false"/>
+    </div>
   </div>
+
 </template>
 
 <script>
 
-    import {getUserById, getUsersPhoto, getUserStatistics} from '../persistance/RestGetRepository'
+import { getUserById, getUsersPhoto, getUserStatistics } from '../persistance/RestGetRepository'
 import UserProfileTimeLine from '../components/UserProfileTimeLine'
 import { diffYears } from '../utils/DateUtils'
+import TaskCategory from '../components/TaskCategory'
 
 export default {
-  components: { UserProfileTimeLine },
+  components: { TaskCategory, UserProfileTimeLine },
   async mounted () {
     this.getPhoto()
     this.getUser()
     this.getUserStatistics()
+    document.addEventListener('keyup', e => {
+      if (e.key === 'Escape' && this.showTasks) {
+        this.showTasks = false
+      }
+    })
   },
   name: 'Profile',
   data () {
@@ -52,6 +65,9 @@ export default {
       series: [1, 1, 1, 1],
       chartOptions: {
         labels: ['TO DO', 'IN PROGRESS', 'UNDER REVIEW', 'DONE'],
+        chart: {
+          width: 1000
+        },
         responsive: [{
           breakpoint: 480,
           options: {
@@ -66,7 +82,9 @@ export default {
       },
       user: {},
       userId: this.$route.query.userId,
-      canEdit: false
+      canEdit: false,
+      showTasks: false,
+      taskCategory: ''
     }
   },
   methods: {
@@ -81,9 +99,14 @@ export default {
         this.$router.push('404')
       }
       this.canEdit = this.user.id === this.userId
+      document.title = 'TeamUp | ' + this.user.firstName + ' ' + this.user.lastName
     },
     async getUserStatistics () {
       this.series = await getUserStatistics(this.userId)
+    },
+    showTasksPopup (e, c, conf) {
+      this.taskCategory = this.chartOptions.labels[conf.dataPointIndex]
+      this.showTasks = true
     }
   },
   computed: {

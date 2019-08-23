@@ -13,6 +13,7 @@
 
 <script>
 import NavBar from './components/NavBar'
+document.title = 'TeamUp'
 
 export default {
   components: {

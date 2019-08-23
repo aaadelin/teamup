@@ -39,6 +39,7 @@ import { login } from '../persistance/RestPostRepository'
 export default {
   mounted () {
     document.getElementById('username').focus()
+    document.title = 'TeamUp | Login'
   },
   name: 'Login',
   data () {

@@ -7,7 +7,6 @@
 <script>
 // @ is an alias to /src
 // import RightMenu from '../components/RightMenu'
-
 window.$ = require('jquery')
 
 $(document).ready(function () {
@@ -17,6 +16,9 @@ $(document).ready(function () {
 })
 
 export default {
+  mounted () {
+    document.title = 'TeamUp'
+  },
   name: 'home',
   data () {
     return {
