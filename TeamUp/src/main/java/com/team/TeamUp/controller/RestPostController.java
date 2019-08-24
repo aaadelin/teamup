@@ -1,15 +1,18 @@
 package com.team.TeamUp.controller;
 
 import com.team.TeamUp.domain.*;
+import com.team.TeamUp.domain.enums.UserEventType;
 import com.team.TeamUp.domain.enums.UserStatus;
 import com.team.TeamUp.dtos.*;
 import com.team.TeamUp.persistance.*;
 import com.team.TeamUp.utils.DTOsConverter;
 import com.team.TeamUp.utils.TokenUtils;
+import com.team.TeamUp.utils.UserUtils;
 import com.team.TeamUp.validation.UserValidation;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -29,6 +32,9 @@ public class RestPostController extends AbstractRestController {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(RestGetController.class);
 
+    @Autowired
+    private UserUtils userUtils;
+
     public RestPostController(TeamRepository teamRepository, UserRepository userRepository, TaskRepository taskRepository,
                               ProjectRepository projectRepository, CommentRepository commentRepository, PostRepository postRepository,
                               UserValidation userValidation, DTOsConverter dtOsConverter, UserEventRepository userEventRepository) {
@@ -38,6 +44,9 @@ public class RestPostController extends AbstractRestController {
 
     @RequestMapping(value = "/user", method = RequestMethod.POST)
     public ResponseEntity<?> addUser(@RequestBody UserDTO user, @RequestHeader Map<String, String> headers) {
+        userUtils.createEvent(userRepository.findByHashKey(headers.get("token")).orElseThrow(),
+                            String.format("Created user %s %s", user.getFirstName(), user.getLastName()),
+                            UserEventType.CREATE);
         LOGGER.info(String.format("Entering method create user with user: %s and headers: %s", user, headers));
         User userToSave = dtOsConverter.getUserFromDTO(user, UserStatus.ADMIN);
         userRepository.save(userToSave);
@@ -48,6 +57,9 @@ public class RestPostController extends AbstractRestController {
 
     @RequestMapping(value = "/project", method = RequestMethod.POST)
     public ResponseEntity<?> addProject(@RequestBody ProjectDTO projectDTO, @RequestHeader Map<String, String> headers) {
+        userUtils.createEvent(userRepository.findByHashKey(headers.get("token")).orElseThrow(),
+                String.format("Created project %s", projectDTO.getName()),
+                UserEventType.CREATE);
         LOGGER.info(String.format("Entering method create project with project: %s and headers: %s", projectDTO, headers));
         projectRepository.save(dtOsConverter.getProjectFromDTO(projectDTO));
         LOGGER.info("Project has been successfully created and saven in database");
@@ -56,6 +68,9 @@ public class RestPostController extends AbstractRestController {
 
     @RequestMapping(value = "/task", method = RequestMethod.POST)
     public ResponseEntity<?> addTask(@RequestBody TaskDTO taskDTO, @RequestHeader Map<String, String> headers) {
+        userUtils.createEvent(userRepository.findByHashKey(headers.get("token")).orElseThrow(),
+                String.format("Created task %s", taskDTO.getSummary()),
+                UserEventType.CREATE);
         LOGGER.info(String.format("Entering method create task with task: %s and headers: %s", taskDTO, headers));Task task = dtOsConverter.getTaskFromDTO(taskDTO, headers.get("token"));
         taskRepository.save(task);
         Post post = new Post();
@@ -68,6 +83,9 @@ public class RestPostController extends AbstractRestController {
 
     @RequestMapping(value = "/team", method = RequestMethod.POST)
     public ResponseEntity<?> addTeam(@RequestBody TeamDTO team, @RequestHeader Map<String, String> headers) {
+        userUtils.createEvent(userRepository.findByHashKey(headers.get("token")).orElseThrow(),
+                String.format("Created team %s on department %s", team.getName(), team.getDepartment()),
+                UserEventType.CREATE);
         LOGGER.info(String.format("Entering method create team with team: %s and headers: %s", team, headers));
         User user = userRepository.findByHashKey(headers.get("token")).orElseGet(User::new);
         Team newTeam = dtOsConverter.getTeamFromDTO(team, user.getStatus());
@@ -77,6 +95,13 @@ public class RestPostController extends AbstractRestController {
 
     @RequestMapping(value = "/comment", method = RequestMethod.POST)
     public ResponseEntity<?> addComment(@RequestBody CommentDTO commentDTO, @RequestHeader Map<String, String> headers) {
+        userUtils.createEvent(userRepository.findByHashKey(headers.get("token")).orElseThrow(),
+                String.format("Added comment \"%s\" at task %s", commentDTO.getTitle().substring(0, 10),
+                        postRepository.findById(commentDTO.getPostId())
+                                .orElseThrow()
+                                .getTask()
+                                .getSummary()),
+                UserEventType.CREATE);
         LOGGER.info(String.format("Entering method add comment with comment: %s and headers: %s", commentDTO, headers));
         User user = userRepository.findByHashKey(headers.get("token")).orElseGet(User::new);
         commentDTO.setCreator(dtOsConverter.getDTOFromUser(user));

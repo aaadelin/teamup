@@ -36,4 +36,8 @@ export default {
     margin-right: 10px;
     margin-top:10px;
   }
+
+  body{
+    overflow-y: hidden;
+  }
 </style>

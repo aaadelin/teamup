@@ -9,6 +9,7 @@ import com.team.TeamUp.dtos.*;
 import com.team.TeamUp.persistance.*;
 import com.team.TeamUp.utils.DTOsConverter;
 import com.team.TeamUp.utils.TaskUtils;
+import com.team.TeamUp.utils.UserUtils;
 import com.team.TeamUp.validation.UserValidation;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -17,7 +18,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -41,6 +41,8 @@ public class RestGetController extends AbstractRestController {
 
     @Autowired
     private TaskUtils taskUtils;
+    @Autowired
+    private UserUtils userUtils;
 
     public RestGetController(TeamRepository teamRepository, UserRepository userRepository, TaskRepository taskRepository,
                              ProjectRepository projectRepository, CommentRepository commentRepository, PostRepository postRepository,
@@ -56,11 +58,29 @@ public class RestGetController extends AbstractRestController {
     //GET methods - for selecting
 
     @RequestMapping(value = "/users", method = GET)
-    public ResponseEntity<?> getAllUsers(@RequestHeader Map<String, String> headers) {
-        LOGGER.info(String.format("Entering get all users method with headers: %s", headers.toString()));
-        List<UserDTO> users = userRepository.findAll().stream().map(dtOsConverter::getDTOFromUser).collect(Collectors.toList());
-        LOGGER.info(String.format("Returning list: %s", users.toString()));
-        return new ResponseEntity<>(users, HttpStatus.OK);
+    public ResponseEntity<?> getAllUsers(@RequestParam(name = "ids", required = false) List<Integer> ids,
+                                        @RequestHeader Map<String, String> headers) {
+        if(ids != null) {
+            LOGGER.info(String.format("Entering get users by ids method with userIds: %s /n and headers: %s", ids, headers.toString()));
+            List<UserDTO> users = new ArrayList<>();
+            for (int id : ids) {
+                Optional<User> userOptional = userRepository.findById(id);
+                if (userOptional.isPresent()) {
+                    LOGGER.info(String.format("Adding user: %s", userOptional.get()));
+                    users.add(dtOsConverter.getDTOFromUser(userOptional.get()));
+                } else {
+                    LOGGER.info(String.format("No user found with id %s", id));
+                    return new ResponseEntity<>("NOT FOUND", HttpStatus.NOT_FOUND);
+                }
+            }
+            LOGGER.info(String.format("Returning users: %s", users));
+            return new ResponseEntity<>(users, HttpStatus.OK);
+        }else {
+            LOGGER.info(String.format("Entering get all users method with headers: %s", headers.toString()));
+            List<UserDTO> users = userRepository.findAll().stream().map(dtOsConverter::getDTOFromUser).collect(Collectors.toList());
+            LOGGER.info(String.format("Returning list: %s", users.toString()));
+            return new ResponseEntity<>(users, HttpStatus.OK);
+        }
     }
 
     @RequestMapping(value = "/teams", method = GET)
@@ -182,21 +202,21 @@ public class RestGetController extends AbstractRestController {
         return new ResponseEntity<>(userStatuses, HttpStatus.OK);
     }
 
-    @RequestMapping(value = "/post/{postid}/comments", method = GET)
-    public ResponseEntity<?> getAllPostComments(@PathVariable int postid, @RequestHeader Map<String, String> headers) {
-        LOGGER.info(String.format("Entering get all post's comments method with postId: %d /n and headers: %s", postid, headers.toString()));
-        Optional<Post> post = postRepository.findById(postid);
+    @RequestMapping(value = "/posts/{postId}/comments", method = GET)
+    public ResponseEntity<?> getAllPostComments(@PathVariable int postId, @RequestHeader Map<String, String> headers) {
+        LOGGER.info(String.format("Entering get all post's comments method with postId: %d /n and headers: %s", postId, headers.toString()));
+        Optional<Post> post = postRepository.findById(postId);
         if (post.isPresent()) {
             PostDTO postDTO = dtOsConverter.getDTOFromPost(post.get());
             LOGGER.info(String.format("Returning post comments: %s", postDTO.getComments()));
             return new ResponseEntity<>(postDTO.getComments(), HttpStatus.OK);
         } else {
-            LOGGER.info(String.format("No post found with id %d", postid));
+            LOGGER.info(String.format("No post found with id %d", postId));
             return new ResponseEntity<>("NOT FOUND", HttpStatus.NOT_FOUND);
         }
     }
 
-    @RequestMapping(value = "/user/{key}/assigned-tasks", method = GET)
+    @RequestMapping(value = "/users/{key}/assigned-tasks", method = GET)
     public ResponseEntity<?> getAssignedTasksForUser(@PathVariable String key, @RequestHeader Map<String, String> headers) {
         LOGGER.info(String.format("Entering get user's assigned tasks with key %s and headers %s", key, headers));
         Optional<User> userOptional = userRepository.findByHashKey(key);
@@ -214,7 +234,7 @@ public class RestGetController extends AbstractRestController {
         return new ResponseEntity<>("NOT FOUND", HttpStatus.NOT_FOUND);
     }
 
-    @RequestMapping(value = "/user/{key}/reported-tasks", method = GET)
+    @RequestMapping(value = "/users/{key}/reported-tasks", method = GET)
     public ResponseEntity<?> getReportedTasksByUser(@PathVariable String key, @RequestHeader Map<String, String> headers) {
         LOGGER.info(String.format("Entering get reported tasks by user with key %s and headers %s", key, headers));
         Optional<User> userOptional = userRepository.findByHashKey(key);
@@ -233,7 +253,7 @@ public class RestGetController extends AbstractRestController {
     }
 
     ///Getter based on ids
-    @RequestMapping(value = "/user/{id}", method = GET)
+    @RequestMapping(value = "/users/{id}", method = GET)
     public ResponseEntity<?> getUserById(@PathVariable int id, @RequestHeader Map<String, String> headers) {
         LOGGER.info(String.format("Entering get user by id method with userId: %d /n and headers: %s", id, headers.toString()));
         Optional<User> userOptional = userRepository.findById(id);
@@ -246,7 +266,7 @@ public class RestGetController extends AbstractRestController {
         }
     }
 
-    @RequestMapping(value = "/team/{id}", method = GET)
+    @RequestMapping(value = "/teams/{id}", method = GET)
     public ResponseEntity<?> getTeamById(@PathVariable int id, @RequestHeader Map<String, String> headers) {
         LOGGER.info(String.format("Entering get team by id method with teamId: %d /n and headers: %s", id, headers.toString()));
         Optional<Team> teamOptional = teamRepository.findById(id);
@@ -259,7 +279,7 @@ public class RestGetController extends AbstractRestController {
         }
     }
 
-    @RequestMapping(value = "/task/{id}", method = GET)
+    @RequestMapping(value = "/tasks/{id}", method = GET)
     public ResponseEntity<?> getTaskById(@PathVariable int id, @RequestHeader Map<String, String> headers) {
         LOGGER.info(String.format("Entering get task by id method with taskId: %d /n and headers: %s", id, headers.toString()));
         Optional<Task> taskOptional = taskRepository.findById(id);
@@ -273,7 +293,7 @@ public class RestGetController extends AbstractRestController {
         }
     }
 
-    @RequestMapping(value = "/project/{id}", method = GET)
+    @RequestMapping(value = "/projects/{id}", method = GET)
     public ResponseEntity<?> getProjectById(@PathVariable int id, @RequestHeader Map<String, String> headers) {
         LOGGER.info(String.format("Entering get project by id method with projectId: %d /n and headers: %s", id, headers.toString()));
         Optional<Project> projectOptional = projectRepository.findById(id);
@@ -299,25 +319,7 @@ public class RestGetController extends AbstractRestController {
         }
     }
 
-    @RequestMapping(value = "/users/{ids}", method = GET)
-    public ResponseEntity<?> getUsersByIds(@PathVariable List<Integer> ids, @RequestHeader Map<String, String> headers) {
-        LOGGER.info(String.format("Entering get users by ids method with userIds: %s /n and headers: %s", ids, headers.toString()));
-        List<UserDTO> users = new ArrayList<>();
-        for (int id : ids) {
-            Optional<User> userOptional = userRepository.findById(id);
-            if (userOptional.isPresent()) {
-                LOGGER.info(String.format("Adding user: %s", userOptional.get()));
-                users.add(dtOsConverter.getDTOFromUser(userOptional.get()));
-            } else {
-                LOGGER.info(String.format("No user found with id %s", id));
-                return new ResponseEntity<>("NOT FOUND", HttpStatus.NOT_FOUND);
-            }
-        }
-        LOGGER.info(String.format("Returning users: %s", users));
-        return new ResponseEntity<>(users, HttpStatus.OK);
-    }
-
-    @RequestMapping(value = "/post/taskid={id}", method = GET)
+    @RequestMapping(value = "/posts/taskid={id}", method = GET)
     public ResponseEntity<?> getPostByTaskId(@PathVariable int id, @RequestHeader Map<String, String> headers) {
         LOGGER.info(String.format("Entering get post by taskId method with taskId: %d /n and headers: %s", id, headers.toString()));
         Optional<Task> taskOptional = taskRepository.findById(id);
@@ -366,7 +368,7 @@ public class RestGetController extends AbstractRestController {
 
     // images
 
-    @RequestMapping(value = "/user/{id}/photo", method = GET, produces = "image/jpg")
+    @RequestMapping(value = "/users/{id}/photo", method = GET, produces = "image/jpg")
     public ResponseEntity<?> getFile(@PathVariable("id") Integer id, @RequestHeader Map<String, String> headers) throws IOException {
         LOGGER.info(String.format("Entering get photo for user method with id: %s and headers: %s", id, headers));
         Optional<User> userOptional = userRepository.findById(id);
@@ -389,7 +391,7 @@ public class RestGetController extends AbstractRestController {
         }
     }
 
-    @RequestMapping(value = "task/{id}/project", method = GET)
+    @RequestMapping(value = "tasks/{id}/project", method = GET)
     public ResponseEntity<?> getTasksProject(@PathVariable int id, @RequestHeader Map<String, String> headers) {
         LOGGER.info(String.format("Entering get task's project with task id %s and headers %s", id, headers));
         Optional<Task> taskOptional = taskRepository.findById(id);
@@ -404,7 +406,7 @@ public class RestGetController extends AbstractRestController {
         }
     }
 
-    @RequestMapping(value = "user/{id}/tasks", method = GET)
+    @RequestMapping(value = "users/{id}/tasks", method = GET)
     public ResponseEntity<?> getTasksFor(@PathVariable int id,
                                          @RequestParam(value = "type", required = false) String type,
                                          @RequestParam(value = "term", required = false) String term,
@@ -521,7 +523,7 @@ public class RestGetController extends AbstractRestController {
         return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
 
-    @RequestMapping(value = "/user/{id}/history", method = GET)
+    @RequestMapping(value = "/users/{id}/history", method = GET)
     public ResponseEntity<?> getUsersHistory(@PathVariable int id,
                                              @RequestParam(name = "page", required = false) Integer page){
         LOGGER.info(String.format("Entered method to get user's history with user id: %s and page %s", id, page));
@@ -542,26 +544,37 @@ public class RestGetController extends AbstractRestController {
         return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
 
-    @RequestMapping(value = "/user/{id}/statistics", method = GET)
+    @RequestMapping(value = "/users/{id}/statistics", method = GET)
     public ResponseEntity<?> getUsersStatistics(@PathVariable int id,
-                                                @RequestParam(name = "lastDays", required = false) Integer lastDays){
-        LOGGER.info(String.format("Entered get user's statistics with id %s and number of last days: %s", id, lastDays));
+                                                @RequestParam(name = "lastDays", required = false) Integer lastDays,
+                                                @RequestParam(name = "reported", required = false) Boolean reported){
+        LOGGER.info(String.format("Entered get user's statistics with id %s, reported %s and number of last days: %s", id, reported, lastDays));
         Optional<User> userOptional = userRepository.findById(id);
         if(userOptional.isPresent()){
             List<Task> statistics;
-            if(lastDays != null){
+            if(lastDays == null){
                 LOGGER.info("Getting statistics from all time");
                 statistics = taskRepository.findAllByTaskStatusInAndAssigneesContaining(Arrays.asList(TaskStatus.values()), userOptional.get(), PageRequest.of(0, 10000));
             }else {
+                // todo
                 LOGGER.info(String.format("Getting statistics from last %s days", lastDays));
-                statistics = taskRepository.findTasksWithStatusesAssignedToOrReportedBy(id, List.of(0, 1, 2, 3, 4), PageRequest.of(0, 10000));
+                statistics = taskRepository.findAllByTaskStatusInAndAssigneesContaining(Arrays.asList(TaskStatus.values()), userOptional.get(), PageRequest.of(0, 10000));
+//                statistics = taskRepository.findAllByTaskStatusInAndAssigneesContaining(id, List.of(0, 1, 2, 3, 4), PageRequest.of(0, 10000));
             }
-            // TODO
-            long todoCount = statistics.stream().filter(task ->task.getTaskStatus().equals(TaskStatus.OPEN) || task.getTaskStatus().equals(TaskStatus.REOPENED)).count();
-            long inProgressCount = statistics.stream().filter(task ->task.getTaskStatus().equals(TaskStatus.IN_PROGRESS)).count();
-            long underReviewCount = statistics.stream().filter(task ->task.getTaskStatus().equals(TaskStatus.UNDER_REVIEW)).count();
-            long done = statistics.stream().filter(task ->task.getTaskStatus().equals(TaskStatus.APPROVED)).count();
-            List<Long> counts = List.of(todoCount, inProgressCount, underReviewCount, done);
+
+            Map<TaskStatus, Integer> statusCount = new HashMap<>();
+            for(Task task: statistics){
+                TaskStatus currentStatus = task.getTaskStatus();
+                if(statusCount.containsKey(currentStatus)){
+                    statusCount.put(currentStatus, statusCount.get(currentStatus) + 1);
+                } else {
+                    statusCount.put(currentStatus, 1);
+                }
+            }
+            List<Integer> counts = List.of(statusCount.getOrDefault(TaskStatus.OPEN, 0) + statusCount.getOrDefault(TaskStatus.REOPENED, 0),
+                    statusCount.getOrDefault(TaskStatus.IN_PROGRESS, 0),
+                    statusCount.getOrDefault(TaskStatus.UNDER_REVIEW, 0),
+                    statusCount.getOrDefault(TaskStatus.APPROVED, 0));
             LOGGER.info(String.format("Exiting with statistics: %s", counts));
             return new ResponseEntity<>(counts, HttpStatus.OK);
         }

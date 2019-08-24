@@ -52,11 +52,6 @@ export default {
     this.getPhoto()
     this.getUser()
     this.getUserStatistics()
-    document.addEventListener('keyup', e => {
-      if (e.key === 'Escape' && this.showTasks) {
-        this.showTasks = false
-      }
-    })
   },
   name: 'Profile',
   data () {

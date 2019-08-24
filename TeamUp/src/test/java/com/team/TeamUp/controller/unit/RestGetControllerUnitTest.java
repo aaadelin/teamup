@@ -12,6 +12,7 @@ import com.team.TeamUp.dtos.UserDTO;
 import com.team.TeamUp.persistance.*;
 import com.team.TeamUp.utils.DTOsConverter;
 import com.team.TeamUp.utils.TaskUtils;
+import com.team.TeamUp.utils.UserUtils;
 import com.team.TeamUp.validation.UserValidation;
 import org.json.JSONArray;
 import org.junit.Assert;
@@ -58,11 +59,15 @@ public class RestGetControllerUnitTest {
     @MockBean
     CommentRepository commentRepository;
     @MockBean
+    UserEventRepository userEventRepository;
+    @MockBean
     UserValidation userValidation;
     @MockBean
     DTOsConverter dtOsConverter;
     @MockBean
     TaskUtils taskUtils;
+    @MockBean
+    UserUtils userUtils;
 
     @Before
     public void setup() {
@@ -169,15 +174,14 @@ public class RestGetControllerUnitTest {
                         .accept(MediaType.APPLICATION_JSON)
         ).andReturn();
 
-        verify(taskRepository, times(1)).findAll();
-        verify(dtOsConverter, times(0)).getDTOFromTask(any());
+        verify(taskUtils, times(1)).getAllTasksConvertedToDTOs();
         assertEquals(200, mvcResult.getResponse().getStatus());
     }
 
     @Test
     public void getAllTasksData() throws Exception {
         when(taskRepository.findAll()).thenReturn(List.of(new Task(), new Task()));
-
+        when(userRepository.findById(any())).thenReturn(Optional.of(new User()));
         //TODO
         MvcResult mvcResult = mockMvc.perform(
                 MockMvcRequestBuilders.get("/api/tasks")
@@ -185,8 +189,7 @@ public class RestGetControllerUnitTest {
                         .accept(MediaType.APPLICATION_JSON)
         ).andReturn();
 
-        verify(taskRepository, times(1)).findAll();
-        verify(dtOsConverter, times(2)).getDTOFromTask(any());
+        verify(taskUtils, times(1)).getAllTasksConvertedToDTOs();
         assertEquals(200, mvcResult.getResponse().getStatus());
     }
 
@@ -446,7 +449,7 @@ public class RestGetControllerUnitTest {
         when(dtOsConverter.getDTOFromPost(any())).thenReturn(new PostDTO());
 
         MvcResult mvcResult = mockMvc.perform(
-                MockMvcRequestBuilders.get("/api/post/1/comments")
+                MockMvcRequestBuilders.get("/api/posts/1/comments")
                         .header("token", "")
                         .accept(MediaType.APPLICATION_JSON)
         ).andReturn();
@@ -457,7 +460,7 @@ public class RestGetControllerUnitTest {
         assertEquals(200, mvcResult.getResponse().getStatus());
 
         mvcResult = mockMvc.perform(
-                MockMvcRequestBuilders.get("/api/post/2/comments")
+                MockMvcRequestBuilders.get("/api/posts/2/comments")
                         .header("token", "")
                         .accept(MediaType.APPLICATION_JSON)
         ).andReturn();
@@ -471,7 +474,7 @@ public class RestGetControllerUnitTest {
         when(taskRepository.findAll()).thenReturn(Collections.emptyList());
 
         MvcResult mvcResult = mockMvc.perform(
-                MockMvcRequestBuilders.get("/api/user/1/assigned-tasks")
+                MockMvcRequestBuilders.get("/api/users/1/assigned-tasks")
                 .header("token", "")
                 .accept(MediaType.APPLICATION_JSON)
         ).andReturn();
@@ -481,7 +484,7 @@ public class RestGetControllerUnitTest {
         when(userRepository.findByHashKey("2")).thenReturn(Optional.empty());
 
         mvcResult = mockMvc.perform(
-                MockMvcRequestBuilders.get("/api/user/2/assigned-tasks")
+                MockMvcRequestBuilders.get("/api/users/2/assigned-tasks")
                 .header("token", "")
                 .accept(MediaType.APPLICATION_JSON)
         ).andReturn();
@@ -500,7 +503,7 @@ public class RestGetControllerUnitTest {
         when(taskRepository.findAll()).thenReturn(Collections.emptyList());
 
         MvcResult mvcResult = mockMvc.perform(
-                MockMvcRequestBuilders.get("/api/user/1/reported-tasks")
+                MockMvcRequestBuilders.get("/api/users/1/reported-tasks")
                         .header("token", "")
                         .accept(MediaType.APPLICATION_JSON)
         ).andReturn();
@@ -510,7 +513,7 @@ public class RestGetControllerUnitTest {
         when(userRepository.findByHashKey("2")).thenReturn(Optional.empty());
 
         mvcResult = mockMvc.perform(
-                MockMvcRequestBuilders.get("/api/user/2/reported-tasks")
+                MockMvcRequestBuilders.get("/api/users/2/reported-tasks")
                         .header("token", "")
                         .accept(MediaType.APPLICATION_JSON)
         ).andReturn();
@@ -528,14 +531,14 @@ public class RestGetControllerUnitTest {
         when(userRepository.findById(2)).thenReturn(Optional.empty());
 
         MvcResult mvcResult = mockMvc.perform(
-                MockMvcRequestBuilders.get("/api/user/1")
+                MockMvcRequestBuilders.get("/api/users/1")
                         .header("token", "")
                         .accept(MediaType.APPLICATION_JSON)
         ).andReturn();
         assertEquals(mvcResult.getResponse().getStatus(), 200);
 
         mvcResult = mockMvc.perform(
-                MockMvcRequestBuilders.get("/api/user/2")
+                MockMvcRequestBuilders.get("/api/users/2")
                         .header("token", "")
                         .accept(MediaType.APPLICATION_JSON)
         ).andReturn();
@@ -551,14 +554,14 @@ public class RestGetControllerUnitTest {
         when(teamRepository.findById(2)).thenReturn(Optional.empty());
 
         MvcResult mvcResult = mockMvc.perform(
-                MockMvcRequestBuilders.get("/api/team/1")
+                MockMvcRequestBuilders.get("/api/teams/1")
                         .header("token", "")
                         .accept(MediaType.APPLICATION_JSON)
         ).andReturn();
         assertEquals(mvcResult.getResponse().getStatus(), 200);
 
         mvcResult = mockMvc.perform(
-                MockMvcRequestBuilders.get("/api/team/2")
+                MockMvcRequestBuilders.get("/api/teams/2")
                         .header("token", "")
                         .accept(MediaType.APPLICATION_JSON)
         ).andReturn();
@@ -575,14 +578,14 @@ public class RestGetControllerUnitTest {
         when(dtOsConverter.getDTOFromTask(any())).thenReturn(new TaskDTO());
 
         MvcResult mvcResult = mockMvc.perform(
-                MockMvcRequestBuilders.get("/api/task/1")
+                MockMvcRequestBuilders.get("/api/tasks/1")
                         .header("token", "")
                         .accept(MediaType.APPLICATION_JSON)
         ).andReturn();
         assertEquals(mvcResult.getResponse().getStatus(), 200);
 
         mvcResult = mockMvc.perform(
-                MockMvcRequestBuilders.get("/api/task/2")
+                MockMvcRequestBuilders.get("/api/tasks/2")
                         .header("token", "")
                         .accept(MediaType.APPLICATION_JSON)
         ).andReturn();
@@ -598,14 +601,14 @@ public class RestGetControllerUnitTest {
         when(projectRepository.findById(2)).thenReturn(Optional.empty());
 
         MvcResult mvcResult = mockMvc.perform(
-                MockMvcRequestBuilders.get("/api/project/1")
+                MockMvcRequestBuilders.get("/api/projects/1")
                         .header("token", "")
                         .accept(MediaType.APPLICATION_JSON)
         ).andReturn();
         assertEquals(mvcResult.getResponse().getStatus(), 200);
 
         mvcResult = mockMvc.perform(
-                MockMvcRequestBuilders.get("/api/project/2")
+                MockMvcRequestBuilders.get("/api/projects/2")
                         .header("token", "")
                         .accept(MediaType.APPLICATION_JSON)
         ).andReturn();
@@ -647,7 +650,7 @@ public class RestGetControllerUnitTest {
         when(dtOsConverter.getDTOFromUser(any())).thenReturn(new UserDTO());
 
         MvcResult mvcResult = mockMvc.perform(
-                MockMvcRequestBuilders.get("/api/users/1,2,3")
+                MockMvcRequestBuilders.get("/api/users?ids=1,2,3")
                         .header("token", "1")
                         .accept(MediaType.APPLICATION_JSON)
         ).andReturn();
@@ -682,14 +685,14 @@ public class RestGetControllerUnitTest {
         when(postRepository.findByTask(task1)).thenReturn(Optional.empty());
 
         MvcResult mvcResult = mockMvc.perform(
-                MockMvcRequestBuilders.get("/api/post/taskid=1")
+                MockMvcRequestBuilders.get("/api/posts/taskid=1")
                         .header("token", "")
                         .accept(MediaType.APPLICATION_JSON)
         ).andReturn();
         assertEquals(mvcResult.getResponse().getStatus(), 200);
 
         mvcResult = mockMvc.perform(
-                MockMvcRequestBuilders.get("/api/post/taskid=2")
+                MockMvcRequestBuilders.get("/api/posts/taskid=2")
                         .header("token", "")
                         .accept(MediaType.APPLICATION_JSON)
         ).andReturn();
@@ -731,13 +734,13 @@ public class RestGetControllerUnitTest {
         when(userRepository.findById(2)).thenReturn(Optional.empty());
 
         MvcResult mvcResult = mockMvc.perform(
-                MockMvcRequestBuilders.get("/api/user/1/photo")
+                MockMvcRequestBuilders.get("/api/users/1/photo")
                         .header("token", "1")
         ).andReturn();
         assertEquals(200, mvcResult.getResponse().getStatus());
 
         mvcResult = mockMvc.perform(
-                MockMvcRequestBuilders.get("/api/user/2/photo")
+                MockMvcRequestBuilders.get("/api/users/2/photo")
                         .header("token", "1")
         ).andReturn();
         assertEquals(404, mvcResult.getResponse().getStatus());
@@ -751,14 +754,14 @@ public class RestGetControllerUnitTest {
         when(taskRepository.findById(2)).thenReturn(Optional.empty());
 
         MvcResult mvcResult = mockMvc.perform(
-                MockMvcRequestBuilders.get("/api/task/1/project")
+                MockMvcRequestBuilders.get("/api/tasks/1/project")
                         .header("token", "1")
                         .accept(MediaType.APPLICATION_JSON)
         ).andReturn();
         assertEquals(200, mvcResult.getResponse().getStatus());
 
         mvcResult = mockMvc.perform(
-                MockMvcRequestBuilders.get("/api/task/2/project")
+                MockMvcRequestBuilders.get("/api/tasks/2/project")
                         .header("token", "1")
                         .accept(MediaType.APPLICATION_JSON)
         ).andReturn();
@@ -775,35 +778,35 @@ public class RestGetControllerUnitTest {
         when(taskUtils.getFilteredTasksByType(any(), any(), any())).thenReturn(Collections.emptyList());
 
         MvcResult mvcResult = mockMvc.perform(
-                MockMvcRequestBuilders.get("/api/user/1/tasks")
+                MockMvcRequestBuilders.get("/api/users/1/tasks")
                         .header("token", "1")
                         .accept(MediaType.APPLICATION_JSON)
         ).andReturn();
         assertEquals(200, mvcResult.getResponse().getStatus());
 
         mvcResult = mockMvc.perform(
-                MockMvcRequestBuilders.get("/api/user/1/tasks?type=assignedto")
+                MockMvcRequestBuilders.get("/api/users/1/tasks?type=assignedto")
                         .header("token", "1")
                         .accept(MediaType.APPLICATION_JSON)
         ).andReturn();
         assertEquals(200, mvcResult.getResponse().getStatus());
 
         mvcResult = mockMvc.perform(
-                MockMvcRequestBuilders.get("/api/user/1/tasks?type=assignedby")
+                MockMvcRequestBuilders.get("/api/users/1/tasks?type=assignedby")
                         .header("token", "1")
                         .accept(MediaType.APPLICATION_JSON)
         ).andReturn();
         assertEquals(200, mvcResult.getResponse().getStatus());
 
         mvcResult = mockMvc.perform(
-                MockMvcRequestBuilders.get("/api/user/1/tasks?type=assignedby&term=now")
+                MockMvcRequestBuilders.get("/api/users/1/tasks?type=assignedby&term=now")
                         .header("token", "1")
                         .accept(MediaType.APPLICATION_JSON)
         ).andReturn();
         assertEquals(200, mvcResult.getResponse().getStatus());
 
         mvcResult = mockMvc.perform(
-                MockMvcRequestBuilders.get("/api/user/1/tasks?type=assignedby&term=now")
+                MockMvcRequestBuilders.get("/api/users/1/tasks?type=assignedby&term=now")
                         .header("token", "1")
                         .accept(MediaType.APPLICATION_JSON)
         ).andReturn();
@@ -817,21 +820,21 @@ public class RestGetControllerUnitTest {
         when(taskUtils.getFilteredTasksByType(any(), any(), any())).thenReturn(Collections.emptyList());
 
         MvcResult mvcResult = mockMvc.perform(
-                MockMvcRequestBuilders.get("/api/user/2/tasks?type=assignedby")
+                MockMvcRequestBuilders.get("/api/users/2/tasks?type=assignedby")
                         .header("token", "1")
                         .accept(MediaType.APPLICATION_JSON)
         ).andReturn();
         assertEquals(403, mvcResult.getResponse().getStatus());
 
         mvcResult = mockMvc.perform(
-                MockMvcRequestBuilders.get("/api/user/2/tasks?type=assignedto")
+                MockMvcRequestBuilders.get("/api/users/2/tasks?type=assignedto")
                         .header("token", "1")
                         .accept(MediaType.APPLICATION_JSON)
         ).andReturn();
         assertEquals(403, mvcResult.getResponse().getStatus());
 
         mvcResult = mockMvc.perform(
-                MockMvcRequestBuilders.get("/api/user/2/tasks")
+                MockMvcRequestBuilders.get("/api/users/2/tasks")
                         .header("token", "1")
                         .accept(MediaType.APPLICATION_JSON)
         ).andReturn();

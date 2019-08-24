@@ -70,27 +70,27 @@ export async function getProjectById (id) {
 }
 
 export async function getProjectByTaskId (id) {
-  let url = `${baseURL}/task/${id}/project`
+  let url = `${baseURL}/tasks/${id}/project`
   return fetchDataFromUrl(url)
 }
 
 export async function getPostByTaskId (id) {
-  let url = `${baseURL}/post/taskid=${id}`
+  let url = `${baseURL}/posts/taskid=${id}`
   return fetchDataFromUrl(url)
 }
 
 export async function getCommentsByPostId (id) {
-  let url = `${baseURL}/post/${id}/comments`
+  let url = `${baseURL}/posts/${id}/comments`
   return fetchDataFromUrl(url)
 }
 
 export async function getTaskById (id) {
-  let url = `${baseURL}/task/${id}`
+  let url = `${baseURL}/tasks/${id}`
   return fetchDataFromUrl(url)
 }
 
 export async function getUsersReportedTasks (pages) {
-  let url = `${baseURL}/user/${localStorage.getItem('access_key')}/reported-tasks`
+  let url = `${baseURL}/users/${localStorage.getItem('access_key')}/reported-tasks`
   return fetchDataFromUrl(url)
 }
 
@@ -156,25 +156,25 @@ export async function getUserStatuses () {
 }
 
 export async function getUsersPhoto (id) {
-  let url = `${baseURL}/user/${id}/photo`
+  let url = `${baseURL}/users/${id}/photo`
   return fetchDataFromUrl(url)
 }
 
 export async function getUserById (id) {
-  let url = `${baseURL}/user/${id}`
+  let url = `${baseURL}/users/${id}`
   return fetchDataFromUrl(url)
 }
 
 export async function getUsersByIds (ids) {
   if (ids.length !== 0) {
-    let url = `${baseURL}/users/${ids}`
+    let url = `${baseURL}/users?ids=${ids}`
     return fetchDataFromUrl(url)
   }
   return []
 }
 
 export async function getUsersTasks (userId, searchTerm = null, options = null) {
-  let url = `${baseURL}/user/${userId}/tasks`
+  let url = `${baseURL}/users/${userId}/tasks`
   if (options !== null || searchTerm !== null) {
     url += '?'
   }
@@ -188,21 +188,21 @@ export async function getUsersTasks (userId, searchTerm = null, options = null) 
 }
 
 export async function getUserHistory (id) {
-  let url = `${baseURL}/user/${id}/history`
+  let url = `${baseURL}/users/${id}/history`
   return fetchDataFromUrl(url)
 }
 
 export async function getUserHistoryByPage (id, page) {
-  let url = `${baseURL}/user/${id}/history?page=${page}`
+  let url = `${baseURL}/users/${id}/history?page=${page}`
   return fetchDataFromUrl(url)
 }
 
 export async function getUserStatistics (id) {
-  let url = `${baseURL}/user/${id}/statistics`
+  let url = `${baseURL}/users/${id}/statistics`
   return fetchDataFromUrl(url, [])
 }
 
 export async function getUserStatisticsByDate (id, date) {
-  let url = `${baseURL}/user/${id}/statistics?lastDays=${date}`
+  let url = `${baseURL}/users/${id}/statistics?lastDays=${date}`
   return fetchDataFromUrl(url)
 }

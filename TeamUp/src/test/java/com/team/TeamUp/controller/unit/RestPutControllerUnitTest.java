@@ -3,6 +3,7 @@ package com.team.TeamUp.controller.unit;
 import com.team.TeamUp.persistance.*;
 import com.team.TeamUp.utils.DTOsConverter;
 import com.team.TeamUp.utils.TaskUtils;
+import com.team.TeamUp.utils.UserUtils;
 import com.team.TeamUp.validation.UserValidation;
 import org.junit.Before;
 import org.junit.Test;
@@ -34,6 +35,10 @@ public class RestPutControllerUnitTest {
     ProjectRepository projectRepository;
     @MockBean
     CommentRepository commentRepository;
+    @MockBean
+    UserEventRepository userEventRepository;
+    @MockBean
+    UserUtils userUtils;
     @MockBean
     UserValidation userValidation;
     @MockBean

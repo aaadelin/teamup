@@ -5,6 +5,7 @@ import com.team.TeamUp.domain.enums.UserStatus;
 import com.team.TeamUp.persistance.*;
 import com.team.TeamUp.utils.DTOsConverter;
 import com.team.TeamUp.utils.TaskUtils;
+import com.team.TeamUp.utils.UserUtils;
 import com.team.TeamUp.validation.UserValidation;
 import org.junit.Before;
 import org.junit.Test;
@@ -34,6 +35,8 @@ public class RestDeleteControllerUnitTest {
     MockMvc mockMvc;
 
     @MockBean
+    UserEventRepository userEventRepository;
+    @MockBean
     UserRepository userRepository;
     @MockBean
     TeamRepository teamRepository;
@@ -51,6 +54,8 @@ public class RestDeleteControllerUnitTest {
     DTOsConverter dtOsConverter;
     @MockBean
     TaskUtils taskUtils;
+    @MockBean
+    UserUtils userUtils;
 
     @Before
     public void setUp() throws Exception {
@@ -60,19 +65,22 @@ public class RestDeleteControllerUnitTest {
         when(userRepository.findById(10)).thenReturn(Optional.of(new User()));
         when(userRepository.findById(11)).thenReturn(Optional.empty());
         when(userValidation.isUserLoggedIn(anyString())).thenReturn(true);
+        when(userRepository.findByHashKey(anyString())).thenReturn(Optional.of(new User()));
     }
 
     @Test
     public void deleteUserExisting() throws Exception {
+        when(userRepository.findById(any())).thenReturn(Optional.of(new User()));
+
         MvcResult mvcResult = mockMvc.perform(
-                MockMvcRequestBuilders.delete("/api/user/10")
-                .header("token", 1)
+                MockMvcRequestBuilders.delete("/api/users/10")
+                .header("token", "")
                 .accept(MediaType.APPLICATION_JSON)
         ).andReturn();
 
         assertEquals(200, mvcResult.getResponse().getStatus());
 
-        }
+    }
 
     @Test
     public void deleteUserNotExisting() throws Exception {
