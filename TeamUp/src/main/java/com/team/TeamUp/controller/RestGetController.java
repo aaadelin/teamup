@@ -38,6 +38,7 @@ public class RestGetController extends AbstractRestController {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(RestGetController.class);
     private static final int PAGE_SIZE = 10;
+    private static final int MAX_PAGE_SIZE = 10000;
 
     @Autowired
     private TaskUtils taskUtils;
@@ -532,7 +533,7 @@ public class RestGetController extends AbstractRestController {
             List<UserEvent> events;
             if(page != null){
                 LOGGER.info("Getting all user s history");
-                 events = eventRepository.findAllByCreatorOrderByTimeDesc(userOptional.get(), PageRequest.of(page, 10));
+                 events = eventRepository.findAllByCreatorOrderByTimeDesc(userOptional.get(), PageRequest.of(page, PAGE_SIZE));
             }else {
                 LOGGER.info(String.format("Getting user's history from page %s", page));
                 events = eventRepository.findAllByCreatorOrderByTimeDesc(userOptional.get());
@@ -554,11 +555,11 @@ public class RestGetController extends AbstractRestController {
             List<Task> statistics;
             if(lastDays == null){
                 LOGGER.info("Getting statistics from all time");
-                statistics = taskRepository.findAllByTaskStatusInAndAssigneesContaining(Arrays.asList(TaskStatus.values()), userOptional.get(), PageRequest.of(0, 10000));
+                statistics = taskRepository.findAllByTaskStatusInAndAssigneesContaining(Arrays.asList(TaskStatus.values()), userOptional.get(), PageRequest.of(0, MAX_PAGE_SIZE));
             }else {
                 // todo
                 LOGGER.info(String.format("Getting statistics from last %s days", lastDays));
-                statistics = taskRepository.findAllByTaskStatusInAndAssigneesContaining(Arrays.asList(TaskStatus.values()), userOptional.get(), PageRequest.of(0, 10000));
+                statistics = taskRepository.findAllByTaskStatusInAndAssigneesContaining(Arrays.asList(TaskStatus.values()), userOptional.get(), PageRequest.of(0, MAX_PAGE_SIZE));
 //                statistics = taskRepository.findAllByTaskStatusInAndAssigneesContaining(id, List.of(0, 1, 2, 3, 4), PageRequest.of(0, 10000));
             }
 

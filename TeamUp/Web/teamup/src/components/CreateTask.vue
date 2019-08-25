@@ -89,7 +89,7 @@
                     <option v-for="assignee in filterAdmins(assigneesList)" :key="assignee.id" :value="assignee">{{ assignee.firstName }} {{ assignee.lastName }} ({{ assignee.department }})</option>
                   </select>
                 </div>
-                <span v-if="localStorage.getItem('isAdmin')==='false'" @click="assignToMe" style="cursor: pointer">Assign to me</span>
+                <span v-if="localStorage.getItem('isAdmin')==='false'" @click="assignToMe" style="cursor: pointer" tabindex="0" @keyup="keyAssignToMe">Assign to me</span>
                 <br/>
 
                 <div id="assignees" class="row justify-content-center">
@@ -332,6 +332,11 @@ export default {
           this.assignees.splice(i, 1)
           break
         }
+      }
+    },
+    keyAssignToMe (e) {
+      if (e.key === ' ' || e.key === 'Enter') {
+        this.assignToMe()
       }
     }
   }

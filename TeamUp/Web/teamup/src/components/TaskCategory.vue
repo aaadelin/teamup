@@ -83,7 +83,6 @@ export default {
       this.tasks = []
     },
     async fetchTasks () {
-      // console.log(this.taskCategory)
       let newTasks = []
       if (this.taskCategory === 'TO DO') {
         newTasks.push(...await getUsersAssignedTasksWithStatuses(this.page, 'OPEN,REOPENED'))
@@ -93,7 +92,6 @@ export default {
         newTasks.push(...await getUsersAssignedTasksWithStatus(this.page, this.taskCategory.replace(' ', '_')))
       }
       this.page++
-      console.log(newTasks.length)
       if (newTasks.length < 10) {
         this.loadMore = false
       }

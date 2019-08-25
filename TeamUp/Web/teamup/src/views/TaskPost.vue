@@ -122,9 +122,6 @@
         </transition>
       </div>
 
-<!--      <ul>-->
-<!--        <li v-for="comment in comments" v-bind:key="comment.id"> {{ comment }} </li>-->
-<!--      </ul>-->
       <div>
         <div class="add-comment col justify-content-lg-start" style="text-align: left">
           <p class="row" style="color: black">Add a comment:</p>
@@ -277,7 +274,7 @@ export default {
       this.edited = false
     },
     seeUsersProfile (userId) {
-      this.$router.push({ path: `/user/${userId}` })
+      this.$router.push({ path: `/profile?userId=${userId}` })
     },
     updateTask () {
       if (this.canEditAll) {
@@ -382,6 +379,11 @@ export default {
 
 <style scoped>
 
+  .taskDetails{
+    margin: 12px auto 12px auto;
+    box-shadow: 5px 5px 12px grey;
+  }
+
   .container{
     padding: 20px;
   }
@@ -404,12 +406,6 @@ export default {
 
   .pointer{
     cursor: pointer;
-  }
-  .fade-enter-active, .fade-leave-active {
-    transition: opacity .5s;
-  }
-  .fade-enter, .fade-leave-to {
-    opacity: 0;
   }
 
   .save-btn{

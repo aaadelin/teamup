@@ -10,10 +10,13 @@ import com.team.TeamUp.validation.UserValidation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.Map;
 import java.util.Optional;
 
@@ -55,4 +58,22 @@ public class RestDeleteController extends AbstractRestController {
         return new ResponseEntity<>("Not found", HttpStatus.NOT_FOUND);
     }
 
+    @RequestMapping(value = "/photo", method = RequestMethod.DELETE)
+    public ResponseEntity<?> deletePhoto(@RequestHeader Map<String, String> headers) throws IOException {
+        LOGGER.info(String.format("Entered delete photo with headers: %s", headers));
+        Optional<User> userOptional = userRepository.findByHashKey(headers.get("token"));
+        if(userOptional.isPresent()){
+            ClassPathResource resource = new ClassPathResource("static/img/" + userOptional.get().getPhoto());
+            if(resource.exists()){
+                boolean deleted = resource.getFile().delete();
+                userOptional.get().setPhoto(null);
+                userRepository.save(userOptional.get());
+                if(deleted){
+                    LOGGER.info("Photo deleted successfully");
+                    return new ResponseEntity<>(HttpStatus.OK);
+                }
+            }
+        }
+        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+    }
 }

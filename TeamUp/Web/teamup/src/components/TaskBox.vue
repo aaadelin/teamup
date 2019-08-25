@@ -134,4 +134,8 @@ export default {
     background-color: rgb(255, 255, 255);
     border-radius: 5px;
   }
+
+  p{
+    font-size: 1em;
+  }
 </style>

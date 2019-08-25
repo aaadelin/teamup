@@ -13,15 +13,26 @@ import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import javax.persistence.ManyToOne;
 import javax.servlet.http.HttpServletRequest;
+import javax.ws.rs.FormParam;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.Base64;
 import java.util.Map;
 import java.util.Optional;
+
+import static org.springframework.web.bind.annotation.RequestMethod.POST;
 
 //POST methods - for creating
 
@@ -42,7 +53,7 @@ public class RestPostController extends AbstractRestController {
         LOGGER.info("Creating RestPostController");
     }
 
-    @RequestMapping(value = "/user", method = RequestMethod.POST)
+    @RequestMapping(value = "/user", method = POST)
     public ResponseEntity<?> addUser(@RequestBody UserDTO user, @RequestHeader Map<String, String> headers) {
         userUtils.createEvent(userRepository.findByHashKey(headers.get("token")).orElseThrow(),
                             String.format("Created user %s %s", user.getFirstName(), user.getLastName()),
@@ -55,7 +66,7 @@ public class RestPostController extends AbstractRestController {
         return new ResponseEntity<>("OK", HttpStatus.OK);
     }
 
-    @RequestMapping(value = "/project", method = RequestMethod.POST)
+    @RequestMapping(value = "/project", method = POST)
     public ResponseEntity<?> addProject(@RequestBody ProjectDTO projectDTO, @RequestHeader Map<String, String> headers) {
         userUtils.createEvent(userRepository.findByHashKey(headers.get("token")).orElseThrow(),
                 String.format("Created project %s", projectDTO.getName()),
@@ -66,7 +77,7 @@ public class RestPostController extends AbstractRestController {
         return new ResponseEntity<>("OK", HttpStatus.OK);
     }
 
-    @RequestMapping(value = "/task", method = RequestMethod.POST)
+    @RequestMapping(value = "/task", method = POST)
     public ResponseEntity<?> addTask(@RequestBody TaskDTO taskDTO, @RequestHeader Map<String, String> headers) {
         userUtils.createEvent(userRepository.findByHashKey(headers.get("token")).orElseThrow(),
                 String.format("Created task %s", taskDTO.getSummary()),
@@ -81,7 +92,7 @@ public class RestPostController extends AbstractRestController {
     }
 
 
-    @RequestMapping(value = "/team", method = RequestMethod.POST)
+    @RequestMapping(value = "/team", method = POST)
     public ResponseEntity<?> addTeam(@RequestBody TeamDTO team, @RequestHeader Map<String, String> headers) {
         userUtils.createEvent(userRepository.findByHashKey(headers.get("token")).orElseThrow(),
                 String.format("Created team %s on department %s", team.getName(), team.getDepartment()),
@@ -93,10 +104,10 @@ public class RestPostController extends AbstractRestController {
         return new ResponseEntity<>("OK", HttpStatus.OK);
     }
 
-    @RequestMapping(value = "/comment", method = RequestMethod.POST)
+    @RequestMapping(value = "/comment", method = POST)
     public ResponseEntity<?> addComment(@RequestBody CommentDTO commentDTO, @RequestHeader Map<String, String> headers) {
         userUtils.createEvent(userRepository.findByHashKey(headers.get("token")).orElseThrow(),
-                String.format("Added comment \"%s\" at task %s", commentDTO.getTitle().substring(0, 10),
+                String.format("Added comment \"%s\" at task %s", commentDTO.getTitle().substring(0, Math.min(commentDTO.getTitle().length(), 30)),
                         postRepository.findById(commentDTO.getPostId())
                                 .orElseThrow()
                                 .getTask()
@@ -115,7 +126,7 @@ public class RestPostController extends AbstractRestController {
         return new ResponseEntity<>("OK", HttpStatus.OK);
     }
 
-    @RequestMapping(value = "/login", method = RequestMethod.POST)
+    @RequestMapping(value = "/login", method = POST)
     public ResponseEntity<?> getKeyForUser(HttpServletRequest request, @RequestParam Map<String, String> requestParameters) {
         LOGGER.info(String.format("Entering method to login with requested parameters: %s", requestParameters));
         String username = requestParameters.get("username");
@@ -155,5 +166,28 @@ public class RestPostController extends AbstractRestController {
         }
         LOGGER.error("User not eligible");
         return new ResponseEntity<>(null, HttpStatus.FORBIDDEN);
+    }
+
+    @RequestMapping(value = "/photo", method = POST)
+    public ResponseEntity<?> uploadPhoto(@RequestHeader Map<String, String> headers,
+                                         @RequestParam(name = "photo") MultipartFile photo
+    ) throws IOException {
+        LOGGER.info(String.format("Uploading photo entered with headers: %s", headers));
+
+        String pathname = new ClassPathResource("/static/img").getFile().getAbsolutePath() + "\\" +  headers.get("token");
+        LOGGER.info(String.format("Uploading to %s", pathname));
+        File file = new File(pathname);
+        try(FileOutputStream fileOutputStream = new FileOutputStream(file)) {
+            fileOutputStream.write(photo.getBytes());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        Optional<User> userOptional = userRepository.findByHashKey(headers.get("token"));
+        if(userOptional.isPresent()){
+            userOptional.get().setPhoto(headers.get("token"));
+            userRepository.save(userOptional.get());
+        }
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 }

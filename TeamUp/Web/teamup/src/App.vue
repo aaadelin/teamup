@@ -37,7 +37,4 @@ export default {
     margin-top:10px;
   }
 
-  body{
-    overflow-y: hidden;
-  }
 </style>

@@ -43,6 +43,26 @@ export function login (username, password) {
   })
 }
 
+export function uploadPhoto (photo) {
+  let data = new FormData()
+  data.set('photo', photo)
+
+  let url = `${baseURL}/photo`
+  return axios({
+    url: url,
+    method: 'post',
+    headers: {
+      'token': localStorage.getItem('access_key')
+    },
+    data: data
+  })
+    .then(rez => {
+      // console.log(rez)
+    }).catch(rez => {
+      // console.log(rez)
+    })
+}
+
 export async function saveTask (data) {
   let url = `${baseURL}/task`
   return postDataToUrl(data, url)

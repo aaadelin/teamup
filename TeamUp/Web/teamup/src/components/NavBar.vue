@@ -157,8 +157,8 @@ export default {
 
   #nav {
     background-color: rgba(0, 0, 0, 0.19);
-    padding: 15px;
-    padding-left: 30px;
+    /*padding: 15px;*/
+    /*padding-left: 30px;*/
     a, #assigned {
       font-weight: bold;
       color: #2c3e50;
