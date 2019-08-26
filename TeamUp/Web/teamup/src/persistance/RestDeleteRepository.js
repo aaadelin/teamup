@@ -15,7 +15,7 @@ function deleteFromUrl (url) {
   })
 }
 
-export async function deletePhoto () {
-  let url = `${baseURL}/photo`
+export async function deletePhoto (id) {
+  let url = `${baseURL}/user/${id}/photo`
   return deleteFromUrl(url)
 }

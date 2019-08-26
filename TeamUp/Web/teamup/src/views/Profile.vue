@@ -40,24 +40,49 @@
           <label class="col-md-3" for="oldPassword">
             Old password:
           </label>
-            <input type="text" id="oldPassword" v-model="oldPassword" class="form-control col-md-4" autocomplete="off">
-           <br>
+
+          <div class="input-group col-md-8 no-left-padding" id="show_hide_password_old">
+
+            <input id="oldPassword" class="form-control" type="password" v-model="oldPassword"/>
+
+            <div class="input-group-addon" @click="showHidePass('oldPassword')">
+              <a><i id="eye-oldPassword" class="fa fa-eye" aria-hidden="true"></i></a>
+            </div>
+          </div>
+            <br>
         </div>
         <div class="row" style="margin-bottom: 10px">
           <label class="col-md-3" for="newPassword">
             New password:
           </label>
-            <input type="text" id="newPassword" v-model="newPassword" class="form-control col-md-4" autocomplete="off">
+
+          <div class="input-group col-md-8 no-left-padding" id="show_hide_password">
+
+            <input id="newPassword" class="form-control" type="password" v-model="newPassword"  :class="{ 'is-invalid':  ( newPassword !== newPasswordAgain || newPassword.length < 6) }" placeholder="Min 6 characters"/>
+
+            <div class="input-group-addon" @click="showHidePass('newPassword')">
+              <a><i id="eye-newPassword" class="fa fa-eye" aria-hidden="true"></i></a>
+            </div>
+          </div>
            <br>
         </div>
         <div class="row">
           <label class="col-md-3" for="newPasswordAgain">
             New password again:
           </label>
-            <input type="text" id="newPasswordAgain" v-model="newPasswordAgain" class="form-control col-md-4" autocomplete="off">
+          <div class="input-group col-md-8 no-left-padding" id="show_hide_password_again">
+
+            <input id="newPasswordAgain" class="form-control" type="password" v-model="newPasswordAgain" :class="{ 'is-invalid':  ( newPassword !== newPasswordAgain || newPasswordAgain.length < 6) }" placeholder="Min 6 characters"/>
+
+            <div class="input-group-addon" @click="showHidePass('newPasswordAgain')">
+              <a><i id="eye-newPasswordAgain" class="fa fa-eye" aria-hidden="true"></i></a>
+            </div>
+          </div>
+           <br>
            <br>
         </div>
 
+        <input type="checkbox" v-model="logout"> Logout from devices
         <div class="save-btn">
           <transition name="fade">
             <button class="btn btn-outline-info" style="margin-left: 15px;" @click="saveChanges">Save</button>
@@ -92,6 +117,7 @@ import { diffYears } from '../utils/DateUtils'
 import TaskCategory from '../components/TaskCategory'
 import { uploadPhoto } from '../persistance/RestPostRepository'
 import { deletePhoto } from '../persistance/RestDeleteRepository'
+import { updatePassword } from '../persistance/RestPutRepository'
 
 export default {
   watch: {
@@ -126,6 +152,13 @@ export default {
   components: { TaskCategory, UserProfileTimeLine },
   async mounted () {
     this.loadAllData()
+    document.addEventListener('keyup', ev => {
+      if (ev.key.toLocaleLowerCase() === 'e'
+          && !this.editMode && this.canEdit
+          && document.activeElement.tagName !== 'INPUT') {
+        this.editMode = true
+      }
+    })
   },
   name: 'Profile',
   data () {
@@ -158,7 +191,9 @@ export default {
       oldPassword: '',
       newPassword: '',
       newPasswordAgain: '',
-      newPhoto: ''
+      newPhoto: '',
+      logout: false,
+      myId: -1
     }
   },
   methods: {
@@ -173,12 +208,12 @@ export default {
       })
     },
     async getUser () {
-      let myId = await getMyID()
+      this.myId = await getMyID()
       this.user = await getUserById(this.userId)
       if (this.user === null) {
         this.$router.push('404')
       }
-      this.canEdit = (myId === parseInt(this.userId))
+      this.canEdit = (this.myId === parseInt(this.userId))
       document.title = 'TeamUp | ' + this.user.firstName + ' ' + this.user.lastName
     },
     async getUserStatistics () {
@@ -189,7 +224,7 @@ export default {
       this.showTasks = true
     },
     saveChanges () {
-      console.log('SAVE')
+      this.changePassword()
     },
     clearChanges () {
       this.oldPassword = ''
@@ -199,7 +234,7 @@ export default {
       this.editMode = false
     },
     async deletePhoto () {
-      await deletePhoto()
+      await deletePhoto(this.user.id)
       this.getPhoto()
     },
     handleDrop (e) {
@@ -209,10 +244,10 @@ export default {
       this.uploadPhoto(files)
     },
     async uploadPhoto (files) {
-      if (files.length !== 1 && files[0].type !== 'image/*') {
-        alert('Only one photo can be uploaded')
+      if (files.length !== 1 && files[0].type !== 'image/*' && files[0].size <= 10000000) {
+        alert('Only one photo can be uploaded with max size of 10MB!')
       } else {
-        await uploadPhoto(files[0])
+        await uploadPhoto(files[0], this.user.id)
         this.getPhoto()
       }
     },
@@ -222,6 +257,57 @@ export default {
     uploadInput (ev) {
       let files = ev.target.files
       this.uploadPhoto(files)
+    },
+    changePassword () {
+      if (this.newPassword === this.newPasswordAgain) {
+        updatePassword(this.user.id, this.oldPassword, this.newPassword, this.logout)
+          .then((rez) => {
+            if (rez === null) {
+              this.$notify({
+                group: 'notificationsGroup',
+                title: 'Error',
+                type: 'error',
+                text: 'An error occurred'
+              })
+            } else {
+              this.$notify({
+                group: 'notificationsGroup',
+                title: 'Changed',
+                type: 'success',
+                text: 'Password successfully changed'
+              })
+              this.editMode = false
+              if (this.logout) {
+                  setTimeout(() => {
+                    location.reload()
+                  }, 1000)
+              }
+            }
+          })
+          this.oldPassword = ''
+          this.newPassword = ''
+          this.newPasswordAgain = ''
+      } else {
+        this.$notify({
+          group: 'notificationsGroup',
+          title: 'Error',
+          type: 'error',
+          text: 'Passwords don\'t match'
+        })
+      }
+    },
+    showHidePass (inputID) {
+      let item = document.getElementById(inputID)
+      let eye = document.getElementById('eye-' + inputID)
+      if (item.type === 'password') {
+        item.type = 'text'
+        eye.classList.remove('fa-eye')
+        eye.classList.add('fa-eye-slash')
+      } else {
+        item.type = 'password'
+        eye.classList.remove('fa-eye-slash')
+        eye.classList.add('fa-eye')
+      }
     }
   },
   computed: {
@@ -262,5 +348,14 @@ export default {
     left: 50%;
     transform: translate(-30%, -150%);
     user-select: none;
+  }
+
+  .input-group-addon{
+    padding: 7px;
+    padding-left: 12px;
+    padding-right: 12px;
+    height: 38px;
+    background-color: rgba(0,0,0,0.19);
+    cursor: pointer;
   }
 </style>

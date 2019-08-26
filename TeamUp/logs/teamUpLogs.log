@@ -1,0 +1,21 @@
+2019-08-26 07:26:38.925  INFO 1232 --- [http-nio-8443-exec-5] c.team.TeamUp.validation.UserValidation  : Checking if user with key 912FC8B10632573D0F7AD378D0A91889 is valid
+2019-08-26 07:26:38.925  INFO 1232 --- [http-nio-8443-exec-7] c.team.TeamUp.validation.UserValidation  : Checking if user with key 912FC8B10632573D0F7AD378D0A91889 is valid
+2019-08-26 07:26:38.925  INFO 1232 --- [http-nio-8443-exec-6] c.team.TeamUp.validation.UserValidation  : Checking if user with key 912FC8B10632573D0F7AD378D0A91889 is valid
+2019-08-26 07:26:40.684  INFO 1232 --- [http-nio-8443-exec-6] c.team.TeamUp.validation.UserValidation  : The key is true
+2019-08-26 07:26:40.684  INFO 1232 --- [http-nio-8443-exec-5] c.team.TeamUp.validation.UserValidation  : The key is true
+2019-08-26 07:26:40.684  INFO 1232 --- [http-nio-8443-exec-7] c.team.TeamUp.validation.UserValidation  : The key is true
+2019-08-26 07:26:40.698  INFO 1232 --- [http-nio-8443-exec-6] c.t.TeamUp.controller.RestGetController  : User is or just has been logged out
+2019-08-26 07:26:40.698  INFO 1232 --- [http-nio-8443-exec-5] c.t.TeamUp.controller.RestGetController  : User is or just has been logged out
+2019-08-26 07:26:40.698  INFO 1232 --- [http-nio-8443-exec-7] c.t.TeamUp.controller.RestGetController  : User is or just has been logged out
+2019-08-26 07:26:40.938  INFO 1232 --- [http-nio-8443-exec-8] c.team.TeamUp.validation.UserValidation  : Checking if user with key 912FC8B10632573D0F7AD378D0A91889 is valid
+2019-08-26 07:26:40.942  INFO 1232 --- [http-nio-8443-exec-8] c.team.TeamUp.validation.UserValidation  : The key is true
+2019-08-26 07:26:40.944  INFO 1232 --- [http-nio-8443-exec-8] c.t.TeamUp.controller.RestGetController  : User is or just has been logged out
+2019-08-26 07:26:40.971  INFO 1232 --- [http-nio-8443-exec-1] c.team.TeamUp.validation.UserValidation  : Checking if user with key [object Object] is valid
+2019-08-26 07:26:40.973  INFO 1232 --- [http-nio-8443-exec-1] c.team.TeamUp.validation.UserValidation  : The key is false
+2019-08-26 07:26:40.973  INFO 1232 --- [http-nio-8443-exec-1] c.t.TeamUp.controller.RestGetController  : User not eligible
+2019-08-26 07:26:40.977  INFO 1232 --- [http-nio-8443-exec-4] c.team.TeamUp.validation.UserValidation  : Checking if user with key [object Object] is valid
+2019-08-26 07:26:40.978  INFO 1232 --- [http-nio-8443-exec-4] c.team.TeamUp.validation.UserValidation  : The key is false
+2019-08-26 07:26:40.979  INFO 1232 --- [http-nio-8443-exec-4] c.t.TeamUp.controller.RestGetController  : User not eligible
+2019-08-26 07:26:40.981  INFO 1232 --- [http-nio-8443-exec-2] c.team.TeamUp.validation.UserValidation  : Checking if user with key [object Object] is valid
+2019-08-26 07:26:40.983  INFO 1232 --- [http-nio-8443-exec-2] c.team.TeamUp.validation.UserValidation  : The key is false
+2019-08-26 07:26:40.983  INFO 1232 --- [http-nio-8443-exec-2] c.t.TeamUp.controller.RestGetController  : User not eligible

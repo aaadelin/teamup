@@ -43,11 +43,11 @@ export function login (username, password) {
   })
 }
 
-export function uploadPhoto (photo) {
+export function uploadPhoto (photo, id) {
   let data = new FormData()
   data.set('photo', photo)
 
-  let url = `${baseURL}/photo`
+  let url = `${baseURL}/user/${id}/photo`
   return axios({
     url: url,
     method: 'post',

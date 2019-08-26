@@ -78,7 +78,13 @@ public class RestGetController extends AbstractRestController {
             return new ResponseEntity<>(users, HttpStatus.OK);
         }else {
             LOGGER.info(String.format("Entering get all users method with headers: %s", headers.toString()));
-            List<UserDTO> users = userRepository.findAll().stream().map(dtOsConverter::getDTOFromUser).collect(Collectors.toList());
+            List<UserDTO> users;
+            if(userRepository.findByHashKey(headers.get("token")).orElseThrow().getStatus() == UserStatus.ADMIN){
+                //if is admin, return all users
+                users = userRepository.findAll().stream().map(dtOsConverter::getDTOFromUser).collect(Collectors.toList());
+            }else{
+                users = userRepository.findAll().stream().filter(user -> user.getStatus() != UserStatus.ADMIN).map(dtOsConverter::getDTOFromUser).collect(Collectors.toList());
+            }
             LOGGER.info(String.format("Returning list: %s", users.toString()));
             return new ResponseEntity<>(users, HttpStatus.OK);
         }
@@ -410,7 +416,7 @@ public class RestGetController extends AbstractRestController {
     @RequestMapping(value = "users/{id}/tasks", method = GET)
     public ResponseEntity<?> getTasksFor(@PathVariable int id,
                                          @RequestParam(value = "type", required = false) String type,
-                                         @RequestParam(value = "term", required = false) String term,
+                                         @RequestParam(value = "search", required = false) String term,
                                          @RequestHeader Map<String, String> headers) {
         LOGGER.info(String.format("Entering get user's tasks with user id %s, type value %s, term value %s and headers %s", id, type, term, headers));
         Optional<User> user = userRepository.findById(id);

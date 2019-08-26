@@ -48,7 +48,7 @@ public class RestDeleteController extends AbstractRestController {
         Optional<User> userOptional = userRepository.findById(id);
         if (userOptional.isPresent()){
             userUtils.createEvent(userRepository.findByHashKey(headers.get("token")).orElseThrow(),
-                    String.format("Deleted user %s %s", userOptional.get().getFirstName(), userOptional.get().getLastName()),
+                    String.format("Deleted user \"%s %s\"", userOptional.get().getFirstName(), userOptional.get().getLastName()),
                     UserEventType.DELETE);
             userRepository.deleteById(id);
             LOGGER.info(String.format("User with id %s has been successfully deleted", id));
@@ -58,11 +58,12 @@ public class RestDeleteController extends AbstractRestController {
         return new ResponseEntity<>("Not found", HttpStatus.NOT_FOUND);
     }
 
-    @RequestMapping(value = "/photo", method = RequestMethod.DELETE)
-    public ResponseEntity<?> deletePhoto(@RequestHeader Map<String, String> headers) throws IOException {
+    @RequestMapping(value = "/user/{id}/photo", method = RequestMethod.DELETE)
+    public ResponseEntity<?> deletePhoto(@PathVariable int id,
+                                         @RequestHeader Map<String, String> headers) throws IOException {
         LOGGER.info(String.format("Entered delete photo with headers: %s", headers));
         Optional<User> userOptional = userRepository.findByHashKey(headers.get("token"));
-        if(userOptional.isPresent()){
+        if(userOptional.isPresent() && (userOptional.get().getStatus() == UserStatus.ADMIN || userOptional.get().getId() == id)){
             ClassPathResource resource = new ClassPathResource("static/img/" + userOptional.get().getPhoto());
             if(resource.exists()){
                 boolean deleted = resource.getFile().delete();

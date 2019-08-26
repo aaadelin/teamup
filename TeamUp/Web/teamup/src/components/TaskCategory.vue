@@ -142,6 +142,7 @@ export default {
     max-height: 60vh;
     max-width: 400px;
     background-color: rgb(225, 225, 225);
+    border-radius: 5px;
   }
 
   .modal-enter .modal-container,

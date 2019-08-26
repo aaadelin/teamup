@@ -18,7 +18,7 @@
               <slot name="body">
                 <div class="row">
                   <label for="summary" class="col-md-3">Summary </label>
-                  <input id="summary" type="text" v-model="summary" name="summary" class="form-control col-md-8" :class="{ 'is-invalid': dataFailed && !summary }"/>
+                  <input id="summary" type="text" v-model="summary" name="summary" class="form-control col-md-8" :class="{ 'is-invalid': dataFailed && !summary }" autocomplete="off"/>
                 </div>
 
                 <br/>
@@ -336,6 +336,7 @@ export default {
     },
     keyAssignToMe (e) {
       if (e.key === ' ' || e.key === 'Enter') {
+        e.preventDefault()
         this.assignToMe()
       }
     }

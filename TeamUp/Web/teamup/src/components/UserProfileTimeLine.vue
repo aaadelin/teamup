@@ -14,7 +14,7 @@
           {{ event.description }}</div>
           <div style="font-size: 12px">{{ event.time }}</div><br>
         </div>
-        <div v-if="loadMore" style="cursor: pointer; color: darkblue; font-size: 12px" @click="getEvents">Load more...</div>
+        <div v-if="loadMore" style="cursor: pointer; color: darkblue; font-size: 12px; margin-bottom: 10px" @click="getEvents">Load more...</div>
       </div>
     </div>
   </div>
@@ -59,6 +59,7 @@ export default {
   methods: {
     clearEvents () {
       this.events = []
+      this.page = 0
     },
     async getEvents () {
       let newEvents = await getUserHistoryByPage(this.user.id, this.page)

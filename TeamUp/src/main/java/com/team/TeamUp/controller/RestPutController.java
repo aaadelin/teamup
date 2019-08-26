@@ -12,8 +12,10 @@ import com.team.TeamUp.dtos.TeamDTO;
 import com.team.TeamUp.dtos.UserDTO;
 import com.team.TeamUp.persistance.*;
 import com.team.TeamUp.utils.DTOsConverter;
+import com.team.TeamUp.utils.TokenUtils;
 import com.team.TeamUp.utils.UserUtils;
 import com.team.TeamUp.validation.UserValidation;
+import org.apache.tomcat.util.security.MD5Encoder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -53,7 +55,7 @@ public class RestPutController extends AbstractRestController {
             return new ResponseEntity<>("NOT FOUND", HttpStatus.NOT_FOUND);
         } else {
             userUtils.createEvent(userRepository.findByHashKey(headers.get("token")).orElseThrow(),
-                    String.format("Updated user %s %s", userOptional.get().getFirstName(), userOptional.get().getLastName()),
+                    String.format("Updated user \"%s %s\"", userOptional.get().getFirstName(), userOptional.get().getLastName()),
                     UserEventType.UPDATE);
 
             User realUser = dtOsConverter.getUserFromDTO(user, UserStatus.ADMIN);
@@ -75,7 +77,7 @@ public class RestPutController extends AbstractRestController {
                 return new ResponseEntity<>("NOT FOUND", HttpStatus.NOT_FOUND);
             } else {
                 userUtils.createEvent(userRepository.findByHashKey(headers.get("token")).orElseThrow(),
-                        String.format("Updated project %s", projectOptional.get().getName()),
+                        String.format("Updated project \"%s\"", projectOptional.get().getName()),
                         UserEventType.UPDATE);
                 Project project = dtOsConverter.getProjectFromDTO(projectDTO);
                 projectRepository.save(project);
@@ -101,7 +103,7 @@ public class RestPutController extends AbstractRestController {
         Optional<Task> taskOptional = taskRepository.findById(taskDTO.getId());
         if (taskOptional.isPresent()) {
             userUtils.createEvent(userRepository.findByHashKey(headers.get("token")).orElseThrow(),
-                    String.format("Updated task %s", taskOptional.get().getSummary()),
+                    String.format("Updated task \"%s\"", taskOptional.get().getSummary()),
                     UserEventType.UPDATE);
 
             Optional<User> userOptional = userRepository.findByHashKey(headers.get("token"));
@@ -137,7 +139,7 @@ public class RestPutController extends AbstractRestController {
                 return new ResponseEntity<>("NOT FOUND", HttpStatus.NOT_FOUND);
             } else {
                 userUtils.createEvent(userRepository.findByHashKey(headers.get("token")).orElseThrow(),
-                        String.format("Updated team %s from department %s", team.getName(), teamOptional.get().getDepartment()),
+                        String.format("Updated team \"%s\" from department \"%s\"", team.getName(), teamOptional.get().getDepartment()),
                         UserEventType.UPDATE);
                 Team newTeam = dtOsConverter.getTeamFromDTO(team, user.getStatus());
                 teamRepository.save(newTeam);
@@ -147,6 +149,43 @@ public class RestPutController extends AbstractRestController {
         }
         LOGGER.error("User not eligible");
         return new ResponseEntity<>("FORBIDDEN", HttpStatus.FORBIDDEN);
+    }
+
+    @RequestMapping(value = "/user/{id}/password", method = RequestMethod.PUT)
+    public ResponseEntity<?> updateUserPassword(@PathVariable int id,
+                                                @RequestParam Map<String, String> parameters,
+                                                @RequestHeader Map<String, String> headers){
+        LOGGER.info(String.format("Entered changing password with id %s, parameters %s and headers %s", id, parameters, headers));
+
+        User requester = userRepository.findByHashKey(headers.get("token")).orElseThrow();
+        User userToChange = userRepository.findById(id).orElseThrow();
+
+        if(parameters.get("newPassword").length() < 6) {
+            LOGGER.info("New password is too short");
+            return new ResponseEntity<>(HttpStatus.NOT_ACCEPTABLE);
+        }
+
+        String oldPassword = TokenUtils.getMD5Token(parameters.get("oldPassword")).toLowerCase();
+        String newPassword = TokenUtils.getMD5Token(parameters.get("newPassword")).toLowerCase();
+
+        if(requester.getId() == userToChange.getId() || requester.getStatus() == UserStatus.ADMIN){
+
+            if(userToChange.getPassword().toLowerCase().equals(oldPassword)){
+                userToChange.setPassword(newPassword);
+                LOGGER.info("Password successfully changed");
+                if(parameters.get("logout").equals("true")){
+                    userToChange.setActive(false);
+                    LOGGER.info("User has been logged out");
+                }
+                userRepository.save(userToChange);
+                return new ResponseEntity<>(HttpStatus.OK);
+            }
+            LOGGER.info("Passwords don't match");
+            return new ResponseEntity<>(HttpStatus.NOT_ACCEPTABLE);
+        }else{
+            LOGGER.info("User not eligible");
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+        }
     }
 
 }

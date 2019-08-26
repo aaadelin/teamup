@@ -20,53 +20,53 @@
       <div class="col columnCategory">
         <span class="header" @click="todo_category = !todo_category">
           <b class="category">TO DO </b>
-          <span class="quantity">{{ tasks[0].length }}{{ pages[0] !== -1 && tasks[0].length === 10 ? '+':'' }}</span>
+          <span class="quantity">{{ tasks[0].length }}{{ this.showMore[0] ? '+':'' }}</span>
         </span>
         <div id="todo-category" v-if="todo_category">
           <task-box v-for="task1 in tasks[0]"
                     v-bind:key="task1.id"
                     :task="task1"/>
         </div>
-        <div style="color: #6d7fcc; cursor: pointer" v-if="pages[0] !== -1 && tasks[0].length === 10" @click="loadMore('todo')">Load more...</div>
+        <div style="color: #6d7fcc; cursor: pointer" v-if="this.showMore[0]" @click="loadMore('todo')">Load more...</div>
       </div>
 
       <div class="col columnCategory">
         <span class="header" @click="in_progress_category = !in_progress_category">
           <b class="category">IN PROGRESS </b>
-          <span class="quantity">{{ tasks[1].length }}{{ pages[1] !== -1 && tasks[1].length === 10  ? '+':'' }}</span>
+          <span class="quantity">{{ tasks[1].length }}{{ this.showMore[1]  ? '+':'' }}</span>
         </span>
         <div id="in-progress-category" v-if="in_progress_category">
           <task-box v-for="task1 in tasks[1]"
                     v-bind:key="task1.id"
                     :task="task1"/>
         </div>
-        <div style="color: #6d7fcc; cursor: pointer" v-if="pages[1] !== -1 && tasks[1].length === 10" @click="loadMore('in-progress')">Load more...</div>
+        <div style="color: #6d7fcc; cursor: pointer" v-if="this.showMore[1]" @click="loadMore('in-progress')">Load more...</div>
       </div>
 
       <div class="col columnCategory">
         <span class="header" @click="under_review_category = !under_review_category">
           <b class="category">UNDER REVIEW </b>
-          <span class="quantity"> {{ tasks[2].length }}{{ pages[2] !== -1 && tasks[2].length === 10  ? '+':'' }}</span>
+          <span class="quantity"> {{ tasks[2].length }}{{ this.showMore[2] ? '+':'' }}</span>
         </span>
         <div id="under-review-category" v-if="under_review_category">
           <task-box v-for="task1 in tasks[2]"
                     v-bind:key="task1.id"
                     :task="task1"/>
         </div>
-        <div style="color: #6d7fcc; cursor: pointer" v-if="pages[2] !== -1 && tasks[2].length === 10" @click="loadMore('under-review')">Load more...</div>
+        <div style="color: #6d7fcc; cursor: pointer" v-if="this.showMore[2]" @click="loadMore('under-review')">Load more...</div>
       </div>
 
       <div class="col columnCategory">
         <span class="header" @click="done_category = !done_category">
           <b class="category">DONE </b>
-          <span class="quantity">{{ tasks[3].length }}{{ pages[3] !== -1 && tasks[3].length === 10  ? '+':'' }}</span>
+          <span class="quantity">{{ tasks[3].length }}{{ this.showMore[3]  ? '+':'' }}</span>
         </span>
         <div id="done-category" v-if="done_category">
           <task-box v-for="task1 in tasks[3]"
                     v-bind:key="task1.id"
                     :task="task1"/>
         </div>
-        <div style="color: #6d7fcc; cursor: pointer" v-if="pages[3] !== -1 && tasks[3].length === 10" @click="loadMore('done')">Load more...</div>
+        <div style="color: #6d7fcc; cursor: pointer" v-if="this.showMore[3]" @click="loadMore('done')">Load more...</div>
       </div>
       <div></div>
     </div>
@@ -107,6 +107,7 @@ export default {
       menu: [],
       oldDraggedTask: null,
       pages: [0, 0, 0, 0],
+      showMore: [true, true, true, true],
 
       draggable_options: {
         dropzoneSelector: 'div',
@@ -146,6 +147,7 @@ export default {
     async changeVisibleTasks () {
       this.reportedTasks = !this.reportedTasks
       this.pages = [0, 0, 0, 0]
+      this.showMore = [true, true, true, true]
       await this.getUsersTasks()
     },
     async getUsersTasks () {
@@ -166,32 +168,66 @@ export default {
     },
     async getAssignedTasks () {
       this.tasks = [[], [], [], []]
+      let newTasks = []
       for (let i = 0; i <= this.pages[0]; i++) {
-        this.tasks[0].push(...await getUsersAssignedTasksWithStatuses(i, 'OPEN,REOPENED'))
+        newTasks = await getUsersAssignedTasksWithStatuses(i, 'OPEN,REOPENED')
+        this.tasks[0].push(...newTasks)
+      }
+      if (newTasks.length < 10) {
+          this.showMore[0] = false
       }
       for (let i = 0; i <= this.pages[1]; i++) {
-        this.tasks[1].push(...await getUsersAssignedTasksWithStatus(i, 'IN_PROGRESS'))
+        newTasks = await getUsersAssignedTasksWithStatus(i, 'IN_PROGRESS')
+        this.tasks[1].push(...newTasks)
+      }
+      if (newTasks.length < 10) {
+          this.showMore[1] = false
       }
       for (let i = 0; i <= this.pages[2]; i++) {
-        this.tasks[2].push(...await getUsersAssignedTasksWithStatus(i, 'UNDER_REVIEW'))
+        newTasks = await getUsersAssignedTasksWithStatus(i, 'UNDER_REVIEW')
+        this.tasks[2].push(...newTasks)
+      }
+      if (newTasks.length < 10) {
+        this.showMore[2] = false
       }
       for (let i = 0; i <= this.pages[3]; i++) {
-        this.tasks[3].push(...await getUsersAssignedTasksWithStatus(i, 'APPROVED'))
+        newTasks = await getUsersAssignedTasksWithStatus(i, 'APPROVED')
+        this.tasks[3].push(...newTasks)
+      }
+      if (newTasks.length < 10) {
+        this.showMore[3] = false
       }
     },
     async getAssignedAndReportedTasks () {
       this.tasks = [[], [], [], []]
+      let newTasks = []
       for (let i = 0; i <= this.pages[0]; i++) {
-        this.tasks[0].push(...await getUsersReportedAndAssignedTasksWithStatuses(i, 'OPEN,REOPENED'))
+        newTasks = await getUsersReportedAndAssignedTasksWithStatuses(i, 'OPEN,REOPENED')
+        this.tasks[0].push(...newTasks)
+      }
+      if (newTasks.length < 10) {
+        this.showMore[0] = false
       }
       for (let i = 0; i <= this.pages[1]; i++) {
-        this.tasks[1].push(...await getUsersReportedAndAssignedTasksWithStatus(i, 'IN_PROGRESS'))
+        newTasks = await getUsersReportedAndAssignedTasksWithStatus(i, 'IN_PROGRESS')
+        this.tasks[1].push(...newTasks)
+      }
+      if (newTasks.length < 10) {
+        this.showMore[1] = false
       }
       for (let i = 0; i <= this.pages[2]; i++) {
-        this.tasks[2].push(...await getUsersReportedAndAssignedTasksWithStatus(i, 'UNDER_REVIEW'))
+        newTasks = await getUsersReportedAndAssignedTasksWithStatus(i, 'UNDER_REVIEW')
+        this.tasks[2].push(...newTasks)
+      }
+      if (newTasks.length < 10) {
+        this.showMore[2] = false
       }
       for (let i = 0; i <= this.pages[3]; i++) {
-        this.tasks[3].push(...await getUsersReportedAndAssignedTasksWithStatus(i, 'APPROVED'))
+        newTasks = await getUsersReportedAndAssignedTasksWithStatus(i, 'APPROVED')
+        this.tasks[3].push(...newTasks)
+      }
+      if (newTasks.length < 10) {
+        this.showMore[3] = false
       }
     },
     async loadMore (category) {
@@ -204,9 +240,9 @@ export default {
           } else {
             newTasks = await getUsersAssignedTasksWithStatuses(this.pages[0], 'OPEN,REOPENED')
           }
-          // if (newTasks.length < 10) {
-          //   this.pages[0] = -1
-          // }
+          if (newTasks.length < 10) {
+            this.showMore[0] = false
+          }
           this.tasks[0].push(...newTasks)
           break
         case 'in-progress':
@@ -216,9 +252,9 @@ export default {
           } else {
             newTasks = await getUsersAssignedTasksWithStatus(this.pages[1], 'IN_PROGRESS')
           }
-          // if (newTasks.length < 10) {
-          //   this.pages[1] = -1
-          // }
+          if (newTasks.length < 10) {
+            this.showMore[1] = false
+          }
           this.tasks[1].push(...newTasks)
           break
         case 'under-review':
@@ -229,9 +265,9 @@ export default {
           } else {
             newTasks = await getUsersAssignedTasksWithStatus(this.pages[2], 'UNDER_REVIEW')
           }
-          // if (newTasks.length < 10) {
-          //   this.pages[2] = -1
-          // }
+          if (newTasks.length < 10) {
+            this.showMore[2] = false
+          }
           this.tasks[2].push(...newTasks)
           break
         case 'done':
@@ -242,9 +278,9 @@ export default {
           } else {
             newTasks = await getUsersAssignedTasksWithStatus(this.pages[3], 'APPROVED')
           }
-          // if (newTasks.length < 10) {
-          //   this.pages[3] = -1
-          // }
+          if (newTasks.length < 10) {
+            this.showMore[3] = false
+          }
           this.tasks[3].push(...newTasks)
           break
       }

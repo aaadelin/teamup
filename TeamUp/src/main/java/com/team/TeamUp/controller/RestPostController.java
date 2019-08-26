@@ -56,7 +56,7 @@ public class RestPostController extends AbstractRestController {
     @RequestMapping(value = "/user", method = POST)
     public ResponseEntity<?> addUser(@RequestBody UserDTO user, @RequestHeader Map<String, String> headers) {
         userUtils.createEvent(userRepository.findByHashKey(headers.get("token")).orElseThrow(),
-                            String.format("Created user %s %s", user.getFirstName(), user.getLastName()),
+                            String.format("Created user \"%s %s\"", user.getFirstName(), user.getLastName()),
                             UserEventType.CREATE);
         LOGGER.info(String.format("Entering method create user with user: %s and headers: %s", user, headers));
         User userToSave = dtOsConverter.getUserFromDTO(user, UserStatus.ADMIN);
@@ -69,7 +69,7 @@ public class RestPostController extends AbstractRestController {
     @RequestMapping(value = "/project", method = POST)
     public ResponseEntity<?> addProject(@RequestBody ProjectDTO projectDTO, @RequestHeader Map<String, String> headers) {
         userUtils.createEvent(userRepository.findByHashKey(headers.get("token")).orElseThrow(),
-                String.format("Created project %s", projectDTO.getName()),
+                String.format("Created project \"%s\"", projectDTO.getName()),
                 UserEventType.CREATE);
         LOGGER.info(String.format("Entering method create project with project: %s and headers: %s", projectDTO, headers));
         projectRepository.save(dtOsConverter.getProjectFromDTO(projectDTO));
@@ -80,7 +80,7 @@ public class RestPostController extends AbstractRestController {
     @RequestMapping(value = "/task", method = POST)
     public ResponseEntity<?> addTask(@RequestBody TaskDTO taskDTO, @RequestHeader Map<String, String> headers) {
         userUtils.createEvent(userRepository.findByHashKey(headers.get("token")).orElseThrow(),
-                String.format("Created task %s", taskDTO.getSummary()),
+                String.format("Created task \"%s\"", taskDTO.getSummary()),
                 UserEventType.CREATE);
         LOGGER.info(String.format("Entering method create task with task: %s and headers: %s", taskDTO, headers));Task task = dtOsConverter.getTaskFromDTO(taskDTO, headers.get("token"));
         taskRepository.save(task);
@@ -95,7 +95,7 @@ public class RestPostController extends AbstractRestController {
     @RequestMapping(value = "/team", method = POST)
     public ResponseEntity<?> addTeam(@RequestBody TeamDTO team, @RequestHeader Map<String, String> headers) {
         userUtils.createEvent(userRepository.findByHashKey(headers.get("token")).orElseThrow(),
-                String.format("Created team %s on department %s", team.getName(), team.getDepartment()),
+                String.format("Created team \"%s\" on department \"%s\"", team.getName(), team.getDepartment()),
                 UserEventType.CREATE);
         LOGGER.info(String.format("Entering method create team with team: %s and headers: %s", team, headers));
         User user = userRepository.findByHashKey(headers.get("token")).orElseGet(User::new);
@@ -107,7 +107,7 @@ public class RestPostController extends AbstractRestController {
     @RequestMapping(value = "/comment", method = POST)
     public ResponseEntity<?> addComment(@RequestBody CommentDTO commentDTO, @RequestHeader Map<String, String> headers) {
         userUtils.createEvent(userRepository.findByHashKey(headers.get("token")).orElseThrow(),
-                String.format("Added comment \"%s\" at task %s", commentDTO.getTitle().substring(0, Math.min(commentDTO.getTitle().length(), 30)),
+                String.format("Added comment \"%s\" at task \"%s\"", commentDTO.getTitle().substring(0, Math.min(commentDTO.getTitle().length(), 30)),
                         postRepository.findById(commentDTO.getPostId())
                                 .orElseThrow()
                                 .getTask()
@@ -168,13 +168,27 @@ public class RestPostController extends AbstractRestController {
         return new ResponseEntity<>(null, HttpStatus.FORBIDDEN);
     }
 
-    @RequestMapping(value = "/photo", method = POST)
-    public ResponseEntity<?> uploadPhoto(@RequestHeader Map<String, String> headers,
+    @RequestMapping(value = "/user/{id}/photo", method = POST)
+    public ResponseEntity<?> uploadPhoto(@PathVariable int id,
+                                         @RequestHeader Map<String, String> headers,
                                          @RequestParam(name = "photo") MultipartFile photo
     ) throws IOException {
-        LOGGER.info(String.format("Uploading photo entered with headers: %s", headers));
 
-        String pathname = new ClassPathResource("/static/img").getFile().getAbsolutePath() + "\\" +  headers.get("token");
+        if (userRepository.findById(id).isEmpty()){
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+
+        Optional<User> userOptional = userRepository.findByHashKey(headers.get("token"));
+        if(userOptional.isPresent() && (userOptional.get().getId() == id || userOptional.get().getStatus() == UserStatus.ADMIN)){
+            userOptional.get().setPhoto(String.valueOf(userOptional.get().getId()));
+            userRepository.save(userOptional.get());
+        } else {
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+        }
+
+        LOGGER.info(String.format("Uploading photo entered with headers: %s and user id: %s", headers, id));
+
+        String pathname = new ClassPathResource("/static/img").getFile().getAbsolutePath() + "\\" +  id;
         LOGGER.info(String.format("Uploading to %s", pathname));
         File file = new File(pathname);
         try(FileOutputStream fileOutputStream = new FileOutputStream(file)) {
@@ -183,11 +197,6 @@ public class RestPostController extends AbstractRestController {
             e.printStackTrace();
         }
 
-        Optional<User> userOptional = userRepository.findByHashKey(headers.get("token"));
-        if(userOptional.isPresent()){
-            userOptional.get().setPhoto(headers.get("token"));
-            userRepository.save(userOptional.get());
-        }
         return new ResponseEntity<>(HttpStatus.OK);
     }
 }

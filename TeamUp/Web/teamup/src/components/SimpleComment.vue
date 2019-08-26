@@ -12,7 +12,7 @@
       </div>
     </div>
     <div class="row" style="padding: 0 10px 5px 13px;">
-      <span class="title">{{comment.content}}</span>
+      <span class="title" v-html="content"></span>
     </div>
   </div>
 </div>
@@ -53,6 +53,11 @@ export default {
           userId: this.creator.id
         }
       })
+    }
+  },
+  computed: {
+    content () {
+      return this.comment.content.replace(/\n/g, '<br>')
     }
   }
 }

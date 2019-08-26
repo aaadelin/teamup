@@ -11,7 +11,7 @@
 
           <span> <strong>Description: </strong>
             <span v-if="editMode && canEditAll"> <textarea @keyup="hasChanged" v-model="currentDescription" cols="50" rows="4"></textarea> </span>
-            <span @dblclick="editMode = canEditAll" v-else>{{ task.description }}</span>
+            <span @dblclick="editMode = canEditAll" v-else v-html="tasksDescription"></span>
           </span>
 
           <p></p>
@@ -372,6 +372,11 @@ export default {
         this.assignees.push(this.userToAdd)
         this.hasChanged()
       }
+    }
+  },
+  computed: {
+    tasksDescription () {
+      return this.currentDescription.replace(/\n/g, '<br>')
     }
   }
 }

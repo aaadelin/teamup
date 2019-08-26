@@ -1,11 +1,11 @@
 import axios from 'axios'
 import { baseURL } from './Repository'
 
-export async function updateTask (task) {
+async function putDataToUrl (data, url) {
   return axios({
-    url: `${baseURL}/task`,
+    url: url,
     method: 'put',
-    data: task,
+    data: data,
     headers: {
       'token': localStorage.getItem('access_key')
     }
@@ -14,4 +14,20 @@ export async function updateTask (task) {
   }).catch(rez => {
     return null
   })
+}
+
+export async function updateTask (task) {
+  let url = `${baseURL}/task`
+  return putDataToUrl(task, url)
+}
+
+export async function updatePassword (id, oldPassword, newPassword, logout) {
+  let data = new FormData()
+  data.set('id', id)
+  data.set('oldPassword', oldPassword)
+  data.set('newPassword', newPassword)
+  data.set('logout', logout)
+  let url = `${baseURL}/user/${id}/password`
+
+  return putDataToUrl(data, url)
 }

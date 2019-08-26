@@ -1,12 +1,10 @@
 <template>
-  <div id="content" class="container" style="margin-top: 15px">
-    Search term: {{ searchTerm }}
-    <div class="" style="background-color: #a5bbcc; padding: 15px;">
+  <div id="content" class="container" style="margin-top: 15px;">
+<!--    Search term: {{ searchTerm }}-->
+    <div class="" style="background-color: rgba(225,225,225,0.55); padding: 15px;  box-shadow: 5px 5px 12px grey">
       <div>
 <!--        TODO div-uri la fiecare categorie prima categorie va afisa rezultatele si din urmatoatele categorii doar la apasarea unei sageti vor aaparea rezultatele (care se vor incarca atunci)-->
         <div @click="showTasks = !showTasks" style="cursor: pointer" class="row">
-        <div v-if="!showTasks"><i class="fas fa-angle-right" ></i></div>
-        <div  v-if="showTasks"><i class="fas fa-angle-down" ></i></div>
         <h3 class="col">Tasks</h3>
         </div>
         <div class="row" style="transition: height 2s" v-if="showTasks">

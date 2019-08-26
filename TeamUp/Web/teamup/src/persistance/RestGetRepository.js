@@ -182,7 +182,7 @@ export async function getUsersTasks (userId, searchTerm = null, options = null) 
     url += 'type=' + options
   }
   if (searchTerm !== null) {
-    url += 'term=' + searchTerm
+    url += 'search=' + searchTerm
   }
   return fetchDataFromUrl(url, { 'reported': [], 'assigned': [] })
 }

@@ -1,5 +1,5 @@
 <template>
-  <div style="text-align: left; cursor: pointer" @click="openTaskPage">
+  <div class="search-box" @click="openTaskPage">
     <strong>
     <vue-highlight-words class="my-highlight"
        highlightClassName="highlight"
@@ -13,7 +13,7 @@
       :searchWords="keywords"
       :auto-escape="true"
       :textToHighlight="task.description"/>
-  <br><br>
+  <br>
   </div>
 </template>
 
@@ -59,4 +59,12 @@ export default {
 
 <style scoped>
 
+  .search-box{
+    text-align: left; cursor: pointer;
+    background-color: rgba(0,0,0,0.08);
+    border: 2px solid rgba(0,0,0,0.35);
+    margin: 7px 0 7px 0;
+    padding: 5px;
+    border-radius: 10px;
+  }
 </style>
