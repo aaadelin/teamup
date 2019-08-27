@@ -376,7 +376,10 @@ export default {
   },
   computed: {
     tasksDescription () {
-      return this.currentDescription.replace(/\n/g, '<br>')
+      if (this.currentDescription !== null) {
+        return this.currentDescription.replace(/\n/g, '<br>')
+      }
+      return this.currentDescription
     }
   }
 }

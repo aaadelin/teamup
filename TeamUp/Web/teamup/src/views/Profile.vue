@@ -153,9 +153,9 @@ export default {
   async mounted () {
     this.loadAllData()
     document.addEventListener('keyup', ev => {
-      if (ev.key.toLocaleLowerCase() === 'e'
-          && !this.editMode && this.canEdit
-          && document.activeElement.tagName !== 'INPUT') {
+      if (ev.key.toLocaleLowerCase() === 'e' &&
+          !this.editMode && this.canEdit &&
+          document.activeElement.tagName !== 'INPUT') {
         this.editMode = true
       }
     })
@@ -278,15 +278,15 @@ export default {
               })
               this.editMode = false
               if (this.logout) {
-                  setTimeout(() => {
-                    location.reload()
-                  }, 1000)
+                setTimeout(() => {
+                  location.reload()
+                }, 1000)
               }
             }
           })
-          this.oldPassword = ''
-          this.newPassword = ''
-          this.newPasswordAgain = ''
+        this.oldPassword = ''
+        this.newPassword = ''
+        this.newPasswordAgain = ''
       } else {
         this.$notify({
           group: 'notificationsGroup',

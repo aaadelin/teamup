@@ -28,7 +28,7 @@ public class Project {
 
     @JsonManagedReference
     @OneToMany
-    @JoinColumn(name = "ID")
+    @JoinColumn(name = "PROJECT_ID")
     private List<Task> tasks;
 
     @Column (columnDefinition = "varchar(50) default '0.0.1'")

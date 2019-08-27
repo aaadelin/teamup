@@ -22,6 +22,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import javax.annotation.security.PermitAll;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -311,6 +312,15 @@ public class RestGetController extends AbstractRestController {
             LOGGER.info("No project found");
             return new ResponseEntity<>("NOT FOUND", HttpStatus.NOT_FOUND);
         }
+    }
+
+    @RequestMapping(value = "/projects/{id}/tasks", method = GET)
+    public ResponseEntity<?> getProjectsTasks(@PathVariable int id, @RequestHeader Map<String, String> headers){
+        LOGGER.info(String.format("Entering method to get all tasks from a project with project id %s and headers %s", id, headers));
+        //TODO get only the task id and the status
+        List<Task> tasks = projectRepository.findById(id).orElseThrow().getTasks();
+        LOGGER.info(String.format("Exiting with list of tasks: %s", tasks));
+        return new ResponseEntity<>(tasks, HttpStatus.OK);
     }
 
     @RequestMapping(value = "/key", method = GET)

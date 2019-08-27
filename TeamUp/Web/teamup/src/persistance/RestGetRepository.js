@@ -206,3 +206,8 @@ export async function getUserStatisticsByDate (id, date) {
   let url = `${baseURL}/users/${id}/statistics?lastDays=${date}`
   return fetchDataFromUrl(url)
 }
+
+export async function getTasksByProjectId (id) {
+  let url = `${baseURL}/projects/${id}/tasks`
+  return fetchDataFromUrl(url)
+}

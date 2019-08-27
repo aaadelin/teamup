@@ -1,5 +1,6 @@
 package com.team.TeamUp.dtos;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.team.TeamUp.domain.Task;
 
 import java.time.LocalDateTime;
@@ -43,6 +44,7 @@ public class ProjectDTO {
         this.description = description;
     }
 
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     public LocalDateTime getDeadline() {
         return deadline;
     }

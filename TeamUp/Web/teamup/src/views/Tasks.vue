@@ -1,9 +1,8 @@
 <template xmlns:v-drag-and-drop="http://www.w3.org/1999/xhtml">
   <div id="tasks">
     <right-menu :name="navName" :menu="menu"/>
-  <div id="content" class="container-fluid" style="width: 100%">
-    <div id="tasksContainer">
-      </div>
+  <div id="content" class="container-fluid" >
+    some random text
       <div class="row justify-content-end">
         <div class="col-4">
           <p>Your tasks:</p>
@@ -15,7 +14,7 @@
         </label>
         </div>
       </div>
-      <div class="row" v-drag-and-drop:options="draggable_options">
+      <div class="row justify-content-center" v-drag-and-drop:options="draggable_options" >
 
       <div class="col columnCategory">
         <span class="header" @click="todo_category = !todo_category">
@@ -174,14 +173,14 @@ export default {
         this.tasks[0].push(...newTasks)
       }
       if (newTasks.length < 10) {
-          this.showMore[0] = false
+        this.showMore[0] = false
       }
       for (let i = 0; i <= this.pages[1]; i++) {
         newTasks = await getUsersAssignedTasksWithStatus(i, 'IN_PROGRESS')
         this.tasks[1].push(...newTasks)
       }
       if (newTasks.length < 10) {
-          this.showMore[1] = false
+        this.showMore[1] = false
       }
       for (let i = 0; i <= this.pages[2]; i++) {
         newTasks = await getUsersAssignedTasksWithStatus(i, 'UNDER_REVIEW')
@@ -462,12 +461,7 @@ export default {
     border-radius: 5px;
     margin: 15px;
     min-width: 330px;
-  }
-
-  #tasksContainer{
-    margin-top: 15px;
-    /*margin-left: 100px;*/
-    justify-content: center;
+    max-width: 500px;
   }
 
   #tasks{

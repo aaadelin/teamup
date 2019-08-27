@@ -5,45 +5,62 @@
     </div>
 
     <ul class="list-unstyled components">
-      <p>Dummy Heading</p>
-      <li class="active">
-        <a href="#homeSubmenu" data-toggle="collapse" aria-expanded="false" class="dropdown-toggle">Home</a>
-        <ul class="collapse list-unstyled" id="homeSubmenu">
-          <li>
-            <a href="#">Home 1</a>
-          </li>
-          <li>
-            <a href="#">Home 2</a>
-          </li>
-          <li>
-            <a href="#">Home 3</a>
-          </li>
-        </ul>
+<!--      <p>Dummy Heading</p>-->
+<!--      <li class="active">-->
+<!--        <a href="#homeSubmenu" data-toggle="collapse" aria-expanded="false" class="dropdown-toggle">Home</a>-->
+<!--        <ul class="collapse list-unstyled" id="homeSubmenu">-->
+<!--          <li>-->
+<!--            <a href="#">Home 1</a>-->
+<!--          </li>-->
+<!--          <li>-->
+<!--            <a href="#">Home 2</a>-->
+<!--          </li>-->
+<!--          <li>-->
+<!--            <a href="#">Home 3</a>-->
+<!--          </li>-->
+<!--        </ul>-->
+<!--      </li>-->
+      <p>Filter:</p>
+      <li>
+        <input type="text" class="form-control" placeholder="Key words" style="width: 200px; margin: auto" >
+        <small>*Filtering only in visible tasks</small>
       </li>
       <li>
-        <a href="#">About</a>
-      </li>
-      <li>
-        <a href="#pageSubmenu" data-toggle="collapse" aria-expanded="false" class="dropdown-toggle">Pages</a>
-        <ul class="collapse list-unstyled" id="pageSubmenu">
-          <li>
-            <a href="#">Page 1</a>
-          </li>
-          <li>
-            <a href="#">Page 2</a>
-          </li>
-          <li>
-            <a href="#">Page 3</a>
-          </li>
-        </ul>
-      </li>
-      <li>
-        <a href="#">Portfolio</a>
-      </li>
-      <li>
-        <a href="#">Contact</a>
+        <label style="padding-left: 15px">
+          <input type="checkbox" @change="reportedChanged">
+          Also see reported issues
+        </label>
       </li>
     </ul>
+    <ul class="ul components">
+      <li>
+      <p>Sort:</p>
+          <label>
+            <input name="sort" type="radio">
+            By deadline
+          </label>
+        <br>
+        <label>
+            <input name="sort" type="radio">
+            By priority
+          </label>
+        <br>
+        <label>
+            <input name="sort" type="radio">
+            By priority
+        </label>
+        <br>
+        <label>
+            <input name="sort" type="radio">
+            By last modified
+        </label>
+        <br>
+        <label>
+          <input type="checkbox"> Descending
+        </label>
+      </li>
+    </ul>
+<!--      todo: apply si clear-->
   </div>
 
 </template>
@@ -68,6 +85,11 @@ export default {
   data () {
     return {
     }
+  },
+  methods: {
+    reportedChanged () {
+
+    }
   }
 }
 </script>
@@ -78,7 +100,7 @@ export default {
 
   #sidebar {
     min-width: 250px;
-    max-width: 250px;
+    max-width: 300px;
     min-height: 92.5vh;
     /*margin-right: 15px; !*to add a space between the sidebar and the tasks*!*/
   }
@@ -150,16 +172,8 @@ export default {
     color: #999;
   }
 
-  a, a:hover, a:focus {
-    color: inherit;
-    text-decoration: none;
-    transition: all 0.3s;
-  }
-
-  ul ul a {
-    font-size: 0.9em !important;
-    padding-left: 30px !important;
-    background: #6d7fcc;
+  li {
+    padding: 10px 0 10px 0
   }
 
 </style>
