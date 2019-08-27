@@ -9,7 +9,6 @@ import com.team.TeamUp.dtos.*;
 import com.team.TeamUp.persistance.*;
 import com.team.TeamUp.utils.DTOsConverter;
 import com.team.TeamUp.utils.TaskUtils;
-import com.team.TeamUp.utils.UserUtils;
 import com.team.TeamUp.validation.UserValidation;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -22,7 +21,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import javax.annotation.security.PermitAll;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -43,8 +41,6 @@ public class RestGetController extends AbstractRestController {
 
     @Autowired
     private TaskUtils taskUtils;
-    @Autowired
-    private UserUtils userUtils;
 
     public RestGetController(TeamRepository teamRepository, UserRepository userRepository, TaskRepository taskRepository,
                              ProjectRepository projectRepository, CommentRepository commentRepository, PostRepository postRepository,
@@ -106,7 +102,7 @@ public class RestGetController extends AbstractRestController {
                                          @RequestParam(value = "last", required = false) Long numberOfTasksSortedDesc) {
         LOGGER.info(String.format("Entering get all tasks method with headers: %s, startPage: %s, status: %s and number of last tasks %s", headers.toString(), startPage, status, numberOfTasksSortedDesc));
         List<TaskDTO> tasks = new ArrayList<>();
-
+        //TODO
         //returning all tasks
         if(startPage == null && status == null && numberOfTasksSortedDesc == null) {
             LOGGER.info("Returning all tasks");
@@ -227,37 +223,30 @@ public class RestGetController extends AbstractRestController {
     @RequestMapping(value = "/users/{key}/assigned-tasks", method = GET)
     public ResponseEntity<?> getAssignedTasksForUser(@PathVariable String key, @RequestHeader Map<String, String> headers) {
         LOGGER.info(String.format("Entering get user's assigned tasks with key %s and headers %s", key, headers));
-        Optional<User> userOptional = userRepository.findByHashKey(key);
-        if (userOptional.isPresent()) {
-            LOGGER.info(String.format("Acquiring tasks assigned to user %s ", userOptional.get()));
-            List<Task> allTasks = taskRepository.findAll();
+        User user = userRepository.findByHashKey(key).orElseThrow();
 
-            List<TaskDTO> filteredTasks = allTasks.stream()
-                    .filter(task -> task.getAssignees().contains(userOptional.get()))
-                    .map(dtOsConverter::getDTOFromTask).collect(Collectors.toList());
-            LOGGER.info(String.format("Returning list of tasks: %s", filteredTasks));
-            return new ResponseEntity<>(filteredTasks, HttpStatus.OK);
-        }
-        LOGGER.info(String.format("No user found with key %s", key));
-        return new ResponseEntity<>("NOT FOUND", HttpStatus.NOT_FOUND);
+        LOGGER.info(String.format("Acquiring tasks assigned to user %s ", user));
+        List<Task> allTasks = taskRepository.findAll();
+
+        List<TaskDTO> filteredTasks = allTasks.stream()
+                .filter(task -> task.getAssignees().contains(user))
+                .map(dtOsConverter::getDTOFromTask).collect(Collectors.toList());
+        LOGGER.info(String.format("Returning list of tasks: %s", filteredTasks));
+        return new ResponseEntity<>(filteredTasks, HttpStatus.OK);
     }
 
     @RequestMapping(value = "/users/{key}/reported-tasks", method = GET)
     public ResponseEntity<?> getReportedTasksByUser(@PathVariable String key, @RequestHeader Map<String, String> headers) {
         LOGGER.info(String.format("Entering get reported tasks by user with key %s and headers %s", key, headers));
-        Optional<User> userOptional = userRepository.findByHashKey(key);
-        if (userOptional.isPresent()) {
-            LOGGER.info(String.format("Acquiring tasks reported by user %s ", userOptional.get()));
-            List<Task> allTasks = taskRepository.findAll();
+        User user = userRepository.findByHashKey(key).orElseThrow();
+        LOGGER.info(String.format("Acquiring tasks reported by user %s ", user));
+        List<Task> allTasks = taskRepository.findAll();
 
-            List<TaskDTO> filteredTasks = allTasks.stream()
-                    .filter(task -> task.getReporter().equals(userOptional.get()))
-                    .map(dtOsConverter::getDTOFromTask).collect(Collectors.toList());
-            LOGGER.info(String.format("Returning list of tasks: %s", filteredTasks));
-            return new ResponseEntity<>(filteredTasks, HttpStatus.OK);
-        }
-        LOGGER.info(String.format("No user found with key %s", key));
-        return new ResponseEntity<>("NOT FOUND", HttpStatus.NOT_FOUND);
+        List<TaskDTO> filteredTasks = allTasks.stream()
+                .filter(task -> task.getReporter().equals(user))
+                .map(dtOsConverter::getDTOFromTask).collect(Collectors.toList());
+        LOGGER.info(String.format("Returning list of tasks: %s", filteredTasks));
+        return new ResponseEntity<>(filteredTasks, HttpStatus.OK);
     }
 
     ///Getter based on ids
@@ -388,23 +377,20 @@ public class RestGetController extends AbstractRestController {
     @RequestMapping(value = "/users/{id}/photo", method = GET, produces = "image/jpg")
     public ResponseEntity<?> getFile(@PathVariable("id") Integer id, @RequestHeader Map<String, String> headers) throws IOException {
         LOGGER.info(String.format("Entering get photo for user method with id: %s and headers: %s", id, headers));
-        Optional<User> userOptional = userRepository.findById(id);
+        User user = userRepository.findById(id).orElseThrow();
 
-        if (userOptional.isPresent() && userOptional.get().getPhoto() == null) {
+        if (user.getPhoto() == null) {
             File file = new ClassPathResource("static/img/avatar.png").getFile();
             byte[] bytes = Files.readAllBytes(file.toPath());
             String encodedString = Base64.getEncoder().encodeToString(bytes);
             LOGGER.info("Exited with default image");
             return new ResponseEntity<>(encodedString, HttpStatus.OK);
-        } else if (userOptional.isPresent()) {
-            File file = new ClassPathResource("static/img/" + userOptional.get().getPhoto()).getFile();
+        } else {
+            File file = new ClassPathResource("static/img/" + user.getPhoto()).getFile();
             byte[] bytes = Files.readAllBytes(file.toPath());
-            LOGGER.info(String.format("Exited with photo with path %s", userOptional.get().getPhoto()));
+            LOGGER.info(String.format("Exited with photo with path %s", user.getPhoto()));
             String encodedString = Base64.getEncoder().encodeToString(bytes);
             return new ResponseEntity<>(encodedString, HttpStatus.OK);
-        } else {
-            LOGGER.info(String.format("No user found with id %s", id));
-            return new ResponseEntity<>("NOT FOUND", HttpStatus.NOT_FOUND);
         }
     }
 
@@ -429,33 +415,30 @@ public class RestGetController extends AbstractRestController {
                                          @RequestParam(value = "search", required = false) String term,
                                          @RequestHeader Map<String, String> headers) {
         LOGGER.info(String.format("Entering get user's tasks with user id %s, type value %s, term value %s and headers %s", id, type, term, headers));
-        Optional<User> user = userRepository.findById(id);
-        if (type == null && user.isPresent()) {
+        User user = userRepository.findById(id).orElseThrow();
+        if (type == null) {
 
             JSONObject arrays = new JSONObject();
-            arrays.put("reported", new JSONArray(taskUtils.getFilteredTasksByType(user.get(), term, "assignedby")));
-            arrays.put("assigned", new JSONArray(taskUtils.getFilteredTasksByType(user.get(), term, "assignedto")));
+            arrays.put("reported", new JSONArray(taskUtils.getFilteredTasksByType(user, term, "assignedby")));
+            arrays.put("assigned", new JSONArray(taskUtils.getFilteredTasksByType(user, term, "assignedto")));
 
-            LOGGER.info(String.format("Exited with list of tasks assigned to and by user %s: %s", user.get(), arrays.toString()));
+            LOGGER.info(String.format("Exited with list of tasks assigned to and by user %s: %s", user, arrays.toString()));
             return new ResponseEntity<>(arrays.toString(), HttpStatus.OK);
-        } else if (user.isPresent()) {
+        } else {
             JSONObject arrays = new JSONObject();
 
             if (type.toLowerCase().equals("assignedto")) {
                 arrays.put("reported", new JSONArray());
-                arrays.put("assigned", new JSONArray(taskUtils.getFilteredTasksByType(user.get(), term, type)));
+                arrays.put("assigned", new JSONArray(taskUtils.getFilteredTasksByType(user, term, type)));
             } else if (type.toLowerCase().equals("assignedby")) {
-                arrays.put("reported", new JSONArray(taskUtils.getFilteredTasksByType(user.get(), term, type)));
+                arrays.put("reported", new JSONArray(taskUtils.getFilteredTasksByType(user, term, type)));
                 arrays.put("assigned", new ArrayList<>());
             } else {
                 LOGGER.info(String.format("Type option not eligible. Send type: %s", type));
                 return new ResponseEntity<>(HttpStatus.NOT_ACCEPTABLE);
             }
-            LOGGER.info(String.format("Exited with list of tasks assigned to user %s: %s", user.get(), arrays.toString()));
+            LOGGER.info(String.format("Exited with list of tasks assigned to user %s: %s", user, arrays.toString()));
             return new ResponseEntity<>(arrays.toString(), HttpStatus.OK);
-        } else {
-            LOGGER.info(String.format("User with id %s is not present", id));
-            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
         }
     }
 
@@ -463,63 +446,62 @@ public class RestGetController extends AbstractRestController {
     public ResponseEntity<?> getAssignedTasks(@RequestHeader Map<String, String> headers,
                                               @RequestParam(value = "page") Integer startPage,
                                               @RequestParam(value = "status", required = false) TaskStatus status,
+                                              @RequestParam(value = "search", required = false) String search,
+                                              @RequestParam(value = "sort", required = false) String sort,
+                                              @RequestParam(value = "desc", required = false) Boolean desc,
                                               @RequestParam(value = "statuses", required = false) List<TaskStatus> statuses){
-        LOGGER.info(String.format("Entered method to get assigned tasks with parameters: \nheaders: %s \nstart page: %s\nstatus: %s \n statuses: %s", headers, startPage, status, statuses));
-        Optional<User> userOptional = userRepository.findByHashKey(headers.get("token"));
-        if(userOptional.isPresent()){
-            List<TaskDTO> taskDTOS;
-            if(status != null){
-                LOGGER.info("Filter method preferred: by one single status");
-                taskDTOS = taskRepository.findAllByTaskStatusAndAssigneesContaining(status,
-                        userOptional.get(),
-                        PageRequest.of(startPage, PAGE_SIZE))
-                        .stream().map(dtOsConverter::getDTOFromTask).collect(Collectors.toList());
-            }else{
-                LOGGER.info("Filter method preferred: by multiple statuses");
-                taskDTOS = taskRepository.findAllByTaskStatusInAndAssigneesContaining(statuses,
-                        userOptional.get(),
-                        PageRequest.of(startPage, PAGE_SIZE))
-                        .stream().map(dtOsConverter::getDTOFromTask).collect(Collectors.toList());
-            }
-            LOGGER.info(String.format("Exiting with list of tasks: %s", taskDTOS));
-            return new ResponseEntity<>(taskDTOS, HttpStatus.OK);
+        LOGGER.info(String.format("Entered method to get assigned tasks with parameters: \nheaders: %s \nstart page: %s\nstatus: %s \n statuses: %s, search %s", headers, startPage, status, statuses, search));
+        User user = userRepository.findByHashKey(headers.get("token")).orElseThrow();
+        List<TaskDTO> taskDTOS;
+        if(status != null){
+            LOGGER.info("Filter method preferred: by one single status");
+            taskDTOS = taskRepository.findAllByTaskStatusAndAssigneesContaining(status,
+                    user,
+                    PageRequest.of(startPage, PAGE_SIZE))
+                    .stream().map(dtOsConverter::getDTOFromTask).collect(Collectors.toList());
+        }else{
+            LOGGER.info("Filter method preferred: by multiple statuses");
+            taskDTOS = taskRepository.findAllByTaskStatusInAndAssigneesContaining(statuses,
+                    user,
+                    PageRequest.of(startPage, PAGE_SIZE))
+                    .stream().map(dtOsConverter::getDTOFromTask).collect(Collectors.toList());
         }
-        LOGGER.info("User not eligible");
-        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        taskDTOS = taskUtils.filterTasks(search, taskDTOS);
+        LOGGER.info(String.format("Exiting with list of tasks: %s", taskDTOS));
+        return new ResponseEntity<>(taskDTOS, HttpStatus.OK);
     }
 
     @RequestMapping(value = "/tasks/reported", method = GET)
     public ResponseEntity<?> getReportedTasks(@RequestHeader Map<String, String> headers,
                                                @RequestParam(value = "page") Integer startPage,
+                                               @RequestParam(value = "search", required = false) String search,
                                                @RequestParam(value = "status") TaskStatus status){
-        LOGGER.info(String.format("Entered method to get reported tasks with parameters: \nheaders: %s \nstart page: %s\nstatus: %s \n statuses: %s", headers, startPage, status));
-        Optional<User> userOptional = userRepository.findByHashKey(headers.get("token"));
-        if(userOptional.isPresent()){
-            List<TaskDTO> taskDTOS = taskRepository.findAllByTaskStatusAndReporter(status,
-                                                                                   userOptional.get(),
-                                                                                   PageRequest.of(startPage, PAGE_SIZE))
-                    .stream().map(dtOsConverter::getDTOFromTask).collect(Collectors.toList());
-            LOGGER.info(String.format("Exiting with list of tasks: %s", taskDTOS));
-            return new ResponseEntity<>(taskDTOS, HttpStatus.OK);
-        }
-        LOGGER.info("User not eligible");
-        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        LOGGER.info(String.format("Entered method to get reported tasks with parameters: \nheaders: %s \nstart page: %s\nstatus: %s \nsearch %s", headers, startPage, status, search));
+        User user = userRepository.findByHashKey(headers.get("token")).orElseThrow();
+        List<TaskDTO> taskDTOS = taskRepository.findAllByTaskStatusAndReporter(status,
+                                                                               user,
+                                                                               PageRequest.of(startPage, PAGE_SIZE))
+                .stream().map(dtOsConverter::getDTOFromTask).collect(Collectors.toList());
+        LOGGER.info(String.format("Exiting with list of tasks: %s", taskDTOS));
+
+        taskDTOS = taskUtils.filterTasks(search, taskDTOS);
+        return new ResponseEntity<>(taskDTOS, HttpStatus.OK);
     }
 
     @RequestMapping(value = "/tasks/assigned-reported", method = GET)
     public ResponseEntity<?> getAssignedAndReportedTasks(@RequestHeader Map<String, String> headers,
                                                          @RequestParam(value = "page") Integer startPage,
                                                          @RequestParam(value = "status", required = false) TaskStatus status,
+                                                         @RequestParam(value = "search", required = false) String search,
                                                          @RequestParam(value = "statuses", required = false) TaskStatus[] statuses){
 
-        LOGGER.info(String.format("Entered method to get assigned and reported tasks with parameters: \nheaders: %s \nstart page: %s\nstatus: %s \n statuses: %s", headers, startPage, status, statuses));
-        Optional<User> userOptional = userRepository.findByHashKey(headers.get("token"));
-        if(userOptional.isPresent()){
-            List<TaskDTO> taskDTOS = new ArrayList<>();
-            if(status != null){
+        LOGGER.info(String.format("Entered method to get assigned and reported tasks with parameters: \nheaders: %s \nstart page: %s\nstatus: %s \n statuses: %s, search %s", headers, startPage, status, Arrays.toString(statuses), search));
+        User user = userRepository.findByHashKey(headers.get("token")).orElseThrow();
+        List<TaskDTO> taskDTOS = new ArrayList<>();
+        if(status != null){
                 LOGGER.info("Filter type selected: by one single status");
                 taskDTOS = taskRepository.findTasksWithStatusAssignedToOrReportedBy(
-                        userOptional.get().getId(),
+                        user.getId(),
                         status.ordinal(),
                         PageRequest.of(startPage, PAGE_SIZE))
                         .stream()
@@ -527,38 +509,32 @@ public class RestGetController extends AbstractRestController {
             }else if (statuses != null){
                 LOGGER.info("Filter type selected: by multiple statuses");
                 taskDTOS = taskRepository.findTasksWithStatusesAssignedToOrReportedBy(
-                        userOptional.get().getId(),
+                        user.getId(),
                         Arrays.stream(statuses).map(Enum::ordinal).collect(Collectors.toList()),
                         PageRequest.of(startPage, PAGE_SIZE))
                         .stream()
                         .map(dtOsConverter::getDTOFromTask).collect(Collectors.toList());
             }
-            LOGGER.info(String.format("Exiting with list of tasks: %s", taskDTOS));
-            return new ResponseEntity<>(taskDTOS, HttpStatus.OK);
-        }
-        LOGGER.info("User not eligible");
-        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        taskDTOS = taskUtils.filterTasks(search, taskDTOS);
+        LOGGER.info(String.format("Exiting with list of tasks: %s", taskDTOS));
+        return new ResponseEntity<>(taskDTOS, HttpStatus.OK);
     }
 
     @RequestMapping(value = "/users/{id}/history", method = GET)
     public ResponseEntity<?> getUsersHistory(@PathVariable int id,
                                              @RequestParam(name = "page", required = false) Integer page){
         LOGGER.info(String.format("Entered method to get user's history with user id: %s and page %s", id, page));
-        Optional<User> userOptional = userRepository.findById(id);
-        if(userOptional.isPresent()){
-            List<UserEvent> events;
-            if(page != null){
-                LOGGER.info("Getting all user s history");
-                 events = eventRepository.findAllByCreatorOrderByTimeDesc(userOptional.get(), PageRequest.of(page, PAGE_SIZE));
-            }else {
-                LOGGER.info(String.format("Getting user's history from page %s", page));
-                events = eventRepository.findAllByCreatorOrderByTimeDesc(userOptional.get());
-            }
-            LOGGER.info(String.format("Exiting with history: %s", events));
-            return new ResponseEntity<>(events, HttpStatus.OK);
+        User user = userRepository.findById(id).orElseThrow();
+        List<UserEvent> events;
+        if(page != null){
+            LOGGER.info("Getting all user s history");
+             events = eventRepository.findAllByCreatorOrderByTimeDesc(user, PageRequest.of(page, PAGE_SIZE));
+        }else {
+            LOGGER.info(String.format("Getting user's history from page %s", page));
+            events = eventRepository.findAllByCreatorOrderByTimeDesc(user);
         }
-        LOGGER.info("User not found");
-        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        LOGGER.info(String.format("Exiting with history: %s", events));
+        return new ResponseEntity<>(events, HttpStatus.OK);
     }
 
     @RequestMapping(value = "/users/{id}/statistics", method = GET)
@@ -566,37 +542,33 @@ public class RestGetController extends AbstractRestController {
                                                 @RequestParam(name = "lastDays", required = false) Integer lastDays,
                                                 @RequestParam(name = "reported", required = false) Boolean reported){
         LOGGER.info(String.format("Entered get user's statistics with id %s, reported %s and number of last days: %s", id, reported, lastDays));
-        Optional<User> userOptional = userRepository.findById(id);
-        if(userOptional.isPresent()){
-            List<Task> statistics;
-            if(lastDays == null){
-                LOGGER.info("Getting statistics from all time");
-                statistics = taskRepository.findAllByTaskStatusInAndAssigneesContaining(Arrays.asList(TaskStatus.values()), userOptional.get(), PageRequest.of(0, MAX_PAGE_SIZE));
-            }else {
-                // todo
-                LOGGER.info(String.format("Getting statistics from last %s days", lastDays));
-                statistics = taskRepository.findAllByTaskStatusInAndAssigneesContaining(Arrays.asList(TaskStatus.values()), userOptional.get(), PageRequest.of(0, MAX_PAGE_SIZE));
-//                statistics = taskRepository.findAllByTaskStatusInAndAssigneesContaining(id, List.of(0, 1, 2, 3, 4), PageRequest.of(0, 10000));
-            }
-
-            Map<TaskStatus, Integer> statusCount = new HashMap<>();
-            for(Task task: statistics){
-                TaskStatus currentStatus = task.getTaskStatus();
-                if(statusCount.containsKey(currentStatus)){
-                    statusCount.put(currentStatus, statusCount.get(currentStatus) + 1);
-                } else {
-                    statusCount.put(currentStatus, 1);
-                }
-            }
-            List<Integer> counts = List.of(statusCount.getOrDefault(TaskStatus.OPEN, 0) + statusCount.getOrDefault(TaskStatus.REOPENED, 0),
-                    statusCount.getOrDefault(TaskStatus.IN_PROGRESS, 0),
-                    statusCount.getOrDefault(TaskStatus.UNDER_REVIEW, 0),
-                    statusCount.getOrDefault(TaskStatus.APPROVED, 0));
-            LOGGER.info(String.format("Exiting with statistics: %s", counts));
-            return new ResponseEntity<>(counts, HttpStatus.OK);
+        User user = userRepository.findById(id).orElseThrow();
+        List<Task> statistics;
+        if(lastDays == null){
+            LOGGER.info("Getting statistics from all time");
+            statistics = taskRepository.findAllByTaskStatusInAndAssigneesContaining(Arrays.asList(TaskStatus.values()), user, PageRequest.of(0, MAX_PAGE_SIZE));
+        }else {
+            // todo
+            LOGGER.info(String.format("Getting statistics from last %s days", lastDays));
+            statistics = taskRepository.findAllByTaskStatusInAndAssigneesContaining(Arrays.asList(TaskStatus.values()), user, PageRequest.of(0, MAX_PAGE_SIZE));
+//          statistics = taskRepository.findAllByTaskStatusInAndAssigneesContaining(id, List.of(0, 1, 2, 3, 4), PageRequest.of(0, 10000));
         }
-        LOGGER.info("User not found");
-        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+
+        Map<TaskStatus, Integer> statusCount = new HashMap<>();
+        for(Task task: statistics){
+            TaskStatus currentStatus = task.getTaskStatus();
+            if(statusCount.containsKey(currentStatus)){
+                statusCount.put(currentStatus, statusCount.get(currentStatus) + 1);
+            } else {
+                statusCount.put(currentStatus, 1);
+            }
+        }
+        List<Integer> counts = List.of(statusCount.getOrDefault(TaskStatus.OPEN, 0) + statusCount.getOrDefault(TaskStatus.REOPENED, 0),
+                statusCount.getOrDefault(TaskStatus.IN_PROGRESS, 0),
+                statusCount.getOrDefault(TaskStatus.UNDER_REVIEW, 0),
+                statusCount.getOrDefault(TaskStatus.APPROVED, 0));
+        LOGGER.info(String.format("Exiting with statistics: %s", counts));
+        return new ResponseEntity<>(counts, HttpStatus.OK);
     }
 }
 

@@ -88,4 +88,11 @@ public class TaskUtils {
                 .map(dtOsConverter::getDTOFromTask)
                 .collect(Collectors.toList());
     }
+
+    public List<TaskDTO> filterTasks(String filterWord, List<TaskDTO> tasks){
+        if(filterWord != null && !filterWord.strip().equals("")) {
+            return tasks.stream().filter(task -> task.getSummary().toLowerCase().contains(filterWord) || task.getSummary().toLowerCase().contains(filterWord)).collect(Collectors.toList());
+        }
+        return tasks;
+    }
 }

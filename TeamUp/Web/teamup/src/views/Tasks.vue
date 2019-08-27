@@ -1,17 +1,13 @@
 <template xmlns:v-drag-and-drop="http://www.w3.org/1999/xhtml">
   <div id="tasks">
-    <right-menu :name="navName" :menu="menu"/>
+    <right-menu :name="navName" :menu="menu"
+                @reportedChanged="changeVisibleTasks"
+                @filter="filterTasks"
+                @sort="sortTasks"/>
   <div id="content" class="container-fluid" >
-    some random text
-      <div class="row justify-content-end">
-        <div class="col-4">
-          <p>Your tasks:</p>
-        </div>
-        <div class="col-4">
-          <label style="padding-left: 15px">
-          <input type="checkbox" @change="changeVisibleTasks">
-          Also see reported issues
-        </label>
+      <div class="row justify-content-center">
+        <div class="col-4" style="margin-top: 5px">
+          <p style="margin: 0; padding: 0">Your tasks:</p>
         </div>
       </div>
       <div class="row justify-content-center" v-drag-and-drop:options="draggable_options" >
@@ -107,6 +103,8 @@ export default {
       oldDraggedTask: null,
       pages: [0, 0, 0, 0],
       showMore: [true, true, true, true],
+      maxPagesLoad: 5,
+      filterWord: '',
 
       draggable_options: {
         dropzoneSelector: 'div',
@@ -150,10 +148,12 @@ export default {
       await this.getUsersTasks()
     },
     async getUsersTasks () {
+      this.showMore = [true, true, true, true]
+      this.tasks = [[], [], [], []]
       if (this.reportedTasks) {
-        this.getAssignedAndReportedTasks()
+        await this.getAssignedAndReportedTasks()
       } else {
-        this.getAssignedTasks()
+        await this.getAssignedTasks()
       }
 
       if (this.tasks === null) {
@@ -169,28 +169,28 @@ export default {
       this.tasks = [[], [], [], []]
       let newTasks = []
       for (let i = 0; i <= this.pages[0]; i++) {
-        newTasks = await getUsersAssignedTasksWithStatuses(i, 'OPEN,REOPENED')
+        newTasks = await getUsersAssignedTasksWithStatuses(i, 'OPEN,REOPENED', this.filterWord)
         this.tasks[0].push(...newTasks)
       }
       if (newTasks.length < 10) {
         this.showMore[0] = false
       }
       for (let i = 0; i <= this.pages[1]; i++) {
-        newTasks = await getUsersAssignedTasksWithStatus(i, 'IN_PROGRESS')
+        newTasks = await getUsersAssignedTasksWithStatus(i, 'IN_PROGRESS', this.filterWord)
         this.tasks[1].push(...newTasks)
       }
       if (newTasks.length < 10) {
         this.showMore[1] = false
       }
       for (let i = 0; i <= this.pages[2]; i++) {
-        newTasks = await getUsersAssignedTasksWithStatus(i, 'UNDER_REVIEW')
+        newTasks = await getUsersAssignedTasksWithStatus(i, 'UNDER_REVIEW', this.filterWord)
         this.tasks[2].push(...newTasks)
       }
       if (newTasks.length < 10) {
         this.showMore[2] = false
       }
       for (let i = 0; i <= this.pages[3]; i++) {
-        newTasks = await getUsersAssignedTasksWithStatus(i, 'APPROVED')
+        newTasks = await getUsersAssignedTasksWithStatus(i, 'APPROVED', this.filterWord)
         this.tasks[3].push(...newTasks)
       }
       if (newTasks.length < 10) {
@@ -201,28 +201,28 @@ export default {
       this.tasks = [[], [], [], []]
       let newTasks = []
       for (let i = 0; i <= this.pages[0]; i++) {
-        newTasks = await getUsersReportedAndAssignedTasksWithStatuses(i, 'OPEN,REOPENED')
+        newTasks = await getUsersReportedAndAssignedTasksWithStatuses(i, 'OPEN,REOPENED', this.filterWord)
         this.tasks[0].push(...newTasks)
       }
       if (newTasks.length < 10) {
         this.showMore[0] = false
       }
       for (let i = 0; i <= this.pages[1]; i++) {
-        newTasks = await getUsersReportedAndAssignedTasksWithStatus(i, 'IN_PROGRESS')
+        newTasks = await getUsersReportedAndAssignedTasksWithStatus(i, 'IN_PROGRESS', this.filterWord)
         this.tasks[1].push(...newTasks)
       }
       if (newTasks.length < 10) {
         this.showMore[1] = false
       }
       for (let i = 0; i <= this.pages[2]; i++) {
-        newTasks = await getUsersReportedAndAssignedTasksWithStatus(i, 'UNDER_REVIEW')
+        newTasks = await getUsersReportedAndAssignedTasksWithStatus(i, 'UNDER_REVIEW', this.filterWord)
         this.tasks[2].push(...newTasks)
       }
       if (newTasks.length < 10) {
         this.showMore[2] = false
       }
       for (let i = 0; i <= this.pages[3]; i++) {
-        newTasks = await getUsersReportedAndAssignedTasksWithStatus(i, 'APPROVED')
+        newTasks = await getUsersReportedAndAssignedTasksWithStatus(i, 'APPROVED', this.filterWord)
         this.tasks[3].push(...newTasks)
       }
       if (newTasks.length < 10) {
@@ -417,10 +417,22 @@ export default {
           status.push('todo-category')
       }
       return status
+    },
+    async filterTasks (word) {
+      this.filterWord = word.toLowerCase()
+      if (word.trim() === '') {
+        this.pages = [0, 0, 0, 0]
+        this.getUsersTasks()
+        return
+      }
+      this.pages = [5, 5, 5, 5]
+      await this.getUsersTasks()
+    },
+    async sortTasks (query) {
+      console.log(query)
     }
   },
   filters: {
-
   }
 }
 </script>

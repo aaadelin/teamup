@@ -121,7 +121,6 @@ export default {
           q: this.searchTerm
         }
       })
-      this.searchTerm = ''
     },
     closeUser () {
       this.addUserIsVisible = false

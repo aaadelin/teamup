@@ -120,13 +120,15 @@ export async function getUsersAssignedAndReportedTasks (pages) {
   return tasks
 }
 
-export async function getUsersAssignedTasksWithStatus (page, status) {
-  let url = `${baseURL}/tasks/assigned?page=${page}&status=${status}`
+export async function getUsersAssignedTasksWithStatus (page, status, search = '') {
+  search = encodeURI(search)
+  let url = `${baseURL}/tasks/assigned?page=${page}&status=${status}&search=${search}`
   return fetchDataFromUrl(url)
 }
 
-export async function getUsersAssignedTasksWithStatuses (page, statuses) {
-  let url = `${baseURL}/tasks/assigned?page=${page}&statuses=${statuses}`
+export async function getUsersAssignedTasksWithStatuses (page, statuses, search = '') {
+  search = encodeURI(search)
+  let url = `${baseURL}/tasks/assigned?page=${page}&statuses=${statuses}&search=${search}`
   return fetchDataFromUrl(url)
 }
 
@@ -135,13 +137,15 @@ export async function getUsersReportedTasksWithStatus (page, status) {
   return fetchDataFromUrl(url)
 }
 
-export async function getUsersReportedAndAssignedTasksWithStatus (page, status) {
-  let url = `${baseURL}/tasks/assigned-reported?page=${page}&status=${status}`
+export async function getUsersReportedAndAssignedTasksWithStatus (page, status, search = '') {
+  search = encodeURI(search)
+  let url = `${baseURL}/tasks/assigned-reported?page=${page}&status=${status}&search=${search}`
   return fetchDataFromUrl(url)
 }
 
-export async function getUsersReportedAndAssignedTasksWithStatuses (page, statuses) {
-  let url = `${baseURL}/tasks/assigned-reported?page=${page}&statuses=${statuses}`
+export async function getUsersReportedAndAssignedTasksWithStatuses (page, statuses, search) {
+  search = encodeURI(search)
+  let url = `${baseURL}/tasks/assigned-reported?page=${page}&statuses=${statuses}&search=${search}`
   return fetchDataFromUrl(url)
 }
 

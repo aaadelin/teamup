@@ -5,25 +5,10 @@
     </div>
 
     <ul class="list-unstyled components">
-<!--      <p>Dummy Heading</p>-->
-<!--      <li class="active">-->
-<!--        <a href="#homeSubmenu" data-toggle="collapse" aria-expanded="false" class="dropdown-toggle">Home</a>-->
-<!--        <ul class="collapse list-unstyled" id="homeSubmenu">-->
-<!--          <li>-->
-<!--            <a href="#">Home 1</a>-->
-<!--          </li>-->
-<!--          <li>-->
-<!--            <a href="#">Home 2</a>-->
-<!--          </li>-->
-<!--          <li>-->
-<!--            <a href="#">Home 3</a>-->
-<!--          </li>-->
-<!--        </ul>-->
-<!--      </li>-->
       <p>Filter:</p>
       <li>
-        <input type="text" class="form-control" placeholder="Key words" style="width: 200px; margin: auto" >
-        <small>*Filtering only in visible tasks</small>
+        <input type="text" class="form-control" v-model="filter" placeholder="Key words" style="width: 200px; margin: auto" @change="filterChanged" >
+        <small>*Filtering is case insensitive</small>
       </li>
       <li>
         <label style="padding-left: 15px">
@@ -32,31 +17,33 @@
         </label>
       </li>
     </ul>
-    <ul class="ul components">
+    <ul class="components">
       <li>
-      <p>Sort:</p>
-          <label>
-            <input name="sort" type="radio">
-            By deadline
-          </label>
-        <br>
+        <p>Sort:</p>
+      </li>
+      <li style="text-align: left; padding-left: 20px">
         <label>
-            <input name="sort" type="radio">
-            By priority
-          </label>
-        <br>
-        <label>
-            <input name="sort" type="radio">
-            By priority
+        <input name="sort" type="radio" checked="checked" value="" @change="sortChanged">
+          None
         </label>
         <br>
         <label>
-            <input name="sort" type="radio">
-            By last modified
+          <input name="sort" type="radio" value="deadline" @change="sortChanged">
+          By deadline
         </label>
         <br>
         <label>
-          <input type="checkbox"> Descending
+          <input name="sort" type="radio" value="priority" @change="sortChanged">
+          By priority
+        </label>
+        <br>
+        <label>
+          <input name="sort" type="radio" value="modified" @change="sortChanged">
+          By last modified
+        </label>
+        <br>
+        <label>
+          <input value="descending" type="checkbox" id="desc" @change="sortChanged"> Descending
         </label>
       </li>
     </ul>
@@ -84,11 +71,21 @@ export default {
   },
   data () {
     return {
+      filter: ''
     }
   },
   methods: {
     reportedChanged () {
-
+      this.$emit('reportedChanged')
+    },
+    filterChanged () {
+      this.$emit('filter', this.filter)
+    },
+    sortChanged () {
+      let sort = document.querySelector('input[name="sort"]:checked').value
+      let desc = document.getElementById('desc').checked
+      let query = `sort=${sort}&desc=${desc}`
+      this.$emit('sort', query)
     }
   }
 }
@@ -138,7 +135,6 @@ export default {
 
   #sidebar ul p {
     color: #fff;
-    padding: 10px;
   }
 
   #sidebar ul li a {
@@ -173,7 +169,7 @@ export default {
   }
 
   li {
-    padding: 10px 0 10px 0
+    /*padding: 10px 0 10px 0*/
   }
 
 </style>
