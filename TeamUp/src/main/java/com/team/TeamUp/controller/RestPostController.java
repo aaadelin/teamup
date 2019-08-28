@@ -1,5 +1,6 @@
 package com.team.TeamUp.controller;
 
+import com.team.TeamUp.controller.get.RestGetController;
 import com.team.TeamUp.domain.*;
 import com.team.TeamUp.domain.enums.UserEventType;
 import com.team.TeamUp.domain.enums.UserStatus;
@@ -8,23 +9,17 @@ import com.team.TeamUp.persistance.*;
 import com.team.TeamUp.utils.DTOsConverter;
 import com.team.TeamUp.utils.TokenUtils;
 import com.team.TeamUp.utils.UserUtils;
-import com.team.TeamUp.validation.UserValidation;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import javax.persistence.ManyToOne;
-import javax.servlet.http.HttpServletRequest;
-import javax.ws.rs.FormParam;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.time.LocalDateTime;
@@ -39,17 +34,32 @@ import static org.springframework.web.bind.annotation.RequestMethod.POST;
 @RestController
 @RequestMapping("/api")
 @CrossOrigin
-public class RestPostController extends AbstractRestController {
+public class RestPostController {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(RestGetController.class);
 
-    @Autowired
     private UserUtils userUtils;
+    private TeamRepository teamRepository;
+    private UserRepository userRepository;
+    private TaskRepository taskRepository;
+    private ProjectRepository projectRepository;
+    private CommentRepository commentRepository;
+    private PostRepository postRepository;
+    private DTOsConverter dtOsConverter;
 
+    @Autowired
     public RestPostController(TeamRepository teamRepository, UserRepository userRepository, TaskRepository taskRepository,
                               ProjectRepository projectRepository, CommentRepository commentRepository, PostRepository postRepository,
-                              UserValidation userValidation, DTOsConverter dtOsConverter, UserEventRepository userEventRepository) {
-        super(teamRepository, userRepository, taskRepository, projectRepository, commentRepository, postRepository, userValidation, dtOsConverter, userEventRepository);
+                              DTOsConverter dtOsConverter, UserUtils userUtils) {
+        this.teamRepository = teamRepository;
+        this.userRepository = userRepository;
+        this.taskRepository = taskRepository;
+        this.projectRepository = projectRepository;
+        this.commentRepository = commentRepository;
+        this.postRepository = postRepository;
+        this.dtOsConverter = dtOsConverter;
+        this.userUtils = userUtils;
+
         LOGGER.info("Creating RestPostController");
     }
 
@@ -127,7 +137,7 @@ public class RestPostController extends AbstractRestController {
     }
 
     @RequestMapping(value = "/login", method = POST)
-    public ResponseEntity<?> getKeyForUser(HttpServletRequest request, @RequestParam Map<String, String> requestParameters) {
+    public ResponseEntity<?> getKeyForUser(@RequestParam Map<String, String> requestParameters) {
         LOGGER.info(String.format("Entering method to login with requested parameters: %s", requestParameters));
         String username = requestParameters.get("username");
         String password = requestParameters.get("password");
@@ -135,7 +145,7 @@ public class RestPostController extends AbstractRestController {
         password = new String(Base64.getDecoder().decode(password));
 
         LOGGER.info(String.format("Username: %s \n Password: %s", username, password));
-        if (username != null && password != null) {
+        if (username != null) {
             password = TokenUtils.getMD5Token(password);
 
             Optional<User> user = userRepository.findByUsernameAndPassword(username, password);

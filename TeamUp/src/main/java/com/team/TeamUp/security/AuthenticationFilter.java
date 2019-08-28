@@ -1,6 +1,6 @@
 package com.team.TeamUp.security;
 
-import com.team.TeamUp.controller.RestGetController;
+import com.team.TeamUp.controller.get.RestGetController;
 import com.team.TeamUp.domain.enums.UserStatus;
 import com.team.TeamUp.validation.UserValidation;
 import org.slf4j.Logger;

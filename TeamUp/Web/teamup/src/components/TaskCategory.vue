@@ -8,9 +8,12 @@
           <div class="modal-container">
 
             <div class="modal-header justify-content-end" style="height: 50px">
-              <slot name="header" >
+              <div class="col-10">
+                {{taskCategory.replace('_', ' ')}}
+              </div>
+              <div name="header" class="col-1" >
                 <p @click="closePopup" style="cursor: pointer">X</p>
-              </slot>
+              </div>
 
             </div>
 

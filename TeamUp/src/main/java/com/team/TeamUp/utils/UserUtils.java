@@ -1,6 +1,6 @@
 package com.team.TeamUp.utils;
 
-import com.team.TeamUp.controller.RestGetController;
+import com.team.TeamUp.controller.get.RestGetController;
 import com.team.TeamUp.domain.User;
 import com.team.TeamUp.domain.UserEvent;
 import com.team.TeamUp.domain.enums.UserEventType;
@@ -10,8 +10,6 @@ import org.apache.tomcat.util.codec.binary.Base64;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.parameters.P;
-import org.springframework.security.web.server.ui.LoginPageGeneratingWebFilter;
 import org.springframework.stereotype.Component;
 
 import javax.crypto.Cipher;

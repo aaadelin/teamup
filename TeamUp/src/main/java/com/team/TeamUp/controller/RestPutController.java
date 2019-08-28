@@ -1,5 +1,6 @@
 package com.team.TeamUp.controller;
 
+import com.team.TeamUp.controller.get.RestGetController;
 import com.team.TeamUp.domain.Project;
 import com.team.TeamUp.domain.Task;
 import com.team.TeamUp.domain.Team;
@@ -10,12 +11,14 @@ import com.team.TeamUp.dtos.ProjectDTO;
 import com.team.TeamUp.dtos.TaskDTO;
 import com.team.TeamUp.dtos.TeamDTO;
 import com.team.TeamUp.dtos.UserDTO;
-import com.team.TeamUp.persistance.*;
+import com.team.TeamUp.persistance.ProjectRepository;
+import com.team.TeamUp.persistance.TaskRepository;
+import com.team.TeamUp.persistance.TeamRepository;
+import com.team.TeamUp.persistance.UserRepository;
 import com.team.TeamUp.utils.DTOsConverter;
 import com.team.TeamUp.utils.TokenUtils;
 import com.team.TeamUp.utils.UserUtils;
 import com.team.TeamUp.validation.UserValidation;
-import org.apache.tomcat.util.security.MD5Encoder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,16 +35,31 @@ import java.util.Optional;
 @RestController
 @RequestMapping("/api")
 @CrossOrigin
-public class RestPutController extends AbstractRestController {
+public class RestPutController{
 
     private static final Logger LOGGER = LoggerFactory.getLogger(RestGetController.class);
-    @Autowired
-    private UserUtils userUtils;
 
+    private UserUtils userUtils;
+    private UserValidation userValidation;
+
+    private TeamRepository teamRepository;
+    private UserRepository userRepository;
+    private TaskRepository taskRepository;
+    private ProjectRepository projectRepository;
+    private DTOsConverter dtOsConverter;
+
+    @Autowired
     public RestPutController(TeamRepository teamRepository, UserRepository userRepository, TaskRepository taskRepository,
-                             ProjectRepository projectRepository, CommentRepository commentRepository, PostRepository postRepository,
-                             UserValidation userValidation, DTOsConverter dtOsConverter, UserEventRepository userEventRepository) {
-        super(teamRepository, userRepository, taskRepository, projectRepository, commentRepository, postRepository, userValidation, dtOsConverter, userEventRepository);
+                             ProjectRepository projectRepository, UserValidation userValidation, DTOsConverter dtOsConverter, UserUtils userUtils) {
+
+        this.teamRepository = teamRepository;
+        this.userRepository = userRepository;
+        this.taskRepository = taskRepository;
+        this.projectRepository = projectRepository;
+        this.dtOsConverter = dtOsConverter;
+
+        this.userValidation = userValidation;
+        this.userUtils = userUtils;
         LOGGER.info("Creating RestPutController");
     }
 
@@ -130,7 +148,7 @@ public class RestPutController extends AbstractRestController {
     public ResponseEntity<?> updateTeam(@RequestBody TeamDTO team, @RequestHeader Map<String, String> headers) {
         LOGGER.info(String.format("Entering update team with team: %s and headers: %s", team, headers));
 
-        User user = userRepository.findByHashKey(headers.get("token")).get();
+        User user = userRepository.findByHashKey(headers.get("token")).orElseThrow();
         if (team.getLeaderID() == user.getId() || user.getStatus().equals(UserStatus.ADMIN)) { //only the leader or admin can change AND only the admin can change the leader
 
             Optional<Team> teamOptional = teamRepository.findById(team.getId());
