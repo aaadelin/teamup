@@ -45,12 +45,12 @@
 
           <span> <strong>Task status: </strong>  <span v-if="editMode">
             <select @change="hasChanged" v-model="currentStatus" >
-                <option v-for="(taskStatus, index) in taskStatuses" :key="index">
-                  {{ taskStatus }}
+                <option v-for="(taskStatus, index) in taskStatuses" :key="index" :value="taskStatus">
+                  {{ taskStatus.replace('_', ' ') }}
                 </option>
             </select>
           </span>
-          <span @dblclick="editMode = canEditStatus || canEditAll" v-else>{{ task.taskStatus }}</span>
+          <span @dblclick="editMode = canEditStatus || canEditAll" v-else>{{ task.taskStatus.replace('_', ' ') }}</span>
           </span>
 
           <p></p>
@@ -166,7 +166,7 @@ export default {
       task: {
         summary: null,
         deadline: null,
-        taskStatus: null
+        taskStatus: ''
       },
       comments: [],
       user: localStorage.getItem('access_key'),

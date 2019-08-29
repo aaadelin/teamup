@@ -1,8 +1,9 @@
 <template>
   <div class="profile-page container" style="background-color: rgba(225,225,225,0.24); height: 100%; padding: 20px; margin-top: 20px">
-
-    <div class="col" style="text-align: right; cursor: pointer" v-if="canEdit" @click="editMode = !editMode">
-      <i class="fas fa-edit pointer"></i>
+    <div class="row justify-content-end">
+      <div class="col-1" style="text-align: right; cursor: pointer" v-if="canEdit" @click="editMode = !editMode" title="Edit mode (E)">
+        <i class="fas fa-edit pointer"></i>
+      </div>
     </div>
 
     <div class="col page">
@@ -157,6 +158,11 @@ export default {
           !this.editMode && this.canEdit &&
           document.activeElement.tagName !== 'INPUT') {
         this.editMode = true
+      }
+    })
+    document.addEventListener('keyup', (ev) => {
+      if (this.editMode && ev.key === 'Escape' && document.activeElement.tagName !== 'INPUT') {
+        this.editMode = false
       }
     })
   },

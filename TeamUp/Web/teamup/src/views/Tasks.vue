@@ -76,9 +76,7 @@ import TaskBox from '../components/TaskBox'
 import RightMenu from '../components/MySideMenu'
 import {
   getTaskById,
-  getUsersAssignedTasksWithStatus,
   getUsersAssignedTasksWithStatuses,
-  getUsersReportedAndAssignedTasksWithStatus,
   getUsersReportedAndAssignedTasksWithStatuses
 } from '../persistance/RestGetRepository'
 import { updateTask } from '../persistance/RestPutRepository'
@@ -105,6 +103,7 @@ export default {
       showMore: [true, true, true, true],
       maxPagesLoad: 5,
       filterWord: '',
+      query: 'sort=&desc=false',
 
       draggable_options: {
         dropzoneSelector: 'div',
@@ -169,28 +168,28 @@ export default {
       this.tasks = [[], [], [], []]
       let newTasks = []
       for (let i = 0; i <= this.pages[0]; i++) {
-        newTasks = await getUsersAssignedTasksWithStatuses(i, 'OPEN,REOPENED', this.filterWord)
+        newTasks = await getUsersAssignedTasksWithStatuses(i, 'OPEN,REOPENED', this.filterWord, this.query)
         this.tasks[0].push(...newTasks)
       }
       if (newTasks.length < 10) {
         this.showMore[0] = false
       }
       for (let i = 0; i <= this.pages[1]; i++) {
-        newTasks = await getUsersAssignedTasksWithStatus(i, 'IN_PROGRESS', this.filterWord)
+        newTasks = await getUsersAssignedTasksWithStatuses(i, 'IN_PROGRESS', this.filterWord, this.query)
         this.tasks[1].push(...newTasks)
       }
       if (newTasks.length < 10) {
         this.showMore[1] = false
       }
       for (let i = 0; i <= this.pages[2]; i++) {
-        newTasks = await getUsersAssignedTasksWithStatus(i, 'UNDER_REVIEW', this.filterWord)
+        newTasks = await getUsersAssignedTasksWithStatuses(i, 'UNDER_REVIEW', this.filterWord, this.query)
         this.tasks[2].push(...newTasks)
       }
       if (newTasks.length < 10) {
         this.showMore[2] = false
       }
       for (let i = 0; i <= this.pages[3]; i++) {
-        newTasks = await getUsersAssignedTasksWithStatus(i, 'APPROVED', this.filterWord)
+        newTasks = await getUsersAssignedTasksWithStatuses(i, 'APPROVED', this.filterWord, this.query)
         this.tasks[3].push(...newTasks)
       }
       if (newTasks.length < 10) {
@@ -201,28 +200,28 @@ export default {
       this.tasks = [[], [], [], []]
       let newTasks = []
       for (let i = 0; i <= this.pages[0]; i++) {
-        newTasks = await getUsersReportedAndAssignedTasksWithStatuses(i, 'OPEN,REOPENED', this.filterWord)
+        newTasks = await getUsersReportedAndAssignedTasksWithStatuses(i, 'OPEN,REOPENED', this.filterWord, this.query)
         this.tasks[0].push(...newTasks)
       }
       if (newTasks.length < 10) {
         this.showMore[0] = false
       }
       for (let i = 0; i <= this.pages[1]; i++) {
-        newTasks = await getUsersReportedAndAssignedTasksWithStatus(i, 'IN_PROGRESS', this.filterWord)
+        newTasks = await getUsersReportedAndAssignedTasksWithStatuses(i, 'IN_PROGRESS', this.filterWord, this.query)
         this.tasks[1].push(...newTasks)
       }
       if (newTasks.length < 10) {
         this.showMore[1] = false
       }
       for (let i = 0; i <= this.pages[2]; i++) {
-        newTasks = await getUsersReportedAndAssignedTasksWithStatus(i, 'UNDER_REVIEW', this.filterWord)
+        newTasks = await getUsersReportedAndAssignedTasksWithStatuses(i, 'UNDER_REVIEW', this.filterWord, this.query)
         this.tasks[2].push(...newTasks)
       }
       if (newTasks.length < 10) {
         this.showMore[2] = false
       }
       for (let i = 0; i <= this.pages[3]; i++) {
-        newTasks = await getUsersReportedAndAssignedTasksWithStatus(i, 'APPROVED', this.filterWord)
+        newTasks = await getUsersReportedAndAssignedTasksWithStatuses(i, 'APPROVED', this.filterWord, this.query)
         this.tasks[3].push(...newTasks)
       }
       if (newTasks.length < 10) {
@@ -235,9 +234,9 @@ export default {
         case 'todo':
           this.pages[0]++
           if (this.reportedTasks) {
-            newTasks = await getUsersReportedAndAssignedTasksWithStatuses(this.pages[0], 'OPEN,REOPENED')
+            newTasks = await getUsersReportedAndAssignedTasksWithStatuses(this.pages[0], 'OPEN,REOPENED', '', this.query)
           } else {
-            newTasks = await getUsersAssignedTasksWithStatuses(this.pages[0], 'OPEN,REOPENED')
+            newTasks = await getUsersAssignedTasksWithStatuses(this.pages[0], 'OPEN,REOPENED', '', this.query)
           }
           if (newTasks.length < 10) {
             this.showMore[0] = false
@@ -247,9 +246,9 @@ export default {
         case 'in-progress':
           this.pages[1]++
           if (this.reportedTasks) {
-            newTasks = await getUsersReportedAndAssignedTasksWithStatus(this.pages[1], 'IN_PROGRESS')
+            newTasks = await getUsersReportedAndAssignedTasksWithStatuses(this.pages[1], 'IN_PROGRESS', '', this.query)
           } else {
-            newTasks = await getUsersAssignedTasksWithStatus(this.pages[1], 'IN_PROGRESS')
+            newTasks = await getUsersAssignedTasksWithStatuses(this.pages[1], 'IN_PROGRESS', '', this.query)
           }
           if (newTasks.length < 10) {
             this.showMore[1] = false
@@ -260,9 +259,9 @@ export default {
           this.pages[2]++
 
           if (this.reportedTasks) {
-            newTasks = await getUsersReportedAndAssignedTasksWithStatus(this.pages[2], 'UNDER_REVIEW')
+            newTasks = await getUsersReportedAndAssignedTasksWithStatuses(this.pages[2], 'UNDER_REVIEW', '', this.query)
           } else {
-            newTasks = await getUsersAssignedTasksWithStatus(this.pages[2], 'UNDER_REVIEW')
+            newTasks = await getUsersAssignedTasksWithStatuses(this.pages[2], 'UNDER_REVIEW', '', this.query)
           }
           if (newTasks.length < 10) {
             this.showMore[2] = false
@@ -273,9 +272,9 @@ export default {
           this.pages[3]++
 
           if (this.reportedTasks) {
-            newTasks = await getUsersReportedAndAssignedTasksWithStatus(this.pages[3], 'APPROVED')
+            newTasks = await getUsersReportedAndAssignedTasksWithStatuses(this.pages[3], 'APPROVED', '', this.query)
           } else {
-            newTasks = await getUsersAssignedTasksWithStatus(this.pages[3], 'APPROVED')
+            newTasks = await getUsersAssignedTasksWithStatuses(this.pages[3], 'APPROVED', '', this.query)
           }
           if (newTasks.length < 10) {
             this.showMore[3] = false
@@ -429,7 +428,8 @@ export default {
       await this.getUsersTasks()
     },
     async sortTasks (query) {
-      console.log(query)
+      this.query = query
+      this.getUsersTasks()
     }
   },
   filters: {

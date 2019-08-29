@@ -33,7 +33,7 @@
 </template>
 
 <script>
-import { getUsersAssignedTasksWithStatus, getUsersAssignedTasksWithStatuses } from '../persistance/RestGetRepository'
+import { getUsersAssignedTasksWithStatuses } from '../persistance/RestGetRepository'
 import TaskBox from './TaskBox'
 
 export default {
@@ -90,9 +90,9 @@ export default {
       if (this.taskCategory === 'TO DO') {
         newTasks.push(...await getUsersAssignedTasksWithStatuses(this.page, 'OPEN,REOPENED'))
       } else if (this.taskCategory === 'DONE') {
-        newTasks.push(...await getUsersAssignedTasksWithStatus(this.page, 'APPROVED'))
+        newTasks.push(...await getUsersAssignedTasksWithStatuses(this.page, 'APPROVED'))
       } else {
-        newTasks.push(...await getUsersAssignedTasksWithStatus(this.page, this.taskCategory.replace(' ', '_')))
+        newTasks.push(...await getUsersAssignedTasksWithStatuses(this.page, this.taskCategory.replace(' ', '_')))
       }
       this.page++
       if (newTasks.length < 10) {

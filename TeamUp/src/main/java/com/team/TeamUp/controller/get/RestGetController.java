@@ -64,9 +64,16 @@ public class RestGetController {
     }
 
     @RequestMapping(value = "/projects", method = GET)
-    public ResponseEntity<?> getAllProjects(@RequestHeader Map<String, String> headers) {
-        LOGGER.info(String.format("Entering get all projects method with headers: %s", headers.toString()));
-        List<ProjectDTO> projects = projectRepository.findAll().stream().map(dtOsConverter::getDTOFromProject).collect(Collectors.toList());
+    public ResponseEntity<?> getAllProjects(@RequestHeader Map<String, String> headers,
+                                            @RequestParam(name = "search", required = false) String search) {
+        LOGGER.info(String.format("Entering get all projects method with headers: %s and search term: %s", headers, search));
+        List<ProjectDTO> projects;
+        if(search != null){
+            projects = projectRepository.findAllByNameContainingOrDescriptionContaining(search, search)
+                    .stream().map(dtOsConverter::getDTOFromProject).collect(Collectors.toList());
+        }else{
+            projects = projectRepository.findAll().stream().map(dtOsConverter::getDTOFromProject).collect(Collectors.toList());
+        }
         LOGGER.info(String.format("Returning list of projects: %s", projects));
         return new ResponseEntity<>(projects, HttpStatus.OK);
     }

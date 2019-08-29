@@ -43,11 +43,18 @@
         </label>
         <br>
         <label>
-          <input value="descending" type="checkbox" id="desc" @change="sortChanged"> Descending
+          <input value="descending" type="checkbox" id="desc" @change="sortChanged"> <strong style="margin-left: 5px">Descending</strong>
         </label>
       </li>
     </ul>
-<!--      todo: apply si clear-->
+    <ul class="list-unstyled components">
+      <li style="text-align: left; padding-left: 5px">
+        <label style="padding-left: 15px">
+          <input type="checkbox" @change="smallView">
+          Switch to small view
+      </label>
+      </li>
+    </ul>
   </div>
 
 </template>
@@ -86,6 +93,9 @@ export default {
       let desc = document.getElementById('desc').checked
       let query = `sort=${sort}&desc=${desc}`
       this.$emit('sort', query)
+    },
+    smallView () {
+      console.log('CREATE SMALL VIEW')
     }
   }
 }

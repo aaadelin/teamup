@@ -149,28 +149,14 @@ public class RestGetTaskController {
     @RequestMapping(value = "/tasks/assigned", method = GET)
     public ResponseEntity<?> getAssignedTasks(@RequestHeader Map<String, String> headers,
                                               @RequestParam(value = "page") Integer startPage,
-                                              @RequestParam(value = "status", required = false) TaskStatus status,
                                               @RequestParam(value = "search", required = false) String search,
                                               @RequestParam(value = "sort", required = false) String sort,
                                               @RequestParam(value = "desc", required = false) Boolean desc,
                                               @RequestParam(value = "statuses", required = false) List<TaskStatus> statuses){
-        LOGGER.info(String.format("Entered method to get assigned tasks with parameters: \nheaders: %s \nstart page: %s\nstatus: %s \n statuses: %s, search %s", headers, startPage, status, statuses, search));
+        LOGGER.info(String.format("Entered method to get assigned tasks with parameters: \nheaders: %s \nstart page: %s\nstatuses: %s, search %s, sort %s, desc %s",
+                headers, startPage, statuses, search, sort, desc));
         User user = userRepository.findByHashKey(headers.get("token")).orElseThrow();
-        List<TaskDTO> taskDTOS;
-        if(status != null){
-            LOGGER.info("Filter method preferred: by one single status");
-            taskDTOS = taskRepository.findAllByTaskStatusAndAssigneesContaining(status,
-                    user,
-                    PageRequest.of(startPage, PAGE_SIZE))
-                    .stream().map(dtOsConverter::getDTOFromTask).collect(Collectors.toList());
-        }else{
-            LOGGER.info("Filter method preferred: by multiple statuses");
-            taskDTOS = taskRepository.findAllByTaskStatusInAndAssigneesContaining(statuses,
-                    user,
-                    PageRequest.of(startPage, PAGE_SIZE))
-                    .stream().map(dtOsConverter::getDTOFromTask).collect(Collectors.toList());
-        }
-        taskDTOS = taskUtils.filterTasks(search, taskDTOS);
+        List<TaskDTO> taskDTOS = taskUtils.findAssignedTasksByParameters(user, startPage, statuses, search, sort, desc);
         LOGGER.info(String.format("Exiting with list of tasks: %s", taskDTOS));
         return new ResponseEntity<>(taskDTOS, HttpStatus.OK);
     }

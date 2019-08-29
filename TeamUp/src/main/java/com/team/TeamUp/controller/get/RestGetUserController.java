@@ -184,14 +184,15 @@ public class RestGetUserController {
     public ResponseEntity<?> getTasksFor(@PathVariable int id,
                                          @RequestParam(value = "type", required = false) String type,
                                          @RequestParam(value = "search", required = false) String term,
+                                         @RequestParam(value = "page") Integer page,
                                          @RequestHeader Map<String, String> headers) {
-        LOGGER.info(String.format("Entering get user's tasks with user id %s, type value %s, term value %s and headers %s", id, type, term, headers));
+        LOGGER.info(String.format("Entering get user's tasks with user id %s, type value %s, term value %s, page %s and headers %s", id, type, term, page, headers));
         User user = userRepository.findById(id).orElseThrow();
         if (type == null) {
 
             JSONObject arrays = new JSONObject();
-            arrays.put("reported", new JSONArray(taskUtils.getFilteredTasksByType(user, term, "assignedby")));
-            arrays.put("assigned", new JSONArray(taskUtils.getFilteredTasksByType(user, term, "assignedto")));
+            arrays.put("reported", new JSONArray(taskUtils.getFilteredTasksByType(user, term, "assignedby", page)));
+            arrays.put("assigned", new JSONArray(taskUtils.getFilteredTasksByType(user, term, "assignedto", page)));
 
             LOGGER.info(String.format("Exited with list of tasks assigned to and by user %s: %s", user, arrays.toString()));
             return new ResponseEntity<>(arrays.toString(), HttpStatus.OK);
@@ -200,9 +201,9 @@ public class RestGetUserController {
 
             if (type.toLowerCase().equals("assignedto")) {
                 arrays.put("reported", new JSONArray());
-                arrays.put("assigned", new JSONArray(taskUtils.getFilteredTasksByType(user, term, type)));
+                arrays.put("assigned", new JSONArray(taskUtils.getFilteredTasksByType(user, term, type, page)));
             } else if (type.toLowerCase().equals("assignedby")) {
-                arrays.put("reported", new JSONArray(taskUtils.getFilteredTasksByType(user, term, type)));
+                arrays.put("reported", new JSONArray(taskUtils.getFilteredTasksByType(user, term, type, page)));
                 arrays.put("assigned", new ArrayList<>());
             } else {
                 LOGGER.info(String.format("Type option not eligible. Send type: %s", type));

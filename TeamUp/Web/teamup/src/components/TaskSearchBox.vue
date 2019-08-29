@@ -12,7 +12,7 @@
                          highlightClassName="highlight"
       :searchWords="keywords"
       :auto-escape="true"
-      :textToHighlight="task.description"/>
+      :textToHighlight="description"/>
   <br>
   </div>
 </template>
@@ -27,7 +27,6 @@ export default {
       required: true,
       default: {
         summary: '',
-        description: '',
         status: ''
       }
     },
@@ -42,6 +41,9 @@ export default {
     },
     summary () {
       return this.task.summary + ' [' + this.task.taskStatus + ']'
+    },
+    description () {
+      return this.task.description.substr(0, 200) + (this.task.description.length > 200 ? '...' : '')
     }
   },
   methods: {

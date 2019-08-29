@@ -151,10 +151,10 @@ public class DTOsConverter {
         Optional<User> reporter = userRepository.findByHashKey(reporterKey);
         task.setReporter(reporter.orElseThrow());
 
-        if(taskDTO.getDeadline().isBefore(task.getProject().getDeadline())){
+        if(taskDTO.getDeadline().isBefore(task.getProject().getDeadline()) && taskDTO.getDeadline().isAfter(LocalDateTime.now().minusMinutes(1))){ //because of the possible delay of the network, it is acceptable to be 1 minute earlier than NOW
             task.setDeadline(taskDTO.getDeadline());
         }else{
-            throw new IllegalArgumentException("Task deadline whould be before project deadline");
+            throw new IllegalArgumentException("Task deadline would be after project's deadline or before NOW");
         }
 
         if (taskDTO.getDifficulty() <= 3 && taskDTO.getDifficulty() >= 1) {

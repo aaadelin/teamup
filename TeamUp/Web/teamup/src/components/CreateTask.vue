@@ -77,7 +77,7 @@
                 <div class="row">
                   <label for="department" class="col-md-3">Department </label>
                   <select id="department" name="department" v-model="department" class="form-control col-md-8"  :class="{ 'is-invalid': dataFailed && !department }">
-                    <option v-for="(department, index) in departments" :key="index">{{ department }}</option>
+                    <option v-for="(department, index) in departments" :key="index" :value="department">{{ department.replace('_', ' ') }}</option>
                   </select>
                 </div>
 
@@ -130,7 +130,20 @@ import { saveTask } from '../persistance/RestPostRepository'
 // Import date picker css
 
 export default {
-  async beforeMount () {
+  watch: {
+    'isVisible': function isVisibleChanged () {
+      if (this.isVisible) {
+        let exists = setInterval(() => {
+          let summary = document.getElementById('summary')
+          if (summary !== null) {
+            summary.focus()
+            clearInterval(exists)
+          }
+        }, 100)
+      }
+    }
+  },
+  async mounted () {
     if (this.$store.state.access_key) {
       await this.getDataArrays()
 

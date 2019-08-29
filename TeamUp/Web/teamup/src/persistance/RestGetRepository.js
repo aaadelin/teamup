@@ -64,6 +64,12 @@ export async function getProjects () {
   return fetchDataFromUrl(url, [])
 }
 
+export async function findProjects (searchTerm) {
+  searchTerm = encodeURI(searchTerm)
+  let url = `${baseURL}/projects?search=${searchTerm}`
+  return fetchDataFromUrl(url, [])
+}
+
 export async function getProjectById (id) {
   let url = `${baseURL}/project/${id}`
   return fetchDataFromUrl(url)
@@ -107,18 +113,18 @@ export async function getUsersAssignedTasks (pages) {
   return tasks
 }
 
-export async function getUsersAssignedAndReportedTasks (pages) {
-  let todoTasks = await getUsersReportedAndAssignedTasksWithStatuses(pages[0], 'OPEN,REOPENED')
-  let inProgressTasks = await getUsersReportedAndAssignedTasksWithStatus(pages[1], 'IN_PROGRESS')
-  let underReviewTasks = await getUsersReportedAndAssignedTasksWithStatus(pages[2], 'UNDER_REVIEW')
-  let approvedTasks = await getUsersReportedAndAssignedTasksWithStatus(pages[3], 'APPROVED')
-
-  let tasks = [todoTasks, inProgressTasks, underReviewTasks, approvedTasks]
-  if (todoTasks == null || inProgressTasks == null || underReviewTasks == null || approvedTasks == null) {
-    return null
-  }
-  return tasks
-}
+// export async function getUsersAssignedAndReportedTasks (pages) {
+//   let todoTasks = await getUsersReportedAndAssignedTasksWithStatuses(pages[0], 'OPEN,REOPENED')
+//   let inProgressTasks = await getUsersReportedAndAssignedTasksWithStatus(pages[1], 'IN_PROGRESS')
+//   let underReviewTasks = await getUsersReportedAndAssignedTasksWithStatus(pages[2], 'UNDER_REVIEW')
+//   let approvedTasks = await getUsersReportedAndAssignedTasksWithStatus(pages[3], 'APPROVED')
+//
+//   let tasks = [todoTasks, inProgressTasks, underReviewTasks, approvedTasks]
+//   if (todoTasks == null || inProgressTasks == null || underReviewTasks == null || approvedTasks == null) {
+//     return null
+//   }
+//   return tasks
+// }
 
 export async function getUsersAssignedTasksWithStatus (page, status, search = '') {
   search = encodeURI(search)
@@ -126,22 +132,22 @@ export async function getUsersAssignedTasksWithStatus (page, status, search = ''
   return fetchDataFromUrl(url)
 }
 
-export async function getUsersAssignedTasksWithStatuses (page, statuses, search = '') {
+export async function getUsersAssignedTasksWithStatuses (page, statuses, search = '', sort = 'sort=&desc=false') {
   search = encodeURI(search)
-  let url = `${baseURL}/tasks/assigned?page=${page}&statuses=${statuses}&search=${search}`
+  let url = `${baseURL}/tasks/assigned?page=${page}&statuses=${statuses}&search=${search}&${sort}`
   return fetchDataFromUrl(url)
 }
 
-export async function getUsersReportedTasksWithStatus (page, status) {
-  let url = `${baseURL}/tasks/reported?page=${page}&status=${status}`
-  return fetchDataFromUrl(url)
-}
+// export async function getUsersReportedTasksWithStatus (page, status) {
+//   let url = `${baseURL}/tasks/reported?page=${page}&status=${status}`
+//   return fetchDataFromUrl(url)
+// }
 
-export async function getUsersReportedAndAssignedTasksWithStatus (page, status, search = '') {
-  search = encodeURI(search)
-  let url = `${baseURL}/tasks/assigned-reported?page=${page}&status=${status}&search=${search}`
-  return fetchDataFromUrl(url)
-}
+// export async function getUsersReportedAndAssignedTasksWithStatus (page, status, search = '') {
+//   search = encodeURI(search)
+//   let url = `${baseURL}/tasks/assigned-reported?page=${page}&status=${status}&search=${search}`
+//   return fetchDataFromUrl(url)
+// }
 
 export async function getUsersReportedAndAssignedTasksWithStatuses (page, statuses, search) {
   search = encodeURI(search)
@@ -177,16 +183,13 @@ export async function getUsersByIds (ids) {
   return []
 }
 
-export async function getUsersTasks (userId, searchTerm = null, options = null) {
-  let url = `${baseURL}/users/${userId}/tasks`
-  if (options !== null || searchTerm !== null) {
-    url += '?'
-  }
-  if (options !== null) {
-    url += 'type=' + options
+export async function getUsersTasks (userId, searchTerm = null, type = null, page = 0) {
+  let url = `${baseURL}/users/${userId}/tasks?page=${page}&`
+  if (type !== null) {
+    url += `type=${type}&`
   }
   if (searchTerm !== null) {
-    url += 'search=' + searchTerm
+    url += `search=${searchTerm}`
   }
   return fetchDataFromUrl(url, { 'reported': [], 'assigned': [] })
 }
