@@ -119,6 +119,7 @@ import TaskCategory from '../components/TaskCategory'
 import { uploadPhoto } from '../persistance/RestPostRepository'
 import { deletePhoto } from '../persistance/RestDeleteRepository'
 import { updatePassword } from '../persistance/RestPutRepository'
+import NProgress from 'nprogress'
 
 export default {
   watch: {
@@ -203,10 +204,11 @@ export default {
     }
   },
   methods: {
-    loadAllData () {
-      this.getPhoto()
+    async loadAllData() {
       this.getUser()
       this.getUserStatistics()
+      await this.getPhoto()
+      NProgress.done()
     },
     getPhoto () {
       getUsersPhoto(this.userId).then(photo => {

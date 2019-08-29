@@ -61,6 +61,7 @@
 import { findProjects, getMyID, getUsersTasks } from '../persistance/RestGetRepository'
 import TaskSearchBox from '../components/TaskSearchBox'
 import ProjectBox from '../components/ProjectBox'
+import NProgress from 'nprogress'
 
 export default {
   components: { ProjectBox, TaskSearchBox },
@@ -118,6 +119,7 @@ export default {
       }
 
       this.projects = await findProjects(this.searchTerm)
+      NProgress.done()
     },
     sortSelected () {
 

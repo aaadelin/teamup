@@ -154,6 +154,7 @@ import {
 import { updateTask } from '../persistance/RestPutRepository'
 import CommentForm from '../components/CommentForm'
 import SimpleComment from '../components/SimpleComment'
+import NProgress from 'nprogress'
 
 export default {
   name: 'TaskPost',
@@ -202,6 +203,7 @@ export default {
       let taskPostData
       try {
         taskPostData = await getPostByTaskId(this.$route.query.taskId)
+        NProgress.done()
       } catch (e) {
         this.$notify({
           group: 'notificationsGroup',

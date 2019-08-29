@@ -1,6 +1,8 @@
 import Vue from 'vue'
 import Router from 'vue-router'
 import Home from './views/Home.vue'
+import NProgress from 'nprogress'
+import '../node_modules/nprogress/nprogress.css'
 
 Vue.use(Router)
 
@@ -52,6 +54,7 @@ export const router = new Router({
 })
 
 router.beforeEach((to, from, next) => {
+  NProgress.start()
   const publicPages = ['/login', '/']
   const authRequired = !publicPages.includes(to.fullPath)
   const loggedIn = localStorage.getItem('access_key')
@@ -72,4 +75,7 @@ router.beforeEach((to, from, next) => {
   }
 
   next()
+})
+
+router.afterEach((to, from) => {
 })

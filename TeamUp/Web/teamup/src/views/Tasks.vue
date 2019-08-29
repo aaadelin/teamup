@@ -80,6 +80,7 @@ import {
   getUsersReportedAndAssignedTasksWithStatuses
 } from '../persistance/RestGetRepository'
 import { updateTask } from '../persistance/RestPutRepository'
+import NProgress from 'nprogress'
 
 export default {
   async beforeMount () {
@@ -147,6 +148,7 @@ export default {
       await this.getUsersTasks()
     },
     async getUsersTasks () {
+      NProgress.start()
       this.showMore = [true, true, true, true]
       this.tasks = [[], [], [], []]
       if (this.reportedTasks) {
@@ -154,7 +156,7 @@ export default {
       } else {
         await this.getAssignedTasks()
       }
-
+      NProgress.done()
       if (this.tasks === null) {
         this.$notify({
           group: 'notificationsGroup',

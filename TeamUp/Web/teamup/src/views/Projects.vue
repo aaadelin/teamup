@@ -12,6 +12,7 @@
 <script>
 import { getProjects } from '../persistance/RestGetRepository'
 import ProjectBox from '../components/ProjectBox'
+import NProgress from 'nprogress'
 
 export default {
   name: 'Projects',
@@ -27,6 +28,7 @@ export default {
   methods: {
     async loadData () {
       this.projects = await getProjects()
+      NProgress.done()
     }
   }
 }
