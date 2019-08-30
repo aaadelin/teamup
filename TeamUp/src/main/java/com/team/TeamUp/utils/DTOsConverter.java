@@ -31,6 +31,7 @@ public class DTOsConverter {
     private ProjectRepository projectRepository;
     private PostRepository postRepository;
     private CommentRepository commentRepository;
+    private LocationRepository locationRepository;
     private TaskValidation taskValidation;
 
     public DTOsConverter(UserRepository userRepository,
@@ -38,6 +39,7 @@ public class DTOsConverter {
                          TaskRepository taskRepository,
                          ProjectRepository projectRepository,
                          PostRepository postRepository,
+                         LocationRepository locationRepository,
                          CommentRepository commentRepository) {
 
         this.userRepository = userRepository;
@@ -45,6 +47,7 @@ public class DTOsConverter {
         this.taskRepository = taskRepository;
         this.projectRepository = projectRepository;
         this.postRepository = postRepository;
+        this.locationRepository = locationRepository;
         this.commentRepository = commentRepository;
 
         this.taskValidation = new TaskValidation();
@@ -297,7 +300,7 @@ public class DTOsConverter {
 
         team.setName(teamDTO.getName());
         team.setDescription(teamDTO.getDescription());
-        team.setLocation(teamDTO.getLocation());
+        team.setLocation(getLocationFromDTO(teamDTO.getLocation()));
         team.setDepartment(teamDTO.getDepartment());
 
         LOGGER.info(String.format("Instance of type Team created: %s", team));
@@ -335,7 +338,7 @@ public class DTOsConverter {
         teamDTO.setId(team.getId());
         teamDTO.setName(team.getName());
         teamDTO.setDescription(team.getDescription());
-        teamDTO.setLocation(team.getLocation());
+        teamDTO.setLocation(getDTOFromLocation(team.getLocation()));
         teamDTO.setDepartment(team.getDepartment());
         if (team.getLeader() != null) {
             teamDTO.setLeaderID(team.getLeader().getId());
@@ -344,6 +347,36 @@ public class DTOsConverter {
 
         LOGGER.info(String.format("Instance of type team created: %s", teamDTO));
         return teamDTO;
+    }
+
+    public LocationDTO getDTOFromLocation(Location location){
+        LOGGER.info(String.format("Method to convert from location to DTO entered with parameter: %s", location));
+        LocationDTO locationDTO = new LocationDTO();
+
+        locationDTO.setId(location.getId());
+        locationDTO.setAddress(location.getAddress());
+        locationDTO.setCity(location.getCity());
+        locationDTO.setCountry(location.getCountry());
+        locationDTO.setTeams(location.getTeams().stream().map(Team::getId).collect(Collectors.toList()));
+
+        LOGGER.info(String.format("Exiting with entity: %s", locationDTO));
+        return locationDTO;
+    }
+
+    public Location getLocationFromDTO(LocationDTO locationDTO){
+        LOGGER.info(String.format("Method to convert from locationDTO to Location entered with parameter: %s", locationDTO));
+
+        Optional<Location> locationOptional = locationRepository.findById(locationDTO.getId());
+        Location location = new Location();
+        locationOptional.ifPresent(value -> location.setId(value.getId()));
+
+        location.setAddress(locationDTO.getAddress());
+        location.setCity(locationDTO.getCity());
+        location.setCountry(locationDTO.getCountry());
+        location.setTeams(teamRepository.findAllById(locationDTO.getTeams()));
+        LOGGER.info(String.format("Exiting with entity: %s", location));
+
+        return location;
     }
 
     public Comment getCommentFromDTO(CommentDTO commentDTO) {

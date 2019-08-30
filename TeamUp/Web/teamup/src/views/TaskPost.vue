@@ -153,7 +153,7 @@ import {
 } from '../persistance/RestGetRepository'
 import { updateTask } from '../persistance/RestPutRepository'
 import CommentForm from '../components/CommentForm'
-import SimpleComment from '../components/SimpleComment'
+import SimpleComment from '../components/containers/SimpleComment'
 import NProgress from 'nprogress'
 
 export default {

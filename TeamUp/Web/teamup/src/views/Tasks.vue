@@ -3,7 +3,8 @@
     <right-menu :name="navName" :menu="menu"
                 @reportedChanged="changeVisibleTasks"
                 @filter="filterTasks"
-                @sort="sortTasks"/>
+                @sort="sortTasks"
+                @smallView="smallView = !smallView"/>
   <div id="content" class="container-fluid" >
       <div class="row justify-content-center">
         <div class="col-4" style="margin-top: 5px">
@@ -17,9 +18,10 @@
           <b class="category">TO DO </b>
           <span class="quantity">{{ tasks[0].length }}{{ this.showMore[0] ? '+':'' }}</span>
         </span>
-        <div id="todo-category" v-if="todo_category">
-          <task-box v-for="task1 in tasks[0]"
-                    v-bind:key="task1.id"
+        <div id="todo-category" v-show="todo_category" v-for="task1 in tasks[0]"  v-bind:key="task1.id">
+          <task-box v-if="!smallView"
+                    :task="task1"/>
+          <small-task-box v-else
                     :task="task1"/>
         </div>
         <div style="color: #6d7fcc; cursor: pointer" v-if="this.showMore[0]" @click="loadMore('todo')">Load more...</div>
@@ -30,9 +32,10 @@
           <b class="category">IN PROGRESS </b>
           <span class="quantity">{{ tasks[1].length }}{{ this.showMore[1]  ? '+':'' }}</span>
         </span>
-        <div id="in-progress-category" v-if="in_progress_category">
-          <task-box v-for="task1 in tasks[1]"
-                    v-bind:key="task1.id"
+        <div id="in-progress-category" v-show="in_progress_category" v-for="task1 in tasks[1]"  v-bind:key="task1.id">
+          <task-box v-if="!smallView"
+                    :task="task1"/>
+          <small-task-box v-else
                     :task="task1"/>
         </div>
         <div style="color: #6d7fcc; cursor: pointer" v-if="this.showMore[1]" @click="loadMore('in-progress')">Load more...</div>
@@ -43,10 +46,11 @@
           <b class="category">UNDER REVIEW </b>
           <span class="quantity"> {{ tasks[2].length }}{{ this.showMore[2] ? '+':'' }}</span>
         </span>
-        <div id="under-review-category" v-if="under_review_category">
-          <task-box v-for="task1 in tasks[2]"
-                    v-bind:key="task1.id"
+        <div id="under-review-category" v-show="under_review_category" v-for="task1 in tasks[2]"  v-bind:key="task1.id">
+          <task-box v-if="!smallView"
                     :task="task1"/>
+          <small-task-box v-else
+                          :task="task1"/>
         </div>
         <div style="color: #6d7fcc; cursor: pointer" v-if="this.showMore[2]" @click="loadMore('under-review')">Load more...</div>
       </div>
@@ -56,10 +60,11 @@
           <b class="category">DONE </b>
           <span class="quantity">{{ tasks[3].length }}{{ this.showMore[3]  ? '+':'' }}</span>
         </span>
-        <div id="done-category" v-if="done_category">
-          <task-box v-for="task1 in tasks[3]"
-                    v-bind:key="task1.id"
+        <div id="done-category" v-show="done_category" v-for="task1 in tasks[3]"  v-bind:key="task1.id">
+          <task-box v-if="!smallView"
                     :task="task1"/>
+          <small-task-box v-else
+                          :task="task1"/>
         </div>
         <div style="color: #6d7fcc; cursor: pointer" v-if="this.showMore[3]" @click="loadMore('done')">Load more...</div>
       </div>
@@ -72,7 +77,7 @@
 </template>
 
 <script>
-import TaskBox from '../components/TaskBox'
+import TaskBox from '../components/containers/TaskBox'
 import RightMenu from '../components/MySideMenu'
 import {
   getTaskById,
@@ -81,6 +86,7 @@ import {
 } from '../persistance/RestGetRepository'
 import { updateTask } from '../persistance/RestPutRepository'
 import NProgress from 'nprogress'
+import SmallTaskBox from '../components/containers/SmallTaskBox'
 
 export default {
   async beforeMount () {
@@ -88,7 +94,7 @@ export default {
     document.title = 'TeamUp | Tasks'
   },
   name: 'Tasks',
-  components: { RightMenu, TaskBox },
+  components: { SmallTaskBox, RightMenu, TaskBox },
   data () {
     return {
       tasks: [[], [], [], []],
@@ -105,6 +111,7 @@ export default {
       maxPagesLoad: 5,
       filterWord: '',
       query: 'sort=&desc=false',
+      smallView: false,
 
       draggable_options: {
         dropzoneSelector: 'div',

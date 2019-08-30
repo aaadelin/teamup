@@ -31,12 +31,14 @@ public class TaskUtils {
         this.dtOsConverter = dtOsConverter;
     }
 
-    public List<TaskDTO> getFilteredTasksByType(User user, String term, String type, int page){
+    public List<TaskDTO> getFilteredTasksByType(User user, String term, String type, int page, List<TaskStatus> statuses){
         List<Task> tasks = new ArrayList<>();
         if(type != null && type.toLowerCase().equals("assignedto")){
-            tasks = taskRepository.findAllByAssigneesContainingAndSummaryContainingOrDescriptionContaining(user, term, term, PageRequest.of(page, PAGE_SIZE));
+            tasks = taskRepository.findAllByAssigneesContainingAndSummaryContainingOrDescriptionContainingAndTaskStatusIn(user.getId(), term, statuses.stream().map(Enum::ordinal)
+                    .collect(Collectors.toList()), PageRequest.of(page, PAGE_SIZE));
         }else if(type != null && type.toLowerCase().equals("assignedby")){
-            tasks = taskRepository.findAllByReporterAndSummaryContainingOrDescriptionContaining(user, term, term, PageRequest.of(page, PAGE_SIZE));
+            tasks = taskRepository.findAllByReporterAndSummaryContainingOrDescriptionContainingAndTaskStatusIn(user.getId(), term, statuses.stream().map(Enum::ordinal)
+                    .collect(Collectors.toList()), PageRequest.of(page, PAGE_SIZE));
         }
 
         if(term == null){

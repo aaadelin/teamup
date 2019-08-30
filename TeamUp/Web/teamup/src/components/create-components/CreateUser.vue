@@ -89,7 +89,7 @@
               <div class="row">
                 <label for="status" class="col-md-3">Status </label>
                 <select v-model="status" name="status" id="status" class="form-control col-md-8">
-                  <option v-for="(status, index) in statuses" :key="index">{{status}}</option>
+                  <option v-for="(status, index) in statuses" :key="index" :value="status">{{status.replace('_', ' ')}}</option>
                 </select>
               </div>
               </slot>
@@ -120,8 +120,8 @@
 
 <script>
 import 'pc-bootstrap4-datetimepicker/build/css/bootstrap-datetimepicker.css'
-import { getTeams, getUserStatuses } from '../persistance/RestGetRepository'
-import { saveUser } from '../persistance/RestPostRepository'
+import { getTeams, getUserStatuses } from '../../persistance/RestGetRepository'
+import { saveUser } from '../../persistance/RestPostRepository'
 
 export default {
   async beforeMount () {

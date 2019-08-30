@@ -40,13 +40,24 @@ export default {
       return this.word.split(' ')
     },
     summary () {
-      return this.task.summary + ' [' + this.task.taskStatus + ']'
+      return this.task.summary + ' [' + this.getTaskStatus() + ']'
     },
     description () {
       return this.task.description.substr(0, 200) + (this.task.description.length > 200 ? '...' : '')
     }
   },
   methods: {
+    getTaskStatus () {
+      switch (this.task.taskStatus) {
+        case 'OPEN':
+        case 'REOPENED':
+          return 'TO DO'
+        case 'APPROVED':
+          return 'DONE'
+        default:
+          return this.task.taskStatus.replace('_', ' ')
+      }
+    },
     openTaskPage () {
       this.$router.push({
         name: 'task',

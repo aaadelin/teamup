@@ -123,8 +123,8 @@
 
 <script>
 import 'pc-bootstrap4-datetimepicker/build/css/bootstrap-datetimepicker.css'
-import { getDepartments, getMyID, getProjects, getTaskTypes, getUsers } from '../persistance/RestGetRepository'
-import { saveTask } from '../persistance/RestPostRepository'
+import { getDepartments, getMyID, getProjects, getTaskTypes, getUsers } from '../../persistance/RestGetRepository'
+import { saveTask } from '../../persistance/RestPostRepository'
 // import Datepicker from 'vuejs-datetimepicker'
 // import datePicker from 'vue-bootstrap-datetimepicker'
 // Import date picker css

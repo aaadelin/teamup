@@ -23,7 +23,7 @@
 </template>
 
 <script>
-import { getTasksByProjectId } from '../persistance/RestGetRepository'
+import { getTasksByProjectId } from '../../persistance/RestGetRepository'
 
 export default {
   watch: {

@@ -20,7 +20,7 @@
 </template>
 
 <script>
-import { getUsersPhoto } from '../persistance/RestGetRepository'
+import { getUsersPhoto } from '../../persistance/RestGetRepository'
 
 export default {
   mounted () {

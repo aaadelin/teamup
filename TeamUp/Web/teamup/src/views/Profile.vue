@@ -204,7 +204,7 @@ export default {
     }
   },
   methods: {
-    async loadAllData() {
+    async loadAllData () {
       this.getUser()
       this.getUserStatistics()
       await this.getPhoto()

@@ -95,7 +95,7 @@ export default {
       this.$emit('sort', query)
     },
     smallView () {
-      console.log('CREATE SMALL VIEW')
+      this.$emit('smallView')
     }
   }
 }

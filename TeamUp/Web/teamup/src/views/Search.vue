@@ -13,6 +13,13 @@
               <option value="priority" >Priority</option>
               <option value="modified" >Modified</option>
             </select>
+            <select v-model="filter" class="col-1 custom-select mr-sm-2" style="margin-left: 30px; height: 35px; min-width: 130px" data-live-search="true" @change="filterSelected">
+              <option value="" selected disabled>Filter by</option>
+              <option value="OPEN,REOPENED" >To do</option>
+              <option value="IN_PROGRESS" >In progress</option>
+              <option value="UNDER_REVIEW" >Under review</option>
+              <option value="APPROVED" >Done</option>
+            </select>
           </label>
         </div>
         <div>
@@ -59,8 +66,8 @@
 
 <script>
 import { findProjects, getMyID, getUsersTasks } from '../persistance/RestGetRepository'
-import TaskSearchBox from '../components/TaskSearchBox'
-import ProjectBox from '../components/ProjectBox'
+import TaskSearchBox from '../components/containers/TaskSearchBox'
+import ProjectBox from '../components/containers/ProjectBox'
 import NProgress from 'nprogress'
 
 export default {
@@ -101,6 +108,7 @@ export default {
       showProjects: false,
       showUsers: false,
       sort: '',
+      filter: '',
       tasksPage: -1,
       nextTasksAvailable: false,
       previousTasksAvailable: false
@@ -109,7 +117,7 @@ export default {
   methods: {
     async loadData () {
       let myId = await getMyID()
-      let tasks = await getUsersTasks(myId, this.searchTerm, null, ++this.tasksPage)
+      let tasks = await getUsersTasks(myId, this.searchTerm, null, ++this.tasksPage, this.filter)
 
       this.assignedToTasks = tasks.assigned
       this.reportedTasks = tasks.reported
@@ -124,9 +132,15 @@ export default {
     sortSelected () {
 
     },
+    filterSelected () {
+      this.tasksPage = -1
+      this.nextTasksAvailable = false
+      this.previousTasksAvailable = false
+      this.loadData()
+    },
     async nextTasks () {
       let myId = await getMyID()
-      let tasks = await getUsersTasks(myId, this.searchTerm, null, ++this.tasksPage)
+      let tasks = await getUsersTasks(myId, this.searchTerm, null, ++this.tasksPage, this.filter)
 
       this.assignedToTasks = tasks.assigned
       this.reportedTasks = tasks.reported
@@ -136,7 +150,7 @@ export default {
     },
     async previousTasks () {
       let myId = await getMyID()
-      let tasks = await getUsersTasks(myId, this.searchTerm, null, --this.tasksPage)
+      let tasks = await getUsersTasks(myId, this.searchTerm, null, --this.tasksPage, this.filter)
 
       this.assignedToTasks = tasks.assigned
       this.reportedTasks = tasks.reported

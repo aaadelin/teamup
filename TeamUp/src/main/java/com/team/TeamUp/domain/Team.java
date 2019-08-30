@@ -1,5 +1,7 @@
 package com.team.TeamUp.domain;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.team.TeamUp.domain.enums.Department;
 
 import javax.persistence.*;
@@ -17,7 +19,10 @@ public class Team {
 
     private String description;
 
-    private String location;
+    @ManyToOne
+    @JoinColumn(name = "location_id")
+    @JsonManagedReference(value = "teamLocation")
+    private Location location;
 
     private Department department;
 
@@ -57,11 +62,12 @@ public class Team {
         this.description = description;
     }
 
-    public String getLocation() {
+    @JsonBackReference(value = "teamLocation")
+    public Location getLocation() {
         return location;
     }
 
-    public void setLocation(String location) {
+    public void setLocation(Location location) {
         this.location = location;
     }
 
@@ -113,7 +119,7 @@ public class Team {
                 "id=" + id +
                 ", name='" + name + '\'' +
                 ", description='" + description + '\'' +
-                ", location='" + location + '\'' +
+                ", location='" + location.getCountry() + " " + location.getCity() + '\'' +
                 ", department=" + department +
                 ", leader=" + leader +
                 ", members=" + members +

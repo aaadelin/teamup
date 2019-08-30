@@ -12,7 +12,7 @@ public class TeamDTO {
 
     private String description;
 
-    private String location;
+    private LocationDTO location;
 
     private Department department;
 
@@ -28,11 +28,11 @@ public class TeamDTO {
         this.id = id;
     }
 
-    public String getLocation() {
+    public LocationDTO getLocation() {
         return location;
     }
 
-    public void setLocation(String location) {
+    public void setLocation(LocationDTO location) {
         this.location = location;
     }
 

@@ -37,18 +37,20 @@ public class RestGetController {
     private ProjectRepository projectRepository;
     private CommentRepository commentRepository;
     private PostRepository postRepository;
+    private LocationRepository locationRepository;
     private DTOsConverter dtOsConverter;
 
     @Autowired
     public RestGetController(TeamRepository teamRepository, UserRepository userRepository, TaskRepository taskRepository,
                              ProjectRepository projectRepository, CommentRepository commentRepository, PostRepository postRepository,
-                             DTOsConverter dtOsConverter) {
+                             DTOsConverter dtOsConverter, LocationRepository locationRepository) {
         this.teamRepository = teamRepository;
         this.userRepository = userRepository;
         this.taskRepository = taskRepository ;
         this.projectRepository = projectRepository;
         this.commentRepository = commentRepository;
         this.postRepository = postRepository;
+        this.locationRepository = locationRepository;
         this.dtOsConverter = dtOsConverter;
         LOGGER.info("Creating RestGetController");
     }
@@ -61,6 +63,14 @@ public class RestGetController {
         List<TeamDTO> teams = teamRepository.findAll().stream().map(dtOsConverter::getDTOFromTeam).collect(Collectors.toList());
         LOGGER.info(String.format("Returning list of teams: %s", teams.toString()));
         return new ResponseEntity<>(teams, HttpStatus.OK);
+    }
+
+    @RequestMapping(value = "/locations", method = GET)
+    public ResponseEntity<?> getAllLocations(@RequestHeader Map<String, String> headers) {
+        LOGGER.info(String.format("Entering get all locations method with headers: %s", headers.toString()));
+        List<Location> locations = locationRepository.findAll();
+        LOGGER.info(String.format("Returning list of teams: %s", locations.toString()));
+        return new ResponseEntity<>(locations, HttpStatus.OK);
     }
 
     @RequestMapping(value = "/projects", method = GET)

@@ -29,9 +29,9 @@ $(document.body).ready(function () {
 
 export default {
   beforeMount () {
-    this.calculateDeadlinePercent() // TODO remove this interval?
+    this.calculateDeadlinePercent()
     this.getTooltipContent()
-    setInterval(() => {
+    setInterval(() => { // TODO remove this interval? (is to update the GUI every 5 seconds)
       this.calculateDeadlinePercent()
     }, 5000)
   },

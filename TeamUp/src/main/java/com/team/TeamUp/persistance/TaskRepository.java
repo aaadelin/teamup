@@ -45,4 +45,20 @@ public interface TaskRepository extends JpaRepository<Task, Integer> {
             "where t.task_status in ?2 and (u.id=?1 or t.reporter_id = ?1)\n" +
             "group by t.id", nativeQuery = true)
     List<Task> findTasksWithStatusesAssignedToOrReportedBy(int userId, List<Integer> taskStatusIndexes ,Pageable pageable);
+
+    @Query(value = "select * from task t " +
+            "where t.reporter_id = ?1 and " +
+            "    (t.summary like concat('%', ?2, '%') or " +
+            "     t.description like concat('%', ?2, '%')) " +
+            "    and t.task_status in ?3 ", nativeQuery = true)
+    List<Task> findAllByReporterAndSummaryContainingOrDescriptionContainingAndTaskStatusIn(int reporter, String searchTerm, List<Integer> statuses, Pageable pageable);
+
+
+    @Query(value = "select * from task t " +
+            "inner join task_assignees ta on t.id = ta.task_id " +
+            "inner join user u on u.id = ta.assignees_id " +
+            "where u.id = ?1 and (t.summary like concat('%', ?2, '%') or t.description like concat('%', ?2, '%')) and t.task_status in ?3 " +
+            "group by t.id", nativeQuery = true)
+    List<Task> findAllByAssigneesContainingAndSummaryContainingOrDescriptionContainingAndTaskStatusIn(int assignee, String searchTerm, List<Integer> statuses, Pageable pageable);
+
 }

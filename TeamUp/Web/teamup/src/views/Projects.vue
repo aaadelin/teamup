@@ -11,7 +11,7 @@
 
 <script>
 import { getProjects } from '../persistance/RestGetRepository'
-import ProjectBox from '../components/ProjectBox'
+import ProjectBox from '../components/containers/ProjectBox'
 import NProgress from 'nprogress'
 
 export default {

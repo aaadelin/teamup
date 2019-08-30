@@ -183,13 +183,16 @@ export async function getUsersByIds (ids) {
   return []
 }
 
-export async function getUsersTasks (userId, searchTerm = null, type = null, page = 0) {
+export async function getUsersTasks (userId, searchTerm = null, type = null, page = 0, statuses = null) {
   let url = `${baseURL}/users/${userId}/tasks?page=${page}&`
   if (type !== null) {
     url += `type=${type}&`
   }
   if (searchTerm !== null) {
-    url += `search=${searchTerm}`
+    url += `search=${searchTerm}&`
+  }
+  if (statuses !== null) {
+    url += `statuses=${statuses}&`
   }
   return fetchDataFromUrl(url, { 'reported': [], 'assigned': [] })
 }

@@ -34,7 +34,7 @@
 
 <script>
 import { getUsersAssignedTasksWithStatuses } from '../persistance/RestGetRepository'
-import TaskBox from './TaskBox'
+import TaskBox from './containers/TaskBox'
 
 export default {
   components: { TaskBox },

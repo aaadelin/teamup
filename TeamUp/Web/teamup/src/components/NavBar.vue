@@ -32,7 +32,7 @@
 
             <b-nav-item-dropdown text="Administrate..." v-if="isAdmin === 'true'" right>
               <b-dropdown-item @click="addUserIsVisible = true">Add User</b-dropdown-item>
-              <b-dropdown-item>Add Team</b-dropdown-item>
+              <b-dropdown-item @click="createTeamIsVisible = true">Add Team</b-dropdown-item>
               <b-dropdown-item>Administrate users</b-dropdown-item>
               <b-dropdown-item>Administrate teams</b-dropdown-item>
             </b-nav-item-dropdown>
@@ -41,22 +41,30 @@
       </b-navbar>
     </div>
 
-    <div>
+    <div >
       <create-task class="overflow-auto"
       :is-visible="addTaskIsVisible"
       @done="closeTask"/>
 
-    <create-user class="overflow-auto"
+    <create-user v-if="isAdmin === 'true'" class="overflow-auto"
       :is-visible="addUserIsVisible"
       @done="closeUser"/>
+
+    <create-team v-if="isAdmin === 'true'"
+      class="overflow-auto"
+      :isVisible="createTeamIsVisible"
+      @done="createTeamIsVisible = false"
+    >
+    </create-team>
     </div>
   </div>
 </template>
 
 <script>
 import { getMyID, getUsersPhoto, logout } from '../persistance/RestGetRepository'
-import CreateTask from './CreateTask'
-import CreateUser from './CreateUser'
+import CreateTask from './create-components/CreateTask'
+import CreateUser from './create-components/CreateUser'
+import CreateTeam from './create-components/CreateTeam'
 
 function keyPress (e) {
   let eventObj = window.event ? event : e
@@ -84,11 +92,12 @@ export default {
     })
   },
   name: 'NavBar',
-  components: { CreateTask, CreateUser },
+  components: { CreateTask, CreateUser, CreateTeam },
   data () {
     return {
       addTaskIsVisible: false,
       addUserIsVisible: false,
+      createTeamIsVisible: false,
       searchTerm: '',
       image: ''
     }
