@@ -70,6 +70,12 @@
       </div>
       <div></div>
     </div>
+
+    <div id="scroll-div" class="scroll-up">
+      <span @click="scrollUp">
+        <i class="fas fa-arrow-alt-circle-up"></i>
+      </span>
+    </div>
     <router-view/>
 
   </div>
@@ -112,6 +118,7 @@ export default {
       filterWord: '',
       query: 'sort=&desc=false',
       smallView: false,
+      showScroll: false,
 
       draggable_options: {
         dropzoneSelector: 'div',
@@ -439,6 +446,9 @@ export default {
     async sortTasks (query) {
       this.query = query
       this.getUsersTasks()
+    },
+    scrollUp () {
+      window.scrollTo({ top: 0, behavior: 'smooth' })
     }
   },
   filters: {
@@ -447,6 +457,19 @@ export default {
 </script>
 
 <style>
+
+  .scroll-up{
+    position: sticky;
+    bottom: 9px;
+    right: 10px;
+    margin: auto 10px 10px auto;
+    text-align: right;
+    font-size: 30px;
+  }
+
+  .scroll-up .fa-arrow-alt-circle-up{
+    cursor: pointer;
+  }
 
   .item-dropzone-area {
     height: 2rem;
