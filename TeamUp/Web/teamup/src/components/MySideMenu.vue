@@ -101,7 +101,7 @@ export default {
 }
 </script>
 
-<style >
+<style scoped>
 
   /*For the navbar*/
 
@@ -163,12 +163,12 @@ export default {
   }
 
   /* Additional styling */
-  @import "https://fonts.googleapis.com/css?family=Poppins:300,400,500,600,700";
 
   body {
     font-family: 'Poppins', sans-serif;
     background: #fafafa;
   }
+  @import "https://fonts.googleapis.com/css?family=Poppins:300,400,500,600,700";
 
   p {
     font-family: 'Poppins', sans-serif;

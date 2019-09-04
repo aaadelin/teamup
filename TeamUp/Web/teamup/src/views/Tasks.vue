@@ -13,12 +13,12 @@
       </div>
       <div class="row justify-content-center" v-drag-and-drop:options="draggable_options" >
 
-      <div class="col columnCategory">
+      <div class="col columnCategory" >
         <span class="header" @click="todo_category = !todo_category">
           <b class="category">TO DO </b>
           <span class="quantity">{{ tasks[0].length }}{{ this.showMore[0] ? '+':'' }}</span>
         </span>
-        <div id="todo-category" v-show="todo_category" v-for="task1 in tasks[0]"  v-bind:key="task1.id">
+        <div id="todo-category" v-show="todo_category" v-for="task1 in tasks[0]" v-bind:key="task1.id">
           <task-box v-if="!smallView"
                     :task="task1"/>
           <small-task-box v-else
@@ -32,7 +32,7 @@
           <b class="category">IN PROGRESS </b>
           <span class="quantity">{{ tasks[1].length }}{{ this.showMore[1]  ? '+':'' }}</span>
         </span>
-        <div id="in-progress-category" v-show="in_progress_category" v-for="task1 in tasks[1]"  v-bind:key="task1.id">
+        <div id="in-progress-category" v-show="in_progress_category" v-for="task1 in tasks[1]" v-bind:key="task1.id">
           <task-box v-if="!smallView"
                     :task="task1"/>
           <small-task-box v-else
@@ -46,7 +46,7 @@
           <b class="category">UNDER REVIEW </b>
           <span class="quantity"> {{ tasks[2].length }}{{ this.showMore[2] ? '+':'' }}</span>
         </span>
-        <div id="under-review-category" v-show="under_review_category" v-for="task1 in tasks[2]"  v-bind:key="task1.id">
+        <div id="under-review-category" v-show="under_review_category" v-for="task1 in tasks[2]" v-bind:key="task1.id" >
           <task-box v-if="!smallView"
                     :task="task1"/>
           <small-task-box v-else
@@ -60,7 +60,7 @@
           <b class="category">DONE </b>
           <span class="quantity">{{ tasks[3].length }}{{ this.showMore[3]  ? '+':'' }}</span>
         </span>
-        <div id="done-category" v-show="done_category" v-for="task1 in tasks[3]"  v-bind:key="task1.id">
+        <div id="done-category" v-show="done_category" v-for="task1 in tasks[3]" v-bind:key="task1.id">
           <task-box v-if="!smallView"
                     :task="task1"/>
           <small-task-box v-else
@@ -93,6 +93,7 @@ import {
 import { updateTask } from '../persistance/RestPutRepository'
 import NProgress from 'nprogress'
 import SmallTaskBox from '../components/containers/SmallTaskBox'
+import { MAX_RESULTS } from '../persistance/Repository'
 
 export default {
   async beforeMount () {
@@ -129,7 +130,6 @@ export default {
         showDropzoneAreas: true,
         onDrop: async function (event) {
           let ans = await this.isDroppable(event)
-
           if (ans) {
             let item = event.items[0]
             let parent = item.parentNode
@@ -149,8 +149,11 @@ export default {
           if (!this.isDraggable(event)) {
             event.drop()
           }
+          this.toggleClassToDropAreas(event)
         },
-        onDragend: function (event) { }
+        onDragend: function (event) {
+          this.toggleClassToDropAreas(event)
+        }
       }
     }
   },
@@ -187,28 +190,28 @@ export default {
         newTasks = await getUsersAssignedTasksWithStatuses(i, 'OPEN,REOPENED', this.filterWord, this.query)
         this.tasks[0].push(...newTasks)
       }
-      if (newTasks.length < 10) {
+      if (newTasks.length < MAX_RESULTS) {
         this.showMore[0] = false
       }
       for (let i = 0; i <= this.pages[1]; i++) {
         newTasks = await getUsersAssignedTasksWithStatuses(i, 'IN_PROGRESS', this.filterWord, this.query)
         this.tasks[1].push(...newTasks)
       }
-      if (newTasks.length < 10) {
+      if (newTasks.length < MAX_RESULTS) {
         this.showMore[1] = false
       }
       for (let i = 0; i <= this.pages[2]; i++) {
         newTasks = await getUsersAssignedTasksWithStatuses(i, 'UNDER_REVIEW', this.filterWord, this.query)
         this.tasks[2].push(...newTasks)
       }
-      if (newTasks.length < 10) {
+      if (newTasks.length < MAX_RESULTS) {
         this.showMore[2] = false
       }
       for (let i = 0; i <= this.pages[3]; i++) {
         newTasks = await getUsersAssignedTasksWithStatuses(i, 'APPROVED', this.filterWord, this.query)
         this.tasks[3].push(...newTasks)
       }
-      if (newTasks.length < 10) {
+      if (newTasks.length < MAX_RESULTS) {
         this.showMore[3] = false
       }
     },
@@ -219,28 +222,28 @@ export default {
         newTasks = await getUsersReportedAndAssignedTasksWithStatuses(i, 'OPEN,REOPENED', this.filterWord, this.query)
         this.tasks[0].push(...newTasks)
       }
-      if (newTasks.length < 10) {
+      if (newTasks.length < MAX_RESULTS) {
         this.showMore[0] = false
       }
       for (let i = 0; i <= this.pages[1]; i++) {
         newTasks = await getUsersReportedAndAssignedTasksWithStatuses(i, 'IN_PROGRESS', this.filterWord, this.query)
         this.tasks[1].push(...newTasks)
       }
-      if (newTasks.length < 10) {
+      if (newTasks.length < MAX_RESULTS) {
         this.showMore[1] = false
       }
       for (let i = 0; i <= this.pages[2]; i++) {
         newTasks = await getUsersReportedAndAssignedTasksWithStatuses(i, 'UNDER_REVIEW', this.filterWord, this.query)
         this.tasks[2].push(...newTasks)
       }
-      if (newTasks.length < 10) {
+      if (newTasks.length < MAX_RESULTS) {
         this.showMore[2] = false
       }
       for (let i = 0; i <= this.pages[3]; i++) {
         newTasks = await getUsersReportedAndAssignedTasksWithStatuses(i, 'APPROVED', this.filterWord, this.query)
         this.tasks[3].push(...newTasks)
       }
-      if (newTasks.length < 10) {
+      if (newTasks.length < MAX_RESULTS) {
         this.showMore[3] = false
       }
     },
@@ -254,7 +257,7 @@ export default {
           } else {
             newTasks = await getUsersAssignedTasksWithStatuses(this.pages[0], 'OPEN,REOPENED', '', this.query)
           }
-          if (newTasks.length < 10) {
+          if (newTasks.length < MAX_RESULTS) {
             this.showMore[0] = false
           }
           this.tasks[0].push(...newTasks)
@@ -266,7 +269,7 @@ export default {
           } else {
             newTasks = await getUsersAssignedTasksWithStatuses(this.pages[1], 'IN_PROGRESS', '', this.query)
           }
-          if (newTasks.length < 10) {
+          if (newTasks.length < MAX_RESULTS) {
             this.showMore[1] = false
           }
           this.tasks[1].push(...newTasks)
@@ -279,7 +282,7 @@ export default {
           } else {
             newTasks = await getUsersAssignedTasksWithStatuses(this.pages[2], 'UNDER_REVIEW', '', this.query)
           }
-          if (newTasks.length < 10) {
+          if (newTasks.length < MAX_RESULTS) {
             this.showMore[2] = false
           }
           this.tasks[2].push(...newTasks)
@@ -292,7 +295,7 @@ export default {
           } else {
             newTasks = await getUsersAssignedTasksWithStatuses(this.pages[3], 'APPROVED', '', this.query)
           }
-          if (newTasks.length < 10) {
+          if (newTasks.length < MAX_RESULTS) {
             this.showMore[3] = false
           }
           this.tasks[3].push(...newTasks)
@@ -420,9 +423,11 @@ export default {
           status.push('todo-category')
           break
         case 'IN_PROGRESS':
+        case 'IN PROGRESS':
           status.push('in-progress-category')
           break
         case 'UNDER_REVIEW':
+        case 'UNDER REVIEW':
           status.push('under-review-category')
           break
         case 'APPROVED':
@@ -449,6 +454,20 @@ export default {
     },
     scrollUp () {
       window.scrollTo({ top: 0, behavior: 'smooth' })
+    },
+    toggleClassToDropAreas (event) {
+      let item = event.items[0]
+      let taskId = item.childNodes[0].childNodes[0].id
+      getTaskById(taskId).then((task) => {
+        let status = task.taskStatus
+        let columns = ['todo-category', 'in-progress-category', 'under-review-category', 'done-category']
+        for (let i = 0; i < columns.length; i++) {
+          if (this.isBeforeOrAfter(status, columns[i])) {
+            let parent = document.getElementById(columns[i]).parentNode
+            parent.classList.toggle('droppable')
+          }
+        }
+      })
     }
   },
   filters: {
@@ -487,10 +506,6 @@ export default {
     /*width: 330px;*/
   }
 
-  /*#content{*/
-  /*  padding-left: 10px;*/
-  /*}*/
-
   .category{
     color: rgba(0, 0, 0, 0.55);
   }
@@ -508,9 +523,11 @@ export default {
     max-width: 500px;
   }
 
+  .droppable {
+    border: 4px dashed black;
+  }
+
   #tasks{
     display: flex;
-    /*width: 100%;*/
-    /*align-items: stretch;*/
   }
 </style>

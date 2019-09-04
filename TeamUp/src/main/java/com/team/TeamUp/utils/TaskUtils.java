@@ -33,6 +33,7 @@ public class TaskUtils {
 
     public List<TaskDTO> getFilteredTasksByType(User user, String term, String type, int page, List<TaskStatus> statuses){
         List<Task> tasks = new ArrayList<>();
+
         if(type != null && type.toLowerCase().equals("assignedto")){
             tasks = taskRepository.findAllByAssigneesContainingAndSummaryContainingOrDescriptionContainingAndTaskStatusIn(user.getId(), term, statuses.stream().map(Enum::ordinal)
                     .collect(Collectors.toList()), PageRequest.of(page, PAGE_SIZE));
@@ -41,8 +42,12 @@ public class TaskUtils {
                     .collect(Collectors.toList()), PageRequest.of(page, PAGE_SIZE));
         }
 
-        if(term == null){
+        if(term == null && (statuses == null || statuses.isEmpty())){
             return taskRepository.findAll(PageRequest.of(page, PAGE_SIZE)).stream()
+                    .map(task -> dtOsConverter.getDTOFromTask(task))
+                    .collect(Collectors.toList());
+        }else if(term == null){
+            return taskRepository.findAllByTaskStatusIn(statuses, PageRequest.of(page, PAGE_SIZE)).stream()
                     .map(task -> dtOsConverter.getDTOFromTask(task))
                     .collect(Collectors.toList());
         }

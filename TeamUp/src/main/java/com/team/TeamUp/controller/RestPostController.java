@@ -7,6 +7,7 @@ import com.team.TeamUp.domain.enums.UserStatus;
 import com.team.TeamUp.dtos.*;
 import com.team.TeamUp.persistance.*;
 import com.team.TeamUp.utils.DTOsConverter;
+import com.team.TeamUp.utils.ImageCompressor;
 import com.team.TeamUp.utils.TokenUtils;
 import com.team.TeamUp.utils.UserUtils;
 import org.json.JSONObject;
@@ -198,14 +199,17 @@ public class RestPostController {
 
         LOGGER.info(String.format("Uploading photo entered with headers: %s and user id: %s", headers, id));
 
+        String pathname_tmp = new ClassPathResource("/static/img").getFile().getAbsolutePath() + "\\" +  id + "_1";
         String pathname = new ClassPathResource("/static/img").getFile().getAbsolutePath() + "\\" +  id;
-        LOGGER.info(String.format("Uploading to %s", pathname));
-        File file = new File(pathname);
+        LOGGER.info(String.format("Uploading to %s", pathname_tmp));
+        File file = new File(pathname_tmp);
         try(FileOutputStream fileOutputStream = new FileOutputStream(file)) {
             fileOutputStream.write(photo.getBytes());
         } catch (IOException e) {
             e.printStackTrace();
         }
+
+        ImageCompressor.compressAndSave(pathname_tmp, pathname);
 
         return new ResponseEntity<>(HttpStatus.OK);
     }

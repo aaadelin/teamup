@@ -122,6 +122,17 @@ export default {
 
 <style scoped>
 
+  @import "https://fonts.googleapis.com/css?family=Poppins:300,400,500,600,700";
+
+  p {
+    font-family: 'Poppins', sans-serif;
+    font-size: 1.1em;
+    font-weight: 300;
+    line-height: 1.7em;
+    color: #999;
+  }
+
+
   #box{
     padding-top: 15px;
     padding-bottom: 10px;

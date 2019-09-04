@@ -43,7 +43,7 @@ export function login (username, password) {
   })
 }
 
-export function uploadPhoto (photo, id) {
+export function uploadPhoto (photo, id, component) {
   let data = new FormData()
   data.set('photo', photo)
 
@@ -54,13 +54,12 @@ export function uploadPhoto (photo, id) {
     headers: {
       'token': localStorage.getItem('access_key')
     },
-    data: data
+    data: data,
+
+    onUploadProgress: function( progressEvent ) {
+      component.uploadPercentage = parseInt( Math.round( ( progressEvent.loaded * 100 ) / progressEvent.total ) )
+    }.bind(component)
   })
-    .then(rez => {
-      // console.log(rez)
-    }).catch(rez => {
-      // console.log(rez)
-    })
 }
 
 export async function saveTask (data) {

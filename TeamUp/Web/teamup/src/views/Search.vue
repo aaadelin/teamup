@@ -69,6 +69,7 @@ import { findProjects, getMyID, getUsersTasks } from '../persistance/RestGetRepo
 import TaskSearchBox from '../components/containers/TaskSearchBox'
 import ProjectBox from '../components/containers/ProjectBox'
 import NProgress from 'nprogress'
+import { MAX_RESULTS } from '../persistance/Repository'
 
 export default {
   components: { ProjectBox, TaskSearchBox },
@@ -122,7 +123,7 @@ export default {
       this.assignedToTasks = tasks.assigned
       this.reportedTasks = tasks.reported
 
-      if (this.assignedToTasks.length === 10 || this.reportedTasks.length === 10) {
+      if (this.assignedToTasks.length === MAX_RESULTS || this.reportedTasks.length === MAX_RESULTS) {
         this.nextTasksAvailable = true
       }
 
@@ -145,7 +146,7 @@ export default {
       this.assignedToTasks = tasks.assigned
       this.reportedTasks = tasks.reported
 
-      this.nextTasksAvailable = this.assignedToTasks.length === 10 || this.reportedTasks.length === 10
+      this.nextTasksAvailable = this.assignedToTasks.length === MAX_RESULTS || this.reportedTasks.length === MAX_RESULTS
       this.previousTasksAvailable = true
     },
     async previousTasks () {

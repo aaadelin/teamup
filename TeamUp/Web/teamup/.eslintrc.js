@@ -14,8 +14,8 @@ module.exports = {
   parserOptions: {
     parser: 'babel-eslint'
   },
-  "globals": {
-    "$": true,
-    "jQuery": true
+  'globals': {
+    '$': true,
+    'jQuery': true
   }
 }

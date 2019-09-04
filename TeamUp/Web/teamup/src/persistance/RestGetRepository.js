@@ -221,3 +221,8 @@ export async function getTasksByProjectId (id) {
   let url = `${baseURL}/projects/${id}/tasks`
   return fetchDataFromUrl(url)
 }
+
+export async function getStatisticsByProjectId (id) {
+  let url = `${baseURL}/projects/${id}/statistics`
+  return fetchDataFromUrl(url)
+}

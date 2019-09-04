@@ -14,6 +14,9 @@
           <img width="200" height="200" class="rounded-circle" :src="image" alt="Profile" style="margin: 5px; opacity: 0.5"/>
           <div class="centered">Click or Drag</div>
         </div>
+        <div class="progress" >
+          <div class="progress-bar bg-info" :style="progressStyle"  aria-valuenow="10" aria-valuemin="0" aria-valuemax="100">{{uploadPercentage}}%</div>
+        </div>
         <div @click="deletePhoto" style="cursor: pointer" title="Delete photo">X</div>
       </div>
 
@@ -127,6 +130,9 @@ export default {
       this.userId = id
       this.loadAllData()
     },
+    'uploadPercentage': function (value) {
+      this.progressStyle = `width: ${value}%;`
+    },
     'editMode': function (value) {
       if (value) {
         let dropArea = document.getElementById('uploadDiv')
@@ -200,7 +206,9 @@ export default {
       newPasswordAgain: '',
       newPhoto: '',
       logout: false,
-      myId: -1
+      myId: -1,
+      uploadPercentage: 0,
+      progressStyle: ''
     }
   },
   methods: {
@@ -252,10 +260,10 @@ export default {
       this.uploadPhoto(files)
     },
     async uploadPhoto (files) {
-      if (files.length !== 1 && files[0].type !== 'image/*' && files[0].size <= 10000000) {
+      if (files.length !== 1 || files[0].type !== 'image/jpeg' || files[0].size >= 10485760) {
         alert('Only one photo can be uploaded with max size of 10MB!')
       } else {
-        await uploadPhoto(files[0], this.user.id)
+        await uploadPhoto(files[0], this.user.id, this)
         this.getPhoto()
       }
     },

@@ -7,9 +7,9 @@
         Progress so far:
       </span>
       <div class="progress col-5" style="margin-top: 5px; padding: 0">
-        <div class="progress-bar bg-info" role="progressbar" :style="todoStyle" aria-valuenow="10" aria-valuemin="0" aria-valuemax="100">To do({{todoCount}})</div>
-        <div class="progress-bar bg-warning" role="progressbar" :style="inProgressStyle" aria-valuenow="20" aria-valuemin="0" aria-valuemax="100">In progress({{inProgressCount}})</div>
-        <div class="progress-bar bg-success" role="progressbar" :style="doneStyle" aria-valuenow="20" aria-valuemin="0" aria-valuemax="100">Done({{doneCount}})</div>
+        <div class="progress-bar bg-info" role="progressbar" :title="todoCount" :style="todoStyle" aria-valuenow="10" aria-valuemin="0" aria-valuemax="100">To do({{todoCount}})</div>
+        <div class="progress-bar bg-warning" role="progressbar" :title="inProgressCount" :style="inProgressStyle" aria-valuenow="20" aria-valuemin="0" aria-valuemax="100">In progress({{inProgressCount}})</div>
+        <div class="progress-bar bg-success" role="progressbar" :title="doneCount" :style="doneStyle" aria-valuenow="20" aria-valuemin="0" aria-valuemax="100">Done({{doneCount}})</div>
       </div>
 
       <span class="col-5" style="text-align: right">
@@ -23,7 +23,7 @@
 </template>
 
 <script>
-import { getTasksByProjectId } from '../../persistance/RestGetRepository'
+import { getStatisticsByProjectId } from '../../persistance/RestGetRepository'
 
 export default {
   watch: {
@@ -46,7 +46,7 @@ export default {
       todoStyle: 'width: ' + 100 / 3 + '%',
       inProgressStyle: 'width: ' + 100 / 3 + '%',
       doneStyle: 'width: ' + 100 / 3 + '%',
-      tasks: [],
+      stats: [],
       todoCount: 0,
       inProgressCount: 0,
       doneCount: 0
@@ -54,15 +54,16 @@ export default {
   },
   methods: {
     async calculatePercentage () {
-      this.tasks = await getTasksByProjectId(this.project.id)
-      this.todoCount = this.tasks.filter(task => task.taskStatus === 'OPEN' || task.taskStatus === 'REOPENED').length
-      this.inProgressCount = this.tasks.filter(task => task.taskStatus === 'IN_PROGRESS' || task.taskStatus === 'UNDER_REVIEW').length
-      this.doneCount = this.tasks.filter(task => task.taskStatus === 'APPROVED' || task.taskStatus === 'CLOSED').length
+      this.stats = await getStatisticsByProjectId(this.project.id)
+      let total = this.stats[0] + this.stats[1] + this.stats[2]
 
-      let total = this.tasks.length
+      this.todoCount = this.stats[0]
+      this.inProgressCount = this.stats[1]
+      this.doneCount = this.stats[2]
+
       this.todoStyle = `width: ${this.todoCount * 100 / total}%`
-      this.inProgressStyle = `width: ${this.inProgressCount * 100 / this.tasks.length}%`
-      this.doneStyle = `width: ${this.doneCount * 100 / this.tasks.length}%`
+      this.inProgressStyle = `width: ${this.inProgressCount * 100 / total}%`
+      this.doneStyle = `width: ${this.doneCount * 100 / total}%`
     }
   }
 }

@@ -15,10 +15,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static org.springframework.web.bind.annotation.RequestMethod.GET;
@@ -118,6 +115,7 @@ public class RestGetController {
         Optional<Post> post = postRepository.findById(postId);
         if (post.isPresent()) {
             PostDTO postDTO = dtOsConverter.getDTOFromPost(post.get());
+            Collections.reverse(postDTO.getComments());
             LOGGER.info(String.format("Returning post comments: %s", postDTO.getComments()));
             return new ResponseEntity<>(postDTO.getComments(), HttpStatus.OK);
         } else {
@@ -146,6 +144,35 @@ public class RestGetController {
         if (projectOptional.isPresent()) {
             LOGGER.info(String.format("Returning project %s", projectOptional.get().toString()));
             return new ResponseEntity<>(dtOsConverter.getDTOFromProject(projectOptional.get()), HttpStatus.OK);
+        } else {
+            LOGGER.info("No project found");
+            return new ResponseEntity<>("NOT FOUND", HttpStatus.NOT_FOUND);
+        }
+    }
+
+    @RequestMapping(value = "/projects/{id}/statistics", method = GET)
+    public ResponseEntity<?> getProjectStatisticsById(@PathVariable int id, @RequestHeader Map<String, String> headers) {
+        LOGGER.info(String.format("Entering get project's statistics by id method with projectId: %d /n and headers: %s", id, headers.toString()));
+        Optional<Project> projectOptional = projectRepository.findById(id);
+        if (projectOptional.isPresent()) {
+            int[] stats = new int[3];
+            for(Task task : projectOptional.get().getTasks()){
+                switch (task.getTaskStatus()){
+                    case OPEN:
+                    case REOPENED:
+                        stats[0]++;
+                        break;
+                    case IN_PROGRESS:
+                        stats[1]++;
+                        break;
+                    case UNDER_REVIEW:
+                    case APPROVED:
+                        stats[2]++;
+                        break;
+                }
+            }
+            LOGGER.info(String.format("Returning project's statistics %s", stats));
+            return new ResponseEntity<>(stats, HttpStatus.OK);
         } else {
             LOGGER.info("No project found");
             return new ResponseEntity<>("NOT FOUND", HttpStatus.NOT_FOUND);
@@ -183,6 +210,7 @@ public class RestGetController {
             Optional<Post> postOptional = postRepository.findByTask(taskOptional.get());
             if (postOptional.isPresent()) {
                 PostDTO postDTO = dtOsConverter.getDTOFromPost(postOptional.get());
+                Collections.reverse(postDTO.getComments());
                 LOGGER.info(String.format("Returning post: %s", postDTO));
                 return new ResponseEntity<>(postDTO, HttpStatus.OK);
             } else {

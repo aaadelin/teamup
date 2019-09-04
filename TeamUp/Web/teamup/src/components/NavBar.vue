@@ -8,7 +8,7 @@
 
         <b-collapse id="nav-collapse" is-nav>
           <b-navbar-nav>
-            <b-nav-item to="/">Home</b-nav-item>
+            <b-nav-item v-if="access_key" to="/">Home</b-nav-item>
 
             <b-nav-item v-if="access_key" to="/tasks">Tasks</b-nav-item>
             <b-nav-item v-if="access_key" to="/projects">Projects</b-nav-item>
