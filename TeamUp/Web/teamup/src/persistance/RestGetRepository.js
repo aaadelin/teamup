@@ -59,14 +59,14 @@ export async function getUsers () {
   return fetchDataFromUrl(url, [])
 }
 
-export async function getProjects () {
-  let url = `${baseURL}/projects`
+export async function getProjects (page = 0) {
+  let url = `${baseURL}/projects?page=${page}`
   return fetchDataFromUrl(url, [])
 }
 
-export async function findProjects (searchTerm) {
+export async function findProjects (searchTerm, page = 0) {
   searchTerm = encodeURI(searchTerm)
-  let url = `${baseURL}/projects?search=${searchTerm}`
+  let url = `${baseURL}/projects?search=${searchTerm}&page=${page}`
   return fetchDataFromUrl(url, [])
 }
 
@@ -197,6 +197,11 @@ export async function getUsersTasks (userId, searchTerm = null, type = null, pag
   return fetchDataFromUrl(url, { 'reported': [], 'assigned': [] })
 }
 
+export async function getLocations () {
+  let url = `${baseURL}/locations`
+  return fetchDataFromUrl(url)
+}
+
 export async function getUserHistory (id) {
   let url = `${baseURL}/users/${id}/history`
   return fetchDataFromUrl(url)
@@ -225,4 +230,9 @@ export async function getTasksByProjectId (id) {
 export async function getStatisticsByProjectId (id) {
   let url = `${baseURL}/projects/${id}/statistics`
   return fetchDataFromUrl(url)
+}
+
+export async function getHighRankUsers () {
+  let url = `${baseURL}/users/high-rank`
+  return fetchDataFromUrl(url, [])
 }

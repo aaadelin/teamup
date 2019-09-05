@@ -269,4 +269,14 @@ public class RestGetUserController {
         return new ResponseEntity<>(counts, HttpStatus.OK);
     }
 
+    @RequestMapping(value = "/users/high-rank", method = GET)
+    public ResponseEntity<?> getHigherRankUsers(){
+        LOGGER.info("Entergin method to get high rank users");
+        List<User> users = userRepository.findAll();
+        List<UserDTO> dtos = users.stream().filter(user -> user.getStatus().ordinal() > 3 && user.getStatus() != UserStatus.ADMIN)
+                .map(dtOsConverter::getDTOFromUser).collect(Collectors.toList());
+        LOGGER.info(String.format("Returning list of users %s", dtos));
+        return new ResponseEntity<>(dtos, HttpStatus.OK);
+    }
+
 }

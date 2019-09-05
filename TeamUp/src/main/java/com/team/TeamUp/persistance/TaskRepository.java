@@ -32,6 +32,7 @@ public interface TaskRepository extends JpaRepository<Task, Integer> {
     List<Task> findAllByTaskStatusInAndAssigneesContainingOrderByPriorityAsc(List<TaskStatus> statuses, User user, Pageable pageable);
     List<Task> findAllByTaskStatusInAndAssigneesContainingOrderByPriorityDesc(List<TaskStatus> statuses, User user, Pageable pageable);
     List<Task> findAllByTaskStatusIn(List<TaskStatus> statuses, Pageable pageable);
+    List<Task> findAllByAssigneesContainingAndTaskStatusIn(User assignee, List<TaskStatus> statuses, Pageable pageable);
 
     @Query(value = "select * from task t\n" +
             "inner join task_assignees ta on t.id = ta.task_id\n" +

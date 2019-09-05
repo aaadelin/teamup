@@ -163,7 +163,8 @@ export default {
     document.addEventListener('keyup', ev => {
       if (ev.key.toLocaleLowerCase() === 'e' &&
           !this.editMode && this.canEdit &&
-          document.activeElement.tagName !== 'INPUT') {
+          (document.activeElement.tagName !== 'INPUT' ||
+          document.activeElement.tagName !== 'TEXTAREA')) {
         this.editMode = true
       }
     })

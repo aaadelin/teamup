@@ -6,11 +6,11 @@
                 @sort="sortTasks"
                 @smallView="smallView = !smallView"/>
   <div id="content" class="container-fluid" >
-      <div class="row justify-content-center">
-        <div class="col-4" style="margin-top: 5px">
-          <p style="margin: 0; padding: 0">Your tasks:</p>
-        </div>
-      </div>
+<!--      <div class="row" style="text-align: left">-->
+<!--        <div class="col-4" style="margin-top: 5px">-->
+<!--          <p style="margin: 5px; padding: 0">Tasks</p>-->
+<!--        </div>-->
+<!--      </div>-->
       <div class="row justify-content-center" v-drag-and-drop:options="draggable_options" >
 
       <div class="col columnCategory" >
@@ -476,6 +476,16 @@ export default {
 </script>
 
 <style>
+
+  @import "https://fonts.googleapis.com/css?family=Poppins:300,400,500,600,700";
+
+  p {
+    font-family: 'Poppins', sans-serif;
+    font-size: 2em;
+    font-weight: 300;
+    /*line-height: 1.7em;*/
+    color: #999;
+  }
 
   .scroll-up{
     position: sticky;

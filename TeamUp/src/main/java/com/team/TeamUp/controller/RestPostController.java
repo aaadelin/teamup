@@ -1,6 +1,5 @@
 package com.team.TeamUp.controller;
 
-import com.team.TeamUp.controller.get.RestGetController;
 import com.team.TeamUp.domain.*;
 import com.team.TeamUp.domain.enums.UserEventType;
 import com.team.TeamUp.domain.enums.UserStatus;
@@ -37,7 +36,7 @@ import static org.springframework.web.bind.annotation.RequestMethod.POST;
 @CrossOrigin
 public class RestPostController {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(RestGetController.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(RestPostController.class);
 
     private UserUtils userUtils;
     private TeamRepository teamRepository;
@@ -109,7 +108,7 @@ public class RestPostController {
                 String.format("Created team \"%s\" on department \"%s\"", team.getName(), team.getDepartment()),
                 UserEventType.CREATE);
         LOGGER.info(String.format("Entering method create team with team: %s and headers: %s", team, headers));
-        User user = userRepository.findByHashKey(headers.get("token")).orElseGet(User::new);
+        User user = userRepository.findByHashKey(headers.get("token")).orElseThrow();
         Team newTeam = dtOsConverter.getTeamFromDTO(team, user.getStatus());
         teamRepository.save(newTeam);
         return new ResponseEntity<>("OK", HttpStatus.OK);
@@ -117,6 +116,10 @@ public class RestPostController {
 
     @RequestMapping(value = "/comment", method = POST)
     public ResponseEntity<?> addComment(@RequestBody CommentDTO commentDTO, @RequestHeader Map<String, String> headers) {
+        LOGGER.info(String.format("Entering method add comment with comment: %s and headers: %s", commentDTO, headers));
+        if(commentDTO.getTitle() == null || commentDTO.getTitle().equals("")){
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+        }
         userUtils.createEvent(userRepository.findByHashKey(headers.get("token")).orElseThrow(),
                 String.format("Added comment \"%s\" at task \"%s\"", commentDTO.getTitle().substring(0, Math.min(commentDTO.getTitle().length(), 30)),
                         postRepository.findById(commentDTO.getPostId())
@@ -124,7 +127,6 @@ public class RestPostController {
                                 .getTask()
                                 .getSummary()),
                 UserEventType.CREATE);
-        LOGGER.info(String.format("Entering method add comment with comment: %s and headers: %s", commentDTO, headers));
         User user = userRepository.findByHashKey(headers.get("token")).orElseGet(User::new);
         commentDTO.setCreator(dtOsConverter.getDTOFromUser(user));
         Comment newComment = dtOsConverter.getCommentFromDTO(commentDTO);

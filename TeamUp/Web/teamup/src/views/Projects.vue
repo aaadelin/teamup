@@ -6,6 +6,9 @@
     <div v-for="project in projects" :key="project.id">
       <project-box :project="project"></project-box>
     </div>
+    <div v-if="showMoreProjects" @click="loadData" style="text-align: center; color: darkblue; cursor: pointer">
+      Show more...
+    </div>
   </div>
 </template>
 
@@ -13,6 +16,7 @@
 import { getProjects } from '../persistance/RestGetRepository'
 import ProjectBox from '../components/containers/ProjectBox'
 import NProgress from 'nprogress'
+import { MAX_RESULTS } from '../persistance/Repository'
 
 export default {
   name: 'Projects',
@@ -22,13 +26,17 @@ export default {
   },
   data () {
     return {
-      projects: []
+      projects: [],
+      showMoreProjects: false,
+      page: 0
     }
   },
   methods: {
     async loadData () {
-      this.projects = await getProjects()
+      let newProjects = await getProjects(this.page++)
+      this.projects.push(...newProjects)
       NProgress.done()
+      this.showMoreProjects = newProjects.length >= MAX_RESULTS
     }
   }
 }

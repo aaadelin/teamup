@@ -23,7 +23,7 @@ export default {
     task: {
       required: true,
       default: {
-          description: ''
+        description: ''
       }
     },
     styleProp: {

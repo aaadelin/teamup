@@ -21,6 +21,11 @@ export async function updateTask (task) {
   return putDataToUrl(task, url)
 }
 
+export async function updateProject (project) {
+  let url = `${baseURL}/project`
+  return putDataToUrl(project, url)
+}
+
 export async function updatePassword (id, oldPassword, newPassword, logout) {
   let data = new FormData()
   data.set('id', id)

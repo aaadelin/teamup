@@ -132,7 +132,6 @@ export default {
     color: #999;
   }
 
-
   #box{
     padding-top: 15px;
     padding-bottom: 10px;

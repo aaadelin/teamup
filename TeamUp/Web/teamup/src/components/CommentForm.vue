@@ -37,16 +37,18 @@ export default {
   },
   methods: {
     async addComment () {
-      let comment = {
-        title: this.title,
-        content: this.comment,
-        postId: this.postId
-      }
+      if (this.title !== '') {
+        let comment = {
+          title: this.title,
+          content: this.comment,
+          postId: this.postId
+        }
 
-      await saveComment(comment)
-      this.title = ''
-      this.comment = ''
-      this.$emit('reloadComments')
+        await saveComment(comment)
+        this.title = ''
+        this.comment = ''
+        this.$emit('reloadComments')
+      }
     }
   }
 }

@@ -1,6 +1,5 @@
 package com.team.TeamUp.controller;
 
-import com.team.TeamUp.controller.get.RestGetController;
 import com.team.TeamUp.domain.Project;
 import com.team.TeamUp.domain.Task;
 import com.team.TeamUp.domain.Team;
@@ -37,7 +36,7 @@ import java.util.Optional;
 @CrossOrigin
 public class RestPutController{
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(RestGetController.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(RestPutController.class);
 
     private UserUtils userUtils;
     private UserValidation userValidation;

@@ -12,18 +12,26 @@
         <div class="progress-bar bg-success" role="progressbar" :title="doneCount" :style="doneStyle" aria-valuenow="20" aria-valuemin="0" aria-valuemax="100">Done({{doneCount}})</div>
       </div>
 
-      <span class="col-5" style="text-align: right">
-        Deadline: {{project.deadline.split(' ')[0]}}
+      <span :id="'deadline' + project.id" class="col-5 justify-content-end" style="text-align: right">
+        <span v-if="!showDate">
+         Deadline: {{project.deadline.split(' ')[0]}}
+        </span>
+        <span v-else style="text-align: right" class="row justify-content-end">
+          <date-picker :config="options" v-model="project.deadline" class="form-control col-md-5" />
+          <span style="margin: 10px; cursor: pointer" @click="saveDeadline" title="Save">
+           <i class="fas fa-save" ></i>
+          </span>
+        </span>
       </span>
       </div>
     </div>
-<!--    {{project}}-->
   </div>
 
 </template>
 
 <script>
-import { getStatisticsByProjectId } from '../../persistance/RestGetRepository'
+import { getMyID, getStatisticsByProjectId } from '../../persistance/RestGetRepository'
+import { updateProject } from '../../persistance/RestPutRepository'
 
 export default {
   watch: {
@@ -33,6 +41,7 @@ export default {
   },
   mounted () {
     this.calculatePercentage()
+    this.enableEdit()
   },
   name: 'ProjectBox',
   props: {
@@ -49,7 +58,16 @@ export default {
       stats: [],
       todoCount: 0,
       inProgressCount: 0,
-      doneCount: 0
+      doneCount: 0,
+      showDate: false,
+
+      options: {
+        format: 'YYYY-MM-DD HH:mm:ss',
+        useCurrent: true,
+        showClear: true,
+        showClose: true,
+        minDate: new Date()
+      }
     }
   },
   methods: {
@@ -64,11 +82,43 @@ export default {
       this.todoStyle = `width: ${this.todoCount * 100 / total}%`
       this.inProgressStyle = `width: ${this.inProgressCount * 100 / total}%`
       this.doneStyle = `width: ${this.doneCount * 100 / total}%`
+    },
+    async enableEdit () {
+      let myId = await getMyID()
+      let isAdmin = localStorage.getItem('isAdmin')
+      if (myId === this.project.ownerID || isAdmin === 'true') {
+        let deadline = document.getElementById('deadline' + this.project.id)
+        deadline.classList.add('deadline')
+        deadline.title = 'Edit'
+        deadline.addEventListener('click', _ => {
+          if (document.activeElement.tagName !== 'INPUT') {
+            this.showDate = !this.showDate
+            deadline.classList.toggle('deadline')
+          }
+        })
+      }
+    },
+    saveDeadline () {
+      let project = {
+        id: this.project.id,
+        deadline: this.project.deadline,
+        ownerID: this.project.ownerID
+      }
+      updateProject(project)
     }
   }
 }
 </script>
 
 <style scoped>
+
+  .deadline {
+    cursor: pointer;
+  }
+
+  .deadline :hover {
+    padding: 2px;
+    border: 1px solid black;
+  }
 
 </style>

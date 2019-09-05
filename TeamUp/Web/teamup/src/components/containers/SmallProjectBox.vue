@@ -31,7 +31,6 @@ export default {
     color: #999;
   }
 
-
   .container{
     padding: 15px 0 10px;
   }

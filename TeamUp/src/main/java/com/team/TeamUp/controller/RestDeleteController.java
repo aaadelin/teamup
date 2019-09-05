@@ -1,10 +1,9 @@
 package com.team.TeamUp.controller;
 
-import com.team.TeamUp.controller.get.RestGetController;
 import com.team.TeamUp.domain.User;
 import com.team.TeamUp.domain.enums.UserEventType;
 import com.team.TeamUp.domain.enums.UserStatus;
-import com.team.TeamUp.persistance.*;
+import com.team.TeamUp.persistance.UserRepository;
 import com.team.TeamUp.utils.UserUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,7 +24,7 @@ import java.util.Optional;
 @CrossOrigin
 public class RestDeleteController {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(RestGetController.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(RestDeleteController.class);
 
     private UserRepository userRepository;
     private UserUtils userUtils;

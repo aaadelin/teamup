@@ -35,9 +35,10 @@
 
               <slot name="body">
                 <div class="row">
-                  <label for="location" class="col-md-3">Location!!! </label>
-<!--                  todo create select + option-->
-                  <input id="location" type="text" v-model="location" name="location" class="form-control col-md-8"  :class="{ 'is-invalid': dataFailed && !username }"/>
+                  <label for="location" class="col-md-3">Location </label>
+                  <select id="location" class="form-control col-md-8" v-model="location">
+                    <option v-for="location in locations" :value="location.id" :key="location.id">{{location.city}}, {{location.country}}</option>
+                  </select>
                 </div>
               </slot>
 
@@ -45,9 +46,10 @@
 
               <slot name="body">
                 <div class="row">
-                  <label for="department" class="col-md-3">Department!!! </label>
-<!--                  todo create select + option-->
-                  <input id="department" type="text" v-model="department" name="department" class="form-control col-md-8"  :class="{ 'is-invalid': (dataFailed && !department) }"/>
+                  <label for="department" class="col-md-3">Department </label>
+                  <select id="department" class="form-control col-md-8" v-model="department">
+                    <option v-for="department in departments" :value="department" :key="department">{{department.replace('_', ' ')}}</option>
+                  </select>
                 </div>
               </slot>
 
@@ -55,22 +57,12 @@
 
               <slot name="body">
                 <div class="row">
-                  <label for="leader" class="col-md-3">Leader!!!</label>
-                  <!--                  todo create select + option-->
-                  <input id="leader" type="text" v-model="leader" name="leader" class="form-control col-md-8" />
+                  <label for="leader" class="col-md-3">Leader</label>
+                  <select id="leader" class="form-control col-md-8" v-model="leader">
+                    <option v-for="leader in leaders" :value="leader.id" :key="leader.id">{{leader.firstName}} {{leader.lastName}}</option>
+                  </select>
                 </div>
               </slot>
-
-              <br/>
-
-              <slot name="body">
-                <div class="row">
-                  <label for="members" class="col-md-3">Members!!! </label>
-                  <!--                  todo create select + option-->
-                  <input id="members" type="text" v-model="members" name="leader" class="form-control col-md-8" />
-                </div>
-              </slot>
-              <br/>
 
               <br/>
 
@@ -98,8 +90,19 @@
 </template>
 
 <script>
+import { getDepartments, getHighRankUsers, getLocations } from '../../persistance/RestGetRepository'
+import { saveTeam } from '../../persistance/RestPostRepository'
 export default {
   name: 'CreateTeam',
+  mounted () {
+    this.loadData()
+
+    document.addEventListener('keyup', ev => {
+      if (ev.key === 'Escape') {
+        this.cancel()
+      }
+    })
+  },
   props: {
     isVisible: {
       required: true,
@@ -113,17 +116,74 @@ export default {
       location: null,
       department: null,
       leader: null,
-      members: [],
-      dataFailed: false
+      dataFailed: false,
+      locations: [],
+      departments: [],
+      leaders: []
     }
   },
   methods: {
+    async loadData () {
+      this.locations = await getLocations()
+      this.departments = await getDepartments()
+      this.leaders = await getHighRankUsers()
+
+      if (this.locations.length > 0) {
+        this.location = this.locations[0].id
+      }
+      if (this.departments.length > 0) {
+        this.department = this.departments[0]
+      }
+      if (this.leaders.length > 0) {
+        this.leader = this.leaders[0].id
+      }
+    },
     cancel () {
       this.$emit('done')
     },
     finished () {
-      this.cancel()
+      this.collectAndSend()
+    },
+    collectAndSend () {
+      if (this.name.trim() !== '' &&
+        this.location !== null &&
+        this.department !== null &&
+        this.leader !== null) {
+        let team = {
+          name: this.name.trim(),
+          description: this.description.trim(),
+          department: this.department,
+          leaderID: this.leader,
+          location: this.location
+        }
+        console.log(team)
+        saveTeam(team).then(el => {
+          this.$notify({
+            group: 'notificationsGroup',
+            title: 'Success',
+            type: 'success',
+            text: 'Team saved successfully'
+          })
+          this.clearData()
+          this.cancel()
+        }
+        )
+      } else {
+        this.$notify({
+          group: 'notificationsGroup',
+          title: 'Error',
+          type: 'error',
+          text: 'An error occurred'
+        })
+      }
     }
+  },
+  clearData () {
+    this.name = ''
+    this.description = ''
+    this.leader = null
+    this.location = null
+    this.leader = null
   }
 }
 </script>

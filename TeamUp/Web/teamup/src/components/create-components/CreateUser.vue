@@ -89,7 +89,7 @@
               <div class="row">
                 <label for="status" class="col-md-3">Status </label>
                 <select v-model="status" name="status" id="status" class="form-control col-md-8">
-                  <option v-for="(status, index) in statuses" :key="index" :value="status">{{status.replace('_', ' ')}}</option>
+                  <option v-for="(status, index) in statuses" :key="index" :value="status">{{status.replace(/_/g, ' ')}}</option>
                 </select>
               </div>
               </slot>
@@ -128,6 +128,13 @@ export default {
     if (this.$store.state.access_key) {
       await this.getDataArrays()
     }
+  },
+  mounted () {
+    document.addEventListener('keyup', ev => {
+      if (ev.key === 'Escape') {
+        this.cancel()
+      }
+    })
   },
   components: {
     // datePicker
@@ -247,6 +254,7 @@ export default {
       if (this.firstName && this.lastName) {
         this.username = this.firstName.slice(0, 1).toLocaleLowerCase() + this.lastName.toLocaleLowerCase()
       }
+      this.username = this.username.replace(' ', '_')
     }
   }
 }

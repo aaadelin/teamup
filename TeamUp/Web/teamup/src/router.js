@@ -59,7 +59,7 @@ router.beforeEach((to, from, next) => {
   const authRequired = !publicPages.includes(to.fullPath)
   const loggedIn = localStorage.getItem('access_key')
 
-  if (!loggedIn && to.fullPath === '/'){
+  if (!loggedIn && to.fullPath === '/') {
     return next('/login')
   }
 

@@ -19,6 +19,7 @@
               <option value="IN_PROGRESS" >In progress</option>
               <option value="UNDER_REVIEW" >Under review</option>
               <option value="APPROVED" >Done</option>
+              <option value="CLOSED" >Closed</option>
             </select>
           </label>
         </div>
@@ -58,6 +59,9 @@
         All available projects
         <div v-for="project in projects" :key="project.id">
           <project-box :project="project"></project-box>
+        </div>
+        <div v-if="showMoreProjects" @click="loadProjects" style="text-align: center; color: darkblue; cursor: pointer">
+          Show more...
         </div>
       </div>
     </div>
@@ -108,9 +112,11 @@ export default {
       showTasks: true,
       showProjects: false,
       showUsers: false,
+      showMoreProjects: false,
       sort: '',
       filter: '',
       tasksPage: -1,
+      projectsPage: 0,
       nextTasksAvailable: false,
       previousTasksAvailable: false
     }
@@ -127,7 +133,7 @@ export default {
         this.nextTasksAvailable = true
       }
 
-      this.projects = await findProjects(this.searchTerm)
+      this.loadProjects()
       NProgress.done()
     },
     sortSelected () {
@@ -160,6 +166,12 @@ export default {
         this.previousTasksAvailable = false
       }
       this.nextTasksAvailable = true
+    },
+    async loadProjects () {
+      console.log()
+      let newProjects = await findProjects(this.searchTerm, this.projectsPage++)
+      this.showMoreProjects = newProjects.length >= MAX_RESULTS
+      this.projects.push(...newProjects)
     }
   }
 }

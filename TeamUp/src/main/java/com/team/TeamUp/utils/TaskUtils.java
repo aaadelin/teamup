@@ -47,7 +47,7 @@ public class TaskUtils {
                     .map(task -> dtOsConverter.getDTOFromTask(task))
                     .collect(Collectors.toList());
         }else if(term == null){
-            return taskRepository.findAllByTaskStatusIn(statuses, PageRequest.of(page, PAGE_SIZE)).stream()
+            return taskRepository.findAllByAssigneesContainingAndTaskStatusIn(user, statuses, PageRequest.of(page, PAGE_SIZE)).stream()
                     .map(task -> dtOsConverter.getDTOFromTask(task))
                     .collect(Collectors.toList());
         }

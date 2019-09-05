@@ -55,10 +55,9 @@ export function uploadPhoto (photo, id, component) {
       'token': localStorage.getItem('access_key')
     },
     data: data,
-
-    onUploadProgress: function( progressEvent ) {
-      component.uploadPercentage = parseInt( Math.round( ( progressEvent.loaded * 100 ) / progressEvent.total ) )
-    }.bind(component)
+    onUploadProgress: function (progressEvent) {
+      component.uploadPercentage = parseInt(Math.round((progressEvent.loaded * 100) / progressEvent.total))
+    }
   })
 }
 
@@ -74,5 +73,10 @@ export async function saveUser (data) {
 
 export async function saveComment (data) {
   let url = `${baseURL}/comment`
+  return postDataToUrl(data, url)
+}
+
+export async function saveTeam (data) {
+  let url = `${baseURL}/team`
   return postDataToUrl(data, url)
 }

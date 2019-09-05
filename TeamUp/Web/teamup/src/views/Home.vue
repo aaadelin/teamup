@@ -29,7 +29,6 @@
 // import RightMenu from '../components/RightMenu'
 import NProgress from 'nprogress'
 import SmallTaskBox from '../components/containers/SmallTaskBox'
-import ProjectBox from "../components/containers/ProjectBox";
 import { getMyID, getProjects, getUsersTasks } from '../persistance/RestGetRepository'
 import SmallProjectBox from '../components/containers/SmallProjectBox'
 
@@ -42,7 +41,7 @@ $(document).ready(function () {
 })
 
 export default {
-  components: {SmallProjectBox, ProjectBox, SmallTaskBox},
+  components: { SmallProjectBox, SmallTaskBox },
   mounted () {
     document.title = 'TeamUp'
     this.getTasks()
@@ -58,21 +57,21 @@ export default {
       user: localStorage.getItem('name')
     }
   },
-    methods: {
-      getTasks() {
-        getMyID().then(id => {
-          getUsersTasks(id, null, 'assignedto', 0, 'OPEN').then(tasks => {
-            console.log(tasks)
-            this.tasks = tasks.assigned
-          })
+  methods: {
+    getTasks () {
+      getMyID().then(id => {
+        getUsersTasks(id, null, 'assignedto', 0, 'OPEN').then(tasks => {
+          console.log(tasks)
+          this.tasks = tasks.assigned
         })
-      },
-      getProjects () {
-        getProjects().then(projects => {
-          this.projects = projects
-        })
-      }
+      })
+    },
+    getProjects () {
+      getProjects().then(projects => {
+        this.projects = projects
+      })
     }
+  }
 }
 </script>
 
@@ -96,5 +95,9 @@ export default {
     padding: 20px;
     font-size: 40px;
     font-family: 'Poppins',serif;
+  }
+
+  .col{
+    min-width: 300px;
   }
 </style>

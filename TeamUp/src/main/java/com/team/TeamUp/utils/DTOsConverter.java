@@ -260,11 +260,19 @@ public class DTOsConverter {
 
         Project project = projectOptional.orElseGet(Project::new);
 
-        project.setId(projectDTO.getId());
-        project.setName(projectDTO.getName());
-        project.setDescription(projectDTO.getDescription());
+        if(projectDTO.getId() != 0){
+            project.setId(projectDTO.getId());
+        }
+        if(!(projectDTO.getName() == null || projectDTO.getName().equals(""))) {
+            project.setName(projectDTO.getName());
+        }
+        if(!(projectDTO.getDescription() == null || projectDTO.getDescription().equals(""))) {
+            project.setDescription(projectDTO.getDescription());
+        }
         project.setDeadline(projectDTO.getDeadline());
-        project.setOwner(userRepository.findById(projectDTO.getOwnerID()).get());
+        if(projectDTO.getOwnerID() != 0){
+            project.setOwner(userRepository.findById(projectDTO.getOwnerID()).get());
+        }
 
         LOGGER.info(String.format("Instance of type Project created: %s", project));
         return project;
@@ -300,7 +308,7 @@ public class DTOsConverter {
 
         team.setName(teamDTO.getName());
         team.setDescription(teamDTO.getDescription());
-        team.setLocation(getLocationFromDTO(teamDTO.getLocation()));
+        team.setLocation(locationRepository.getOne(teamDTO.getLocation()));
         team.setDepartment(teamDTO.getDepartment());
 
         LOGGER.info(String.format("Instance of type Team created: %s", team));
@@ -338,7 +346,7 @@ public class DTOsConverter {
         teamDTO.setId(team.getId());
         teamDTO.setName(team.getName());
         teamDTO.setDescription(team.getDescription());
-        teamDTO.setLocation(getDTOFromLocation(team.getLocation()));
+        teamDTO.setLocation(team.getLocation().getId());
         teamDTO.setDepartment(team.getDepartment());
         if (team.getLeader() != null) {
             teamDTO.setLeaderID(team.getLeader().getId());

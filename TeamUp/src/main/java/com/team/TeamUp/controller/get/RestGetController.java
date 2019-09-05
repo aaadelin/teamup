@@ -11,6 +11,7 @@ import com.team.TeamUp.utils.DTOsConverter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -26,6 +27,7 @@ import static org.springframework.web.bind.annotation.RequestMethod.GET;
 public class RestGetController {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(RestGetController.class);
+    private static final int PAGE_SIZE = 10;
 
 
     private TeamRepository teamRepository;
@@ -72,14 +74,15 @@ public class RestGetController {
 
     @RequestMapping(value = "/projects", method = GET)
     public ResponseEntity<?> getAllProjects(@RequestHeader Map<String, String> headers,
+                                            @RequestParam(value = "page", required = false, defaultValue = "0") Integer page,
                                             @RequestParam(name = "search", required = false) String search) {
-        LOGGER.info(String.format("Entering get all projects method with headers: %s and search term: %s", headers, search));
+        LOGGER.info(String.format("Entering get all projects method with headers: %s, page %s and search term: %s", headers, page, search));
         List<ProjectDTO> projects;
         if(search != null){
-            projects = projectRepository.findAllByNameContainingOrDescriptionContaining(search, search)
+            projects = projectRepository.findAllByNameContainingOrDescriptionContaining(search, search, PageRequest.of(page, PAGE_SIZE))
                     .stream().map(dtOsConverter::getDTOFromProject).collect(Collectors.toList());
         }else{
-            projects = projectRepository.findAll().stream().map(dtOsConverter::getDTOFromProject).collect(Collectors.toList());
+            projects = projectRepository.findAll(PageRequest.of(page, PAGE_SIZE)).stream().map(dtOsConverter::getDTOFromProject).collect(Collectors.toList());
         }
         LOGGER.info(String.format("Returning list of projects: %s", projects));
         return new ResponseEntity<>(projects, HttpStatus.OK);
@@ -171,7 +174,7 @@ public class RestGetController {
                         break;
                 }
             }
-            LOGGER.info(String.format("Returning project's statistics %s", stats));
+            LOGGER.info(String.format("Returning project's statistics %s", Arrays.toString(stats)));
             return new ResponseEntity<>(stats, HttpStatus.OK);
         } else {
             LOGGER.info("No project found");

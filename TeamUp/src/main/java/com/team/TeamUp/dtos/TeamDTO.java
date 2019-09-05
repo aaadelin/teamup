@@ -12,7 +12,7 @@ public class TeamDTO {
 
     private String description;
 
-    private LocationDTO location;
+    private int locationId;
 
     private Department department;
 
@@ -28,12 +28,12 @@ public class TeamDTO {
         this.id = id;
     }
 
-    public LocationDTO getLocation() {
-        return location;
+    public int getLocation() {
+        return locationId;
     }
 
-    public void setLocation(LocationDTO location) {
-        this.location = location;
+    public void setLocation(int location) {
+        this.locationId = location;
     }
 
     public String getName() {
@@ -82,7 +82,7 @@ public class TeamDTO {
                 "id=" + id +
                 ", name='" + name + '\'' +
                 ", description='" + description + '\'' +
-                ", location='" + location + '\'' +
+                ", location='" + locationId + '\'' +
                 ", department=" + department +
                 ", leaderID=" + leaderID +
                 ", members=" + members +
