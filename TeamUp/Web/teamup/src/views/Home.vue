@@ -61,7 +61,6 @@ export default {
     getTasks () {
       getMyID().then(id => {
         getUsersTasks(id, null, 'assignedto', 0, 'OPEN').then(tasks => {
-          console.log(tasks)
           this.tasks = tasks.assigned
         })
       })

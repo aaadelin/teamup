@@ -1,8 +1,8 @@
 <template>
   <div class="container" >
-    <div class="row">
-      <div class="col-9"><p style="font-weight: 500">{{project.name}}</p></div>
-      <div class="col-3"><p>{{project.deadline.split(' ')[0]}}</p></div>
+    <div class="col">
+      <div class="row"><p style="font-weight: 500">{{project.name}}</p></div>
+      <div class="row"><p>{{project.deadline.split(' ')[0]}}</p></div>
     </div>
   </div>
 </template>
@@ -35,10 +35,14 @@ export default {
     padding: 15px 0 10px;
   }
 
-  .row{
+  .col{
     background: white;
     padding: 10px;
     margin: auto 0 auto 0;
     border-radius: 5px
+  }
+
+  .row{
+    padding-left: 15px;
   }
 </style>
