@@ -3,7 +3,7 @@
   <form class="commentForm" @submit.prevent="addComment">
 
     <label class="row" for="title">Title:
-      <input id="title" type="text" v-model="title" class="form-control" name="title" autocomplete="off">
+      <input id="title" type="text" v-model="title" class="form-control" name="title" autocomplete="off" @keyup="focusOnComment">
     </label>
     <label class="row" for="comment">Comment:
       <textarea id="comment" type="text" v-model="comment" name="comment" class="form-control" rows="5" cols="40"></textarea>
@@ -37,7 +37,7 @@ export default {
   },
   methods: {
     async addComment () {
-      if (this.title !== '') {
+      if (this.title !== '' && this.comment.length > 2) {
         let comment = {
           title: this.title,
           content: this.comment,
@@ -48,6 +48,11 @@ export default {
         this.title = ''
         this.comment = ''
         this.$emit('reloadComments')
+      }
+    },
+    focusOnComment (ev) {
+      if (ev.key === 'Enter') {
+        document.getElementById('comment').focus()
       }
     }
   }

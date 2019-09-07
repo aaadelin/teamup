@@ -229,7 +229,6 @@ export default {
       this.taskStatuses = await this.getTaskStatusPossibilities()
       this.taskTypes = await getTaskTypes()
       this.comments = taskPostData.comments
-      console.log(this.comments)
       let me = await getMyID()
       if (this.task.reporterID === me) {
         this.canEditAll = true

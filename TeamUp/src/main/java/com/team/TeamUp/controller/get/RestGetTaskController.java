@@ -48,8 +48,12 @@ public class RestGetTaskController {
 
     @RequestMapping(value = "/tasks", method = GET)
     public ResponseEntity<?> getAllTasks(@RequestHeader Map<String, String> headers,
-                                         @RequestParam(value = "start", required = false) Integer startPage,
+                                         @RequestParam(value = "page", required = false) Integer startPage,
                                          @RequestParam(value = "status", required = false) TaskStatus status,
+                                         @RequestParam(value = "statuses", required = false) List<TaskStatus> statuses,
+                                         @RequestParam(value = "search", required = false) String search,
+                                         @RequestParam(value = "sort", required = false) String sort,
+                                         @RequestParam(value = "desc", required = false, defaultValue = "false") Boolean desc,
                                          @RequestParam(value = "last", required = false) Long numberOfTasksSortedDesc) {
         LOGGER.info(String.format("Entering get all tasks method with headers: %s, startPage: %s, status: %s and number of last tasks %s", headers.toString(), startPage, status, numberOfTasksSortedDesc));
         List<TaskDTO> tasks = new ArrayList<>();
@@ -96,6 +100,7 @@ public class RestGetTaskController {
                     .collect(Collectors.toList());
         }
 
+        tasks = taskUtils.findTasksByParameters(startPage, statuses, search, sort, desc);
 
         LOGGER.info(String.format("Returning list of tasks: %s", tasks.toString()));
         return new ResponseEntity<>(tasks, HttpStatus.OK);

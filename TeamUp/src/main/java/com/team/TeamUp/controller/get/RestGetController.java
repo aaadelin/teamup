@@ -172,6 +172,7 @@ public class RestGetController {
                     case APPROVED:
                         stats[2]++;
                         break;
+                    //todo add CLOSED to the finished category and Under_review at in_progress category?
                 }
             }
             LOGGER.info(String.format("Returning project's statistics %s", Arrays.toString(stats)));

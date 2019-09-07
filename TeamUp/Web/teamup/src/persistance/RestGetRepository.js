@@ -113,19 +113,6 @@ export async function getUsersAssignedTasks (pages) {
   return tasks
 }
 
-// export async function getUsersAssignedAndReportedTasks (pages) {
-//   let todoTasks = await getUsersReportedAndAssignedTasksWithStatuses(pages[0], 'OPEN,REOPENED')
-//   let inProgressTasks = await getUsersReportedAndAssignedTasksWithStatus(pages[1], 'IN_PROGRESS')
-//   let underReviewTasks = await getUsersReportedAndAssignedTasksWithStatus(pages[2], 'UNDER_REVIEW')
-//   let approvedTasks = await getUsersReportedAndAssignedTasksWithStatus(pages[3], 'APPROVED')
-//
-//   let tasks = [todoTasks, inProgressTasks, underReviewTasks, approvedTasks]
-//   if (todoTasks == null || inProgressTasks == null || underReviewTasks == null || approvedTasks == null) {
-//     return null
-//   }
-//   return tasks
-// }
-
 export async function getUsersAssignedTasksWithStatus (page, status, search = '') {
   search = encodeURI(search)
   let url = `${baseURL}/tasks/assigned?page=${page}&status=${status}&search=${search}`
@@ -137,17 +124,6 @@ export async function getUsersAssignedTasksWithStatuses (page, statuses, search 
   let url = `${baseURL}/tasks/assigned?page=${page}&statuses=${statuses}&search=${search}&${sort}`
   return fetchDataFromUrl(url)
 }
-
-// export async function getUsersReportedTasksWithStatus (page, status) {
-//   let url = `${baseURL}/tasks/reported?page=${page}&status=${status}`
-//   return fetchDataFromUrl(url)
-// }
-
-// export async function getUsersReportedAndAssignedTasksWithStatus (page, status, search = '') {
-//   search = encodeURI(search)
-//   let url = `${baseURL}/tasks/assigned-reported?page=${page}&status=${status}&search=${search}`
-//   return fetchDataFromUrl(url)
-// }
 
 export async function getUsersReportedAndAssignedTasksWithStatuses (page, statuses, search) {
   search = encodeURI(search)
@@ -235,4 +211,10 @@ export async function getStatisticsByProjectId (id) {
 export async function getHighRankUsers () {
   let url = `${baseURL}/users/high-rank`
   return fetchDataFromUrl(url, [])
+}
+
+export async function getSearchedSortedFilteredTasks (page, statuses, search, sort, desc) {
+  search = encodeURI(search)
+  let url = `${baseURL}/tasks?page=${page}&statuses=${statuses}&search=${search}&sort=${sort}&desc=${desc}`
+  return fetchDataFromUrl(url)
 }

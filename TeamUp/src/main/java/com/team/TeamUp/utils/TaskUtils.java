@@ -13,6 +13,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -122,8 +123,45 @@ public class TaskUtils {
         }
         List<TaskDTO> taskDTOS = tasks.stream().map(dtOsConverter::getDTOFromTask).collect(Collectors.toList());
         taskDTOS = filterTasks(search, taskDTOS);
-
+        LOGGER.info(String.format("Returning list of tasks: %s", taskDTOS));
         return taskDTOS;
+    }
+
+    public List<TaskDTO> findTasksByParameters(Integer page, List<TaskStatus> statuses, String search, String sort, Boolean desc){
+        LOGGER.info(String.format("Entering method to find tasks with statuses %s in page %s containing string %s sorted %s %s", statuses, page, search, sort, desc));
+        List<Task> tasks;
+
+        if (statuses.isEmpty()){
+            statuses = Arrays.asList(TaskStatus.values());
+        }
+        tasks = findAllTasksWithTaskStatusInAndSummaryOrDescriptionContainingSordedBy(statuses.stream().map(Enum::ordinal).collect(Collectors.toList()), search, sort, desc, page);
+
+        List<TaskDTO> taskDTOS = tasks.stream().map(dtOsConverter::getDTOFromTask).collect(Collectors.toList());
+
+        LOGGER.info(String.format("Exiting with tasks: %s", taskDTOS));
+        return taskDTOS;
+    }
+
+    private List<Task> findAllTasksWithTaskStatusInAndSummaryOrDescriptionContainingSordedBy(List<Integer> statuses, String search, String sort, Boolean desc, Integer page) {
+        switch(sort) {
+            case "deadline":
+                if (desc) {
+                    return taskRepository.findAllByTaskStatusInAndDescriptionContainingOrSummaryContainingOrderByDeadlineDesc(statuses, search, search, PageRequest.of(page, PAGE_SIZE));
+                }
+                return taskRepository.findAllByTaskStatusInAndDescriptionContainingOrSummaryContainingOrderByDeadline(statuses, search, search, PageRequest.of(page, PAGE_SIZE));
+            case "priority":
+                if (desc) {
+                    return taskRepository.findAllByTaskStatusInAndDescriptionContainingOrSummaryContainingOrderByPriorityDesc(statuses, search, search, PageRequest.of(page, PAGE_SIZE));
+                }
+                return taskRepository.findAllByTaskStatusInAndDescriptionContainingOrSummaryContainingOrderByPriority(statuses, search, search, PageRequest.of(page, PAGE_SIZE));
+            case "modified":
+                if (desc) {
+                    return taskRepository.findAllByTaskStatusInAndDescriptionContainingOrSummaryContainingOrderByLastChangedDesc(statuses, search, search, PageRequest.of(page, PAGE_SIZE));
+                }
+                return taskRepository.findAllByTaskStatusInAndDescriptionContainingOrSummaryContainingOrderByLastChanged(statuses, search, search, PageRequest.of(page, PAGE_SIZE));
+            default:
+                return taskRepository.findAllByTaskStatusInAndDescriptionContainingOrSummaryContaining(statuses, search, search, PageRequest.of(page, PAGE_SIZE));
+        }
     }
 
     private List<Task> getAssignedSortedTasks(User user, List<TaskStatus> statuses, Integer page, String sort, Boolean desc){

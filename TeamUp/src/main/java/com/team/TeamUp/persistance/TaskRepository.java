@@ -35,6 +35,42 @@ public interface TaskRepository extends JpaRepository<Task, Integer> {
     List<Task> findAllByAssigneesContainingAndTaskStatusIn(User assignee, List<TaskStatus> statuses, Pageable pageable);
 
     @Query(value = "select * from task t\n" +
+            "where t.task_status in ?1 and (t.summary like concat('%', ?2, '%') or t.description like concat('%', ?2, '%'))", nativeQuery = true)
+    List<Task> findAllByTaskStatusInAndDescriptionContainingOrSummaryContaining(List<Integer> taskStatuses, String description, String summary, Pageable pageable);
+
+
+    @Query(value = "select * from task t\n" +
+            "where t.task_status in ?1 and (t.summary like concat('%', ?2, '%') or t.description like concat('%', ?2, '%'))\n" +
+            "order by t.deadline", nativeQuery = true)
+    List<Task> findAllByTaskStatusInAndDescriptionContainingOrSummaryContainingOrderByDeadline(List<Integer> taskStatuses, String description, String summary, Pageable pageable);
+
+    @Query(value = "select * from task t\n" +
+            "where t.task_status in ?1 and (t.summary like concat('%', ?2, '%') or t.description like concat('%', ?2, '%'))\n" +
+            "order by t.deadline desc", nativeQuery = true)
+    List<Task> findAllByTaskStatusInAndDescriptionContainingOrSummaryContainingOrderByDeadlineDesc(List<Integer> taskStatuses, String description, String summary, Pageable pageable);
+
+    @Query(value = "select * from task t\n" +
+            "where t.task_status in ?1 and (t.summary like concat('%', ?2, '%') or t.description like concat('%', ?2, '%'))\n" +
+            "order by t.last_changed", nativeQuery = true)
+    List<Task> findAllByTaskStatusInAndDescriptionContainingOrSummaryContainingOrderByLastChanged(List<Integer> taskStatuses, String description, String summary, Pageable pageable);
+
+    @Query(value = "select * from task t\n" +
+            "where t.task_status in ?1 and (t.summary like concat('%', ?2, '%') or t.description like concat('%', ?2, '%'))\n" +
+            "order by t.last_changed desc", nativeQuery = true)
+    List<Task> findAllByTaskStatusInAndDescriptionContainingOrSummaryContainingOrderByLastChangedDesc(List<Integer> taskStatuses, String description, String summary, Pageable pageable);
+
+
+    @Query(value = "select * from task t\n" +
+            "where t.task_status in ?1 and (t.summary like concat('%', ?2, '%') or t.description like concat('%', ?2, '%'))\n" +
+            "order by t.priority", nativeQuery = true)
+    List<Task> findAllByTaskStatusInAndDescriptionContainingOrSummaryContainingOrderByPriority(List<Integer> taskStatuses, String description, String summary, Pageable pageable);
+
+    @Query(value = "select * from task t\n" +
+            "where t.task_status in ?1 and (t.summary like concat('%', ?2, '%') or t.description like concat('%', ?2, '%'))\n" +
+            "order by t.priority desc", nativeQuery = true)
+    List<Task> findAllByTaskStatusInAndDescriptionContainingOrSummaryContainingOrderByPriorityDesc(List<Integer> taskStatuses, String description, String summary, Pageable pageable);
+
+    @Query(value = "select * from task t\n" +
             "inner join task_assignees ta on t.id = ta.task_id\n" +
             "inner join user u on ta.assignees_id = u.id\n" +
             "where t.task_status=?2 and (u.id=?1 or t.reporter_id = ?1)\n" +

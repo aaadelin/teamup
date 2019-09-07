@@ -24,6 +24,10 @@
           <small-task-box v-else
                     :task="task1"/>
         </div>
+<!--        duplicated id is needed. if the list is empty, the div is not rendered and the drag&drop will not work. those two elements will never be rendered at the same time-->
+        <div id="todo-category" v-if="tasks[0].length === 0">
+
+        </div>
         <div style="color: #6d7fcc; cursor: pointer" v-if="this.showMore[0]" @click="loadMore('todo')">Load more...</div>
       </div>
 
@@ -37,6 +41,9 @@
                     :task="task1"/>
           <small-task-box v-else
                     :task="task1"/>
+        </div>
+        <div id="in-progress-category" v-if="tasks[1].length === 0">
+
         </div>
         <div style="color: #6d7fcc; cursor: pointer" v-if="this.showMore[1]" @click="loadMore('in-progress')">Load more...</div>
       </div>
@@ -52,6 +59,9 @@
           <small-task-box v-else
                           :task="task1"/>
         </div>
+        <div id="under-review-category" v-if="tasks[2].length === 0">
+
+        </div>
         <div style="color: #6d7fcc; cursor: pointer" v-if="this.showMore[2]" @click="loadMore('under-review')">Load more...</div>
       </div>
 
@@ -65,6 +75,9 @@
                     :task="task1"/>
           <small-task-box v-else
                           :task="task1"/>
+        </div>
+        <div id="done-category" v-if="tasks[3].length === 0">
+
         </div>
         <div style="color: #6d7fcc; cursor: pointer" v-if="this.showMore[3]" @click="loadMore('done')">Load more...</div>
       </div>
@@ -185,121 +198,50 @@ export default {
     },
     async getAssignedTasks () {
       this.tasks = [[], [], [], []]
-      let newTasks = []
-      for (let i = 0; i <= this.pages[0]; i++) {
-        newTasks = await getUsersAssignedTasksWithStatuses(i, 'OPEN,REOPENED', this.filterWord, this.query)
-        this.tasks[0].push(...newTasks)
-      }
-      if (newTasks.length < MAX_RESULTS) {
-        this.showMore[0] = false
-      }
-      for (let i = 0; i <= this.pages[1]; i++) {
-        newTasks = await getUsersAssignedTasksWithStatuses(i, 'IN_PROGRESS', this.filterWord, this.query)
-        this.tasks[1].push(...newTasks)
-      }
-      if (newTasks.length < MAX_RESULTS) {
-        this.showMore[1] = false
-      }
-      for (let i = 0; i <= this.pages[2]; i++) {
-        newTasks = await getUsersAssignedTasksWithStatuses(i, 'UNDER_REVIEW', this.filterWord, this.query)
-        this.tasks[2].push(...newTasks)
-      }
-      if (newTasks.length < MAX_RESULTS) {
-        this.showMore[2] = false
-      }
-      for (let i = 0; i <= this.pages[3]; i++) {
-        newTasks = await getUsersAssignedTasksWithStatuses(i, 'APPROVED', this.filterWord, this.query)
-        this.tasks[3].push(...newTasks)
-      }
-      if (newTasks.length < MAX_RESULTS) {
-        this.showMore[3] = false
+
+      let categories = ['OPEN,REOPENED', 'IN_PROGRESS', 'UNDER_REVIEW', 'APPROVED']
+      for (let j = 0; j < categories.length; j++) {
+        let newTasks = []
+        for (let i = 0; i <= this.pages[j]; i++) {
+          newTasks = await getUsersAssignedTasksWithStatuses(i, categories[j], this.filterWord, this.query)
+          this.tasks[j].push(...newTasks)
+        }
+        if (newTasks.length < MAX_RESULTS) {
+          this.showMore[j] = false
+        }
       }
     },
     async getAssignedAndReportedTasks () {
       this.tasks = [[], [], [], []]
-      let newTasks = []
-      for (let i = 0; i <= this.pages[0]; i++) {
-        newTasks = await getUsersReportedAndAssignedTasksWithStatuses(i, 'OPEN,REOPENED', this.filterWord, this.query)
-        this.tasks[0].push(...newTasks)
-      }
-      if (newTasks.length < MAX_RESULTS) {
-        this.showMore[0] = false
-      }
-      for (let i = 0; i <= this.pages[1]; i++) {
-        newTasks = await getUsersReportedAndAssignedTasksWithStatuses(i, 'IN_PROGRESS', this.filterWord, this.query)
-        this.tasks[1].push(...newTasks)
-      }
-      if (newTasks.length < MAX_RESULTS) {
-        this.showMore[1] = false
-      }
-      for (let i = 0; i <= this.pages[2]; i++) {
-        newTasks = await getUsersReportedAndAssignedTasksWithStatuses(i, 'UNDER_REVIEW', this.filterWord, this.query)
-        this.tasks[2].push(...newTasks)
-      }
-      if (newTasks.length < MAX_RESULTS) {
-        this.showMore[2] = false
-      }
-      for (let i = 0; i <= this.pages[3]; i++) {
-        newTasks = await getUsersReportedAndAssignedTasksWithStatuses(i, 'APPROVED', this.filterWord, this.query)
-        this.tasks[3].push(...newTasks)
-      }
-      if (newTasks.length < MAX_RESULTS) {
-        this.showMore[3] = false
+
+      let categories = ['OPEN,REOPENED', 'IN_PROGRESS', 'UNDER_REVIEW', 'APPROVED']
+      for (let j = 0; j < categories.length; j++) {
+        let newTasks = []
+        for (let i = 0; i <= this.pages[j]; i++) {
+          newTasks = await getUsersReportedAndAssignedTasksWithStatuses(i, categories[j], this.filterWord) // todo add query parameter for sort
+          this.tasks[j].push(...newTasks)
+        }
+        if (newTasks.length < MAX_RESULTS) {
+          this.showMore[j] = false
+        }
       }
     },
     async loadMore (category) {
-      let newTasks = null
-      switch (category) {
-        case 'todo':
-          this.pages[0]++
+      let categories = [['todo', 'OPEN,REOPENED'], ['in-progress', 'IN_PROGRESS'], ['under-review', 'UNDER_REVIEW'], ['done', 'APPROVED']]
+      for (let i = 0; i < categories.length; i++) {
+        if (category === categories[i][0]) {
+          let newTasks = []
+          this.pages[i]++
           if (this.reportedTasks) {
-            newTasks = await getUsersReportedAndAssignedTasksWithStatuses(this.pages[0], 'OPEN,REOPENED', '', this.query)
+            newTasks = await getUsersReportedAndAssignedTasksWithStatuses(this.pages[i], categories[i][1], '', this.query)
           } else {
-            newTasks = await getUsersAssignedTasksWithStatuses(this.pages[0], 'OPEN,REOPENED', '', this.query)
+            newTasks = await getUsersAssignedTasksWithStatuses(this.pages[i], categories[i][1], '', this.query)
           }
           if (newTasks.length < MAX_RESULTS) {
-            this.showMore[0] = false
+            this.showMore[i] = false
           }
-          this.tasks[0].push(...newTasks)
-          break
-        case 'in-progress':
-          this.pages[1]++
-          if (this.reportedTasks) {
-            newTasks = await getUsersReportedAndAssignedTasksWithStatuses(this.pages[1], 'IN_PROGRESS', '', this.query)
-          } else {
-            newTasks = await getUsersAssignedTasksWithStatuses(this.pages[1], 'IN_PROGRESS', '', this.query)
-          }
-          if (newTasks.length < MAX_RESULTS) {
-            this.showMore[1] = false
-          }
-          this.tasks[1].push(...newTasks)
-          break
-        case 'under-review':
-          this.pages[2]++
-
-          if (this.reportedTasks) {
-            newTasks = await getUsersReportedAndAssignedTasksWithStatuses(this.pages[2], 'UNDER_REVIEW', '', this.query)
-          } else {
-            newTasks = await getUsersAssignedTasksWithStatuses(this.pages[2], 'UNDER_REVIEW', '', this.query)
-          }
-          if (newTasks.length < MAX_RESULTS) {
-            this.showMore[2] = false
-          }
-          this.tasks[2].push(...newTasks)
-          break
-        case 'done':
-          this.pages[3]++
-
-          if (this.reportedTasks) {
-            newTasks = await getUsersReportedAndAssignedTasksWithStatuses(this.pages[3], 'APPROVED', '', this.query)
-          } else {
-            newTasks = await getUsersAssignedTasksWithStatuses(this.pages[3], 'APPROVED', '', this.query)
-          }
-          if (newTasks.length < MAX_RESULTS) {
-            this.showMore[3] = false
-          }
-          this.tasks[3].push(...newTasks)
-          break
+          this.tasks[i].push(...newTasks)
+        }
       }
     },
     getIds (tasks) {
