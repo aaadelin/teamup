@@ -223,10 +223,7 @@ export default {
       this.passwordAgain = this.password
     },
     async getDataArrays () {
-      this.teams = await getTeams()
-      if (this.teams.length !== 0) {
-        this.team = this.teams[0]
-      }
+      this.getTeamsArray()
 
       this.statuses = await getUserStatuses()
       if (this.statuses.length !== 0) {
@@ -236,6 +233,12 @@ export default {
       this.dataReady = true
       this.password = Math.random().toString(34).slice(-8)
       this.passwordAgain = this.password
+    },
+    async getTeamsArray () {
+      this.teams = await getTeams()
+      if (this.teams.length !== 0) {
+        this.team = this.teams[0]
+      }
     },
     showHidePass (inputID) {
       let item = document.getElementById(inputID)

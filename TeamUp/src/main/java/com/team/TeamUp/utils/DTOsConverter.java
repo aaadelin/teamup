@@ -241,7 +241,7 @@ public class DTOsConverter {
         taskDTO.setProject(task.getProject().getId());
         taskDTO.setDifficulty(task.getDifficulty());
         taskDTO.setPriority(task.getPriority());
-        taskDTO.setDepartment(taskDTO.getDepartment());
+        taskDTO.setDepartment(task.getDepartment());
         taskDTO.setTaskType(task.getTaskType());
         taskDTO.setReporterID(task.getReporter().getId());
         taskDTO.setAssignees(task.getAssignees().stream().map(User::getId).collect(Collectors.toList()));

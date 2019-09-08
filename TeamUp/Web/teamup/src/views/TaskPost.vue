@@ -9,19 +9,19 @@
       <div class="row">
         <div class="col container-fluid" style="text-align: left">
 
-          <span> <strong>Description: </strong>
-            <span v-if="editMode && canEditAll"> <textarea @keyup="hasChanged" v-model="currentDescription" cols="50" rows="4"></textarea> </span>
-            <span @dblclick="editMode = canEditAll" v-else v-html="tasksDescription"></span>
-          </span>
+          <div class="row"> <strong class="col-3">Description: </strong>
+            <span v-if="editMode && canEditAll" > <textarea @keyup="hasChanged" v-model="currentDescription" cols="50" rows="4"></textarea> </span>
+            <span @dblclick="editMode = canEditAll" v-else v-html="tasksDescription" class="col"></span>
+          </div>
 
           <p></p>
 
-          <span style="text-align: left"> <strong>Created at: </strong>
-            {{ task.createdAt }} </span>
+          <div style="text-align: left" class="row"> <strong class="col-3" >Created at: </strong>
+            {{ task.createdAt }} </div>
 
           <p></p>
 
-          <span class="row" style="text-align: left; padding-left: 15px"> <strong>Deadline: </strong>
+          <span class="row" style="text-align: left"> <strong class="col-3">Deadline: </strong>
               <date-picker v-if="editMode && canEditAll" v-model="currentDeadline" id="deadline" name="deadline"
                            :config="options" @dp-change="hasChanged"
                            class="form-control col col-4"></date-picker>
@@ -32,83 +32,88 @@
 
           <p></p>
 
-          <span> <strong> Last changed: </strong>{{ task.lastChanged }} </span>
+          <div class="row"> <strong class="col-3"> Last changed: </strong>{{ task.lastChanged }} </div>
 
           <p></p>
 
-          <div> <strong>Reporter: </strong> {{ reporter.firstName }} {{ reporter.lastName }} </div>
+          <div class="row"> <strong class="col-3">Reporter: </strong> {{ reporter.firstName }} {{ reporter.lastName }} </div>
 
           <p></p>
         </div>
 
         <div class="col container-fluid" style="text-align: left">
 
-          <span> <strong>Task status: </strong>  <span v-if="editMode">
-            <select @change="hasChanged" v-model="currentStatus" >
+          <div class="row"> <strong class="col-3">Task status: </strong>  <span v-if="editMode">
+            <select @change="hasChanged" v-model="currentStatus" class="form-control" >
                 <option v-for="(taskStatus, index) in taskStatuses" :key="index" :value="taskStatus">
                   {{ taskStatus.replace('_', ' ') }}
                 </option>
             </select>
           </span>
           <span @dblclick="editMode = canEditStatus || canEditAll" v-else>{{ task.taskStatus.replace('_', ' ') }}</span>
-          </span>
+          </div>
 
           <p></p>
 
-          <span> <strong>Task type: </strong>  <span v-if="editMode && canEditAll">
-            <select @change="hasChanged" v-model="currentType" >
+          <div class="row"> <strong class="col-3">Task type: </strong>
+            <span v-if="editMode && canEditAll">
+            <select @change="hasChanged" v-model="currentType" class="form-control">
                 <option v-for="(taskType, index) in taskTypes" :key="index">
                   {{ taskType }}
                 </option>
             </select>
           </span>
-          <span @dblclick="editMode = canEditAll" v-else>{{ task.taskType }}</span></span>
+          <span @dblclick="editMode = canEditAll" v-else>{{ task.taskType }}</span></div>
 
           <p></p>
 
-          <span> <strong>Difficulty: </strong> <span v-if="editMode && canEditAll">
-            <select @change="hasChanged" v-model="currentDifficulty" >
+          <div class="row"> <strong class="col-3">Difficulty: </strong> <span v-if="editMode && canEditAll">
+            <select @change="hasChanged" v-model="currentDifficulty" class="form-control">
                 <option v-for="(diff, index) in 3" :key="index">
                   {{ diff }}
                 </option>
             </select>
           </span>
           <span @dblclick="editMode = canEditAll" v-else>{{ task.difficulty }}</span>
-          </span>
+          </div>
 
           <p></p>
 
-          <span> <strong>Priority: </strong><span v-if="editMode && canEditAll">
-            <select @change="hasChanged" v-model="currentPriority" >
+          <div class="row">
+            <strong class="col-3">Priority: </strong>
+            <span v-if="editMode && canEditAll">
+            <select @change="hasChanged" v-model="currentPriority" class="form-control">
                 <option v-for="(priority, index) in 3" :key="index">
                   {{ priority }}
                 </option>
             </select>
             </span>
             <span @dblclick="editMode = canEditAll" v-else>{{ task.priority }}</span>
-          </span>
+          </div>
 
           <p></p>
 
-          <span>
-            <strong>Assignees: </strong>
-            <select  v-if="editMode && canEditAll" @click="addPersons" v-model="userToAdd">
-              <option v-for="user in users" :key="user.id" :value="user">{{user.firstName}} {{user.lastName}} ({{user.department}})</option>
-            </select>
-<!--            <button v-if="editMode && canEditAll" class="btn btn-success btn-circle" @click="addPersons">+</button>-->
-            <span>
-            <ul class="col-3" style="list-style-type: none; text-align: left; margin-left: 20px">
+          <div>
+            <div class="row">
+                <strong class="col-3">Assignees: </strong>
+                <select v-if="editMode && canEditAll" @click="addPersons" v-model="userToAdd" class="form-control col">
+                  <option v-for="user in users" :key="user.id" :value="user">{{user.firstName}} {{user.lastName}} ({{user.department.replace(/_/g, ' ')}})</option>
+                </select>
+            </div>
+            <div class="row">
+            <div class="col-3"></div>
+            <ul class="col-3" style="list-style-type: none; text-align: left">
               <li v-for="assignee in assignees" :key="assignee.id">
                 <div class="row">
-                  <div style="cursor: pointer; margin-right: 5px;" @click="seeUsersProfile(assignee.id)">
+                  <div style="cursor: pointer; margin-right: 5px" @click="seeUsersProfile(assignee.id)">
                     {{assignee.firstName}} {{assignee.lastName}}
                   </div>
                   <button v-if="editMode && canEditAll" class="btn btn-danger btn-circle" @click="removeFromAssignees(assignee)">-</button>
                 </div>
               </li>
             </ul>
-            </span>
-          </span>
+            </div>
+          </div>
 
         </div>
 
@@ -241,6 +246,7 @@ export default {
       this.currentAssignees.push(...this.assignees)
       getUsers().then(answer => {
         this.users = answer.filter(elem => elem.status !== 'ADMIN')
+        this.users = this.users.sort((a, b) => a.department === this.task.department && b.department !== this.task.department ? -1 : 1)
       })
       this.options.maxDate = (await getProjectByTaskId(this.task.id)).deadline
     },

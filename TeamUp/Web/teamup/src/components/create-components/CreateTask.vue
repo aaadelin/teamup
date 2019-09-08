@@ -41,9 +41,10 @@
                 <div class="row">
                   <label for="project" class="col-md-3">Project </label>
                   <select id="project" name="difficulty" v-model="project" class="form-control col-md-8" @change="adjustMaxDate"  :class="{ 'is-invalid': dataFailed && !project }">
-                    <option v-for="proj in projects" :key="proj.id" :value="proj">{{ proj.name }}</option>
+                    <option v-for="proj in projects" :key="proj.id" :value="proj" >{{ proj.name }}</option>
                   </select>
                 </div>
+                <p v-show="project.deadline !== ''" style="font-size: 10px; margin-bottom: 0">Deadline: {{project.deadline}}</p>
 
                 <br/>
 
@@ -76,7 +77,7 @@
 
                 <div class="row">
                   <label for="department" class="col-md-3">Department </label>
-                  <select id="department" name="department" v-model="department" class="form-control col-md-8"  :class="{ 'is-invalid': dataFailed && !department }">
+                  <select id="department" name="department" @change="sortUsers" v-model="department" class="form-control col-md-8"  :class="{ 'is-invalid': dataFailed && !department }">
                     <option v-for="(department, index) in departments" :key="index" :value="department">{{ department.replace('_', ' ') }}</option>
                   </select>
                 </div>
@@ -86,7 +87,7 @@
                 <div class="row">
                   <label for="assigneesList" class="col-md-3">Assignees </label>
                   <select id="assigneesList" name="assignees" class="form-control col-md-8" @change="add" v-model="currentlySelected">
-                    <option v-for="assignee in filterAdmins(assigneesList)" :key="assignee.id" :value="assignee">{{ assignee.firstName }} {{ assignee.lastName }} ({{ assignee.department }})</option>
+                    <option v-for="assignee in filterAdmins(assigneesList)" :key="assignee.id" :value="assignee">{{ assignee.firstName }} {{ assignee.lastName }} ({{ assignee.department.replace(/_/g, ' ') }})</option>
                   </select>
                 </div>
                 <span v-if="localStorage.getItem('isAdmin')==='false'" @click="assignToMe" style="cursor: pointer" tabindex="0" @keyup="keyAssignToMe">Assign to me</span>
@@ -174,7 +175,7 @@ export default {
       reporter: null,
       localStorage: localStorage,
       assignees: [],
-      project: null,
+      project: { deadline: '' },
 
       taskTypes: [],
       projects: [],
@@ -282,8 +283,7 @@ export default {
         appendLeadingZeroes(date.getSeconds())
     },
     adjustMaxDate () {
-      let projectDeadline = this.project.deadline.replace('T', ' ')
-      this.options.maxDate = projectDeadline
+      this.options.maxDate = this.project.deadline.replace('T', ' ')
     },
     clearData () {
       this.summary = ''
@@ -299,7 +299,7 @@ export default {
       this.assignees = []
       this.localStorage = localStorage
       this.currentlySelected = null
-      this.project = null
+      this.project = { deadline: '' }
     },
     async getDataArrays () {
       this.taskTypes = await getTaskTypes()
@@ -309,6 +309,10 @@ export default {
       this.assigneesList = await getUsers()
 
       this.projects = await getProjects()
+
+      if (this.projects.length > 0) {
+        this.project = this.projects[0]
+      }
 
       this.dataReady = true
     },
@@ -352,6 +356,9 @@ export default {
         e.preventDefault()
         this.assignToMe()
       }
+    },
+    sortUsers () {
+      this.assigneesList = this.assigneesList.sort((a, b) => a.department === this.department && b.department !== this.department ? -1 : 1)
     }
   }
 }
@@ -379,7 +386,7 @@ export default {
   .modal-container {
     min-width: 360px;
     max-width: 540px;
-    margin: 0px auto;
+    margin: 0 auto;
     padding: 20px 30px;
     background-color: #fff;
     border-radius: 2px;

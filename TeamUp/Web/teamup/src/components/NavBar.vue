@@ -44,16 +44,19 @@
     <div >
       <create-task class="overflow-auto"
       :is-visible="addTaskIsVisible"
+      ref="createTask"
       @done="closeTask"/>
 
     <create-user v-if="isAdmin === 'true'" class="overflow-auto"
       :is-visible="addUserIsVisible"
+      ref="createUser"
       @done="closeUser"/>
 
     <create-team v-if="isAdmin === 'true'"
       class="overflow-auto"
       :isVisible="createTeamIsVisible"
-      @done="createTeamIsVisible = false"
+      ref="createTeam"
+      @done="closeTeam"
     >
     </create-team>
     </div>
@@ -133,6 +136,11 @@ export default {
     },
     closeUser () {
       this.addUserIsVisible = false
+      this.$refs.createTeam.getLeaders()
+    },
+    closeTeam () {
+      this.createTeamIsVisible = false
+      this.$refs.createUser.getTeamsArray()
     },
     getPhoto () {
       getMyID().then(rez => {

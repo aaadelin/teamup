@@ -126,7 +126,7 @@ export default {
     async loadData () {
       this.locations = await getLocations()
       this.departments = await getDepartments()
-      this.leaders = await getHighRankUsers()
+      this.getLeaders()
 
       if (this.locations.length > 0) {
         this.location = this.locations[0].id
@@ -134,6 +134,10 @@ export default {
       if (this.departments.length > 0) {
         this.department = this.departments[0]
       }
+    },
+    async getLeaders () {
+      this.leaders = await getHighRankUsers()
+
       if (this.leaders.length > 0) {
         this.leader = this.leaders[0].id
       }
@@ -156,7 +160,6 @@ export default {
           leaderID: this.leader,
           location: this.location
         }
-        console.log(team)
         saveTeam(team).then(el => {
           this.$notify({
             group: 'notificationsGroup',
@@ -176,14 +179,14 @@ export default {
           text: 'An error occurred'
         })
       }
+    },
+    clearData () {
+      this.name = ''
+      this.description = ''
+      this.leader = null
+      this.location = null
+      this.leader = null
     }
-  },
-  clearData () {
-    this.name = ''
-    this.description = ''
-    this.leader = null
-    this.location = null
-    this.leader = null
   }
 }
 </script>
