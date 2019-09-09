@@ -1,13 +1,20 @@
 <template>
   <div class="container" style="box-shadow: 5px 5px 12px grey; margin: 20px auto 20px auto; padding-bottom: 15px">
-    <div style="padding: 15px 0 15px 15px; text-align: left">
-      <h3>Projects</h3>
+    <div class="row justify-content-between" style="padding: 15px">
+      <h3 class="col-2">Projects</h3>
+      <button class="col-2 btn btn-outline-secondary" @click="addProjectVisible = true">+ Create Project</button>
     </div>
     <div v-for="project in projects" :key="project.id">
       <project-box :project="project"></project-box>
     </div>
     <div v-if="showMoreProjects" @click="loadData" style="text-align: center; color: darkblue; cursor: pointer">
       Show more...
+    </div>
+
+    <div>
+      <create-project
+        :is-visible="addProjectVisible"
+        @done="closeAddProject"></create-project>
     </div>
   </div>
 </template>
@@ -17,15 +24,17 @@ import { getProjects } from '../persistance/RestGetRepository'
 import ProjectBox from '../components/containers/ProjectBox'
 import NProgress from 'nprogress'
 import { MAX_RESULTS } from '../persistance/Repository'
+import CreateProject from '../components/create-components/CreateProject'
 
 export default {
   name: 'Projects',
-  components: { ProjectBox },
+  components: { CreateProject, ProjectBox },
   mounted () {
     this.loadData()
   },
   data () {
     return {
+      addProjectVisible: false,
       projects: [],
       showMoreProjects: false,
       page: 0
@@ -37,6 +46,10 @@ export default {
       this.projects.push(...newProjects)
       NProgress.done()
       this.showMoreProjects = newProjects.length >= MAX_RESULTS
+    },
+    closeAddProject () {
+      this.addProjectVisible = false
+      this.loadData()
     }
   }
 }

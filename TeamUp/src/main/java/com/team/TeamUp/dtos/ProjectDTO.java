@@ -1,7 +1,6 @@
 package com.team.TeamUp.dtos;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import com.team.TeamUp.domain.Task;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -19,6 +18,8 @@ public class ProjectDTO {
     private List<Integer> tasksIDs;
 
     private int ownerID;
+
+    private String version;
 
     public int getId() {
         return id;
@@ -69,6 +70,14 @@ public class ProjectDTO {
         this.ownerID = ownerID;
     }
 
+    public String getVersion() {
+        return version;
+    }
+
+    public void setVersion(String version) {
+        this.version = version;
+    }
+
     @Override
     public String toString() {
         return "ProjectDTO{" +
@@ -78,6 +87,7 @@ public class ProjectDTO {
                 ", deadline=" + deadline +
                 ", tasksIDs=" + tasksIDs +
                 ", ownerID=" + ownerID +
+                ", version=" + version +
                 '}';
     }
 }

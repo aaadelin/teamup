@@ -1,8 +1,6 @@
 package com.team.TeamUp.domain;
 
 import com.fasterxml.jackson.annotation.JsonManagedReference;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
@@ -102,6 +100,14 @@ public class Project {
         this.owner = owner;
     }
 
+    public String getVersion() {
+        return version;
+    }
+
+    public void setVersion(String version) {
+        this.version = version;
+    }
+
     @Override
     public String toString() {
         return "Project{" +
@@ -111,6 +117,7 @@ public class Project {
                 ", deadline=" + deadline +
                 ", owner=" + owner +
                 ", tasks=" + tasks +
+                ", verion" + version +
                 '}';
     }
 }

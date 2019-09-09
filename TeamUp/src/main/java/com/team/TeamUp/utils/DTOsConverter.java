@@ -274,6 +274,12 @@ public class DTOsConverter {
             project.setOwner(userRepository.findById(projectDTO.getOwnerID()).get());
         }
 
+        if(projectDTO.getVersion() == null || projectDTO.getVersion().equals("")){
+            project.setVersion(projectDTO.getVersion());
+        }else{
+            project.setVersion("0.0.1");
+        }
+
         LOGGER.info(String.format("Instance of type Project created: %s", project));
         return project;
     }
@@ -290,6 +296,7 @@ public class DTOsConverter {
         projectDTO.setDeadline(project.getDeadline());
         projectDTO.setDescription(project.getDescription());
         projectDTO.setName(project.getName());
+        projectDTO.setVersion(project.getVersion());
         projectDTO.setTasksIDs(project.getTasks().stream().map(Task::getId).collect(Collectors.toList()));
         projectDTO.setOwnerID(project.getOwner().getId());
 

@@ -1,7 +1,7 @@
 <template>
   <div class="container" style="text-align: left; padding-top: 5px;margin: 0 0 15px 0; border-top: 1px solid black">
-    <div class="">
-      <h5 style="font-weight: 600">{{project.name}}</h5>
+    <div>
+      <h4 style="font-weight: 600">{{project.name}}</h4>
       <div class="row" style="padding: auto 15px auto 15px">
       <span class="col-2">
         Progress so far:

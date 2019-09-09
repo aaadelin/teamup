@@ -80,3 +80,8 @@ export async function saveTeam (data) {
   let url = `${baseURL}/team`
   return postDataToUrl(data, url)
 }
+
+export async function saveProject (project) {
+  let url = `${baseURL}/project`
+  return postDataToUrl(project, url)
+}

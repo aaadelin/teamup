@@ -96,13 +96,13 @@
           <div>
             <div class="row">
                 <strong class="col-3">Assignees: </strong>
-                <select v-if="editMode && canEditAll" @click="addPersons" v-model="userToAdd" class="form-control col">
+                <select size="5" v-if="editMode && canEditAll" @click="addPersons" v-model="userToAdd" class="form-control col">
                   <option v-for="user in users" :key="user.id" :value="user">{{user.firstName}} {{user.lastName}} ({{user.department.replace(/_/g, ' ')}})</option>
                 </select>
             </div>
             <div class="row">
             <div class="col-3"></div>
-            <ul class="col-3" style="list-style-type: none; text-align: left">
+            <ul class="col-5" style="list-style-type: none; text-align: left">
               <li v-for="assignee in assignees" :key="assignee.id">
                 <div class="row">
                   <div style="cursor: pointer; margin-right: 5px" @click="seeUsersProfile(assignee.id)">
