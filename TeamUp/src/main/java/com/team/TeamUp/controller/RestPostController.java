@@ -4,7 +4,7 @@ import com.team.TeamUp.domain.*;
 import com.team.TeamUp.domain.enums.UserEventType;
 import com.team.TeamUp.domain.enums.UserStatus;
 import com.team.TeamUp.dtos.*;
-import com.team.TeamUp.persistance.*;
+import com.team.TeamUp.persistence.*;
 import com.team.TeamUp.utils.DTOsConverter;
 import com.team.TeamUp.utils.ImageCompressor;
 import com.team.TeamUp.utils.TokenUtils;

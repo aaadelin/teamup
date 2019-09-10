@@ -1,4 +1,4 @@
-package com.team.TeamUp.persistance;
+package com.team.TeamUp.persistence;
 
 import com.team.TeamUp.domain.Location;
 import org.springframework.data.jpa.repository.JpaRepository;

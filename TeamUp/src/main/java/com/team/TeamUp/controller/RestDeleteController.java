@@ -3,7 +3,7 @@ package com.team.TeamUp.controller;
 import com.team.TeamUp.domain.User;
 import com.team.TeamUp.domain.enums.UserEventType;
 import com.team.TeamUp.domain.enums.UserStatus;
-import com.team.TeamUp.persistance.UserRepository;
+import com.team.TeamUp.persistence.UserRepository;
 import com.team.TeamUp.utils.UserUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

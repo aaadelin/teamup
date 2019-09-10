@@ -5,7 +5,7 @@ import com.team.TeamUp.domain.Task;
 import com.team.TeamUp.domain.User;
 import com.team.TeamUp.domain.enums.TaskStatus;
 import com.team.TeamUp.dtos.TaskDTO;
-import com.team.TeamUp.persistance.TaskRepository;
+import com.team.TeamUp.persistence.TaskRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -114,6 +114,10 @@ public class TaskUtils {
     public List<TaskDTO> findAssignedTasksByParameters(User user, Integer page, List<TaskStatus> statuses, String search, String sort, Boolean desc){
         List<Task> tasks;
         LOGGER.info("Filter method preferred: by multiple statuses");
+        if(statuses == null){
+            statuses = List.of(TaskStatus.values());
+        }
+
         if(sort.equals("")){
             tasks = taskRepository.findAllByTaskStatusInAndAssigneesContaining(statuses,
                     user,
@@ -131,7 +135,16 @@ public class TaskUtils {
         LOGGER.info(String.format("Entering method to find tasks with statuses %s in page %s containing string %s sorted %s %s", statuses, page, search, sort, desc));
         List<Task> tasks;
 
-        if (statuses.isEmpty()){
+        if(search == null){
+            search = "";
+        }
+        if(sort == null){
+            sort = "";
+        }
+        if(page == null){
+            page = 0;
+        }
+        if (statuses == null || statuses.isEmpty()){
             statuses = Arrays.asList(TaskStatus.values());
         }
         tasks = findAllTasksWithTaskStatusInAndSummaryOrDescriptionContainingSordedBy(statuses.stream().map(Enum::ordinal).collect(Collectors.toList()), search, sort, desc, page);

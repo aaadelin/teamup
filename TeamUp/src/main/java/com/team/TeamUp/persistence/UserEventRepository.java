@@ -1,9 +1,8 @@
-package com.team.TeamUp.persistance;
+package com.team.TeamUp.persistence;
 
 import com.team.TeamUp.domain.User;
 import com.team.TeamUp.domain.UserEvent;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;

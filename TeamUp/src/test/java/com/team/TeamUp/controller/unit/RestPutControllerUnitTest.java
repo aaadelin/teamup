@@ -1,6 +1,6 @@
 package com.team.TeamUp.controller.unit;
 
-import com.team.TeamUp.persistance.*;
+import com.team.TeamUp.persistence.*;
 import com.team.TeamUp.utils.DTOsConverter;
 import com.team.TeamUp.utils.TaskUtils;
 import com.team.TeamUp.utils.UserUtils;
@@ -13,8 +13,6 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
-
-import static org.junit.Assert.*;
 
 @RunWith(SpringRunner.class)
 @WebMvcTest
@@ -33,6 +31,8 @@ public class RestPutControllerUnitTest {
     TaskRepository taskRepository;
     @MockBean
     ProjectRepository projectRepository;
+    @MockBean
+    LocationRepository locationRepository;
     @MockBean
     CommentRepository commentRepository;
     @MockBean

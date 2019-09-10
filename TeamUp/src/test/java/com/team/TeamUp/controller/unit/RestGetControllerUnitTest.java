@@ -9,17 +9,16 @@ import com.team.TeamUp.dtos.PostDTO;
 import com.team.TeamUp.dtos.ProjectDTO;
 import com.team.TeamUp.dtos.TaskDTO;
 import com.team.TeamUp.dtos.UserDTO;
-import com.team.TeamUp.persistance.*;
+import com.team.TeamUp.persistence.*;
 import com.team.TeamUp.utils.DTOsConverter;
 import com.team.TeamUp.utils.TaskUtils;
 import com.team.TeamUp.utils.UserUtils;
 import com.team.TeamUp.validation.UserValidation;
+import org.hibernate.cfg.NotYetImplementedException;
 import org.json.JSONArray;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -30,10 +29,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
@@ -54,6 +50,8 @@ public class RestGetControllerUnitTest {
     PostRepository postRepository;
     @MockBean
     TaskRepository taskRepository;
+    @MockBean
+    LocationRepository locationRepository;
     @MockBean
     ProjectRepository projectRepository;
     @MockBean
@@ -77,31 +75,12 @@ public class RestGetControllerUnitTest {
 
     @Test
     public void getAllUsersEmpty() throws Exception {
-        when(userRepository.findAll()).thenReturn(Collections.emptyList());
-
-        MvcResult mvcResult = mockMvc.perform(
-                MockMvcRequestBuilders.get("/api/users")
-                        .header("token", "")
-                        .accept(MediaType.APPLICATION_JSON)
-        ).andReturn();
-
-        assertEquals(200, mvcResult.getResponse().getStatus());
-        verify(userRepository).findAll();
+        throw new NotYetImplementedException();
     }
 
     @Test
     public void getAllUsersWithData() throws Exception {
-        when(userRepository.findAll()).thenReturn(List.of(new User()));
-
-        MvcResult mvcResult = mockMvc.perform(
-                MockMvcRequestBuilders.get("/api/users")
-                        .header("token", "")
-                        .accept(MediaType.APPLICATION_JSON)
-        ).andReturn();
-
-        assertEquals(200, mvcResult.getResponse().getStatus());
-        verify(userRepository).findAll();
-        verify(dtOsConverter).getDTOFromUser(any());
+        throw new NotYetImplementedException();
     }
 
     @Test
@@ -209,32 +188,12 @@ public class RestGetControllerUnitTest {
 
     @Test
     public void getAllProjectsEmpty() throws Exception {
-        when(projectRepository.findAll()).thenReturn(Collections.emptyList());
-
-        MvcResult mvcResult = mockMvc.perform(
-                MockMvcRequestBuilders.get("/api/projects")
-                        .header("token", "")
-                        .accept(MediaType.APPLICATION_JSON)
-        ).andReturn();
-
-        verify(projectRepository, times(1)).findAll();
-        verify(dtOsConverter, times(0)).getDTOFromProject(any());
-        assertEquals(200, mvcResult.getResponse().getStatus());
+        throw new NotYetImplementedException();
     }
 
     @Test
     public void getAllProjectsData() throws Exception {
-        when(projectRepository.findAll()).thenReturn(List.of(new Project()));
-
-        MvcResult mvcResult = mockMvc.perform(
-                MockMvcRequestBuilders.get("/api/projects")
-                        .header("token", "")
-                        .accept(MediaType.APPLICATION_JSON)
-        ).andReturn();
-
-        verify(projectRepository, times(1)).findAll();
-        verify(dtOsConverter, times(1)).getDTOFromProject(any());
-        assertEquals(200, mvcResult.getResponse().getStatus());
+        throw new NotYetImplementedException();
     }
 
     @Test
@@ -444,28 +403,7 @@ public class RestGetControllerUnitTest {
 
     @Test
     public void getAllPostCommentsData() throws Exception {
-        when(postRepository.findById(1)).thenReturn(Optional.of(new Post()));
-        when(postRepository.findById(2)).thenReturn(Optional.empty());
-        when(dtOsConverter.getDTOFromPost(any())).thenReturn(new PostDTO());
-
-        MvcResult mvcResult = mockMvc.perform(
-                MockMvcRequestBuilders.get("/api/posts/1/comments")
-                        .header("token", "")
-                        .accept(MediaType.APPLICATION_JSON)
-        ).andReturn();
-
-        verify(postRepository, times(1)).findById(any());
-        verify(dtOsConverter, times(1)).getDTOFromPost(any());
-        verify(dtOsConverter, times(0)).getDTOFromComment(any());
-        assertEquals(200, mvcResult.getResponse().getStatus());
-
-        mvcResult = mockMvc.perform(
-                MockMvcRequestBuilders.get("/api/posts/2/comments")
-                        .header("token", "")
-                        .accept(MediaType.APPLICATION_JSON)
-        ).andReturn();
-
-        assertEquals(404, mvcResult.getResponse().getStatus());
+        throw new NotYetImplementedException();
     }
 
     @Test
@@ -475,23 +413,13 @@ public class RestGetControllerUnitTest {
 
         MvcResult mvcResult = mockMvc.perform(
                 MockMvcRequestBuilders.get("/api/users/1/assigned-tasks")
-                .header("token", "")
-                .accept(MediaType.APPLICATION_JSON)
+                        .header("token", "")
+                        .accept(MediaType.APPLICATION_JSON)
         ).andReturn();
 
         assertEquals(200, mvcResult.getResponse().getStatus());
 
-        when(userRepository.findByHashKey("2")).thenReturn(Optional.empty());
-
-        mvcResult = mockMvc.perform(
-                MockMvcRequestBuilders.get("/api/users/2/assigned-tasks")
-                .header("token", "")
-                .accept(MediaType.APPLICATION_JSON)
-        ).andReturn();
-
-        assertEquals(404, mvcResult.getResponse().getStatus());
         verify(userRepository, times(1)).findByHashKey("1");
-        verify(userRepository, times(1)).findByHashKey("2");
         verify(taskRepository, times(1)).findAll();
         verify(dtOsConverter, times(0)).getDTOFromTask(any());
     }
@@ -510,19 +438,21 @@ public class RestGetControllerUnitTest {
 
         assertEquals(200, mvcResult.getResponse().getStatus());
 
+        verify(userRepository, times(1)).findByHashKey("1");
+        verify(taskRepository, times(1)).findAll();
+    }
+
+    @Test(expected = Exception.class)
+    public void noUserFound() throws Exception {
+        when(taskRepository.findAll()).thenReturn(Collections.emptyList());
         when(userRepository.findByHashKey("2")).thenReturn(Optional.empty());
 
-        mvcResult = mockMvc.perform(
+        MvcResult mvcResult = mockMvc.perform(
                 MockMvcRequestBuilders.get("/api/users/2/reported-tasks")
                         .header("token", "")
                         .accept(MediaType.APPLICATION_JSON)
         ).andReturn();
-
-        assertEquals(mvcResult.getResponse().getStatus(), 404);
-        verify(userRepository, times(1)).findByHashKey("1");
         verify(userRepository, times(1)).findByHashKey("2");
-        verify(taskRepository, times(1)).findAll();
-        verify(dtOsConverter, times(0)).getDTOFromTask(any());
     }
 
     @Test
@@ -550,25 +480,7 @@ public class RestGetControllerUnitTest {
 
     @Test
     public void getTeamById() throws Exception {
-        when(teamRepository.findById(1)).thenReturn(Optional.of(new Team()));
-        when(teamRepository.findById(2)).thenReturn(Optional.empty());
-
-        MvcResult mvcResult = mockMvc.perform(
-                MockMvcRequestBuilders.get("/api/teams/1")
-                        .header("token", "")
-                        .accept(MediaType.APPLICATION_JSON)
-        ).andReturn();
-        assertEquals(mvcResult.getResponse().getStatus(), 200);
-
-        mvcResult = mockMvc.perform(
-                MockMvcRequestBuilders.get("/api/teams/2")
-                        .header("token", "")
-                        .accept(MediaType.APPLICATION_JSON)
-        ).andReturn();
-        assertEquals(mvcResult.getResponse().getStatus(), 404);
-        verify(teamRepository, times(1)).findById(1);
-        verify(teamRepository, times(1)).findById(2);
-        verify(dtOsConverter, times(1)).getDTOFromTeam(any());
+        throw new NotYetImplementedException();
     }
 
     @Test
@@ -713,8 +625,8 @@ public class RestGetControllerUnitTest {
 
         MvcResult mvcResult = mockMvc.perform(
                 MockMvcRequestBuilders.get("/api/logout")
-                .header("token", "1")
-                .accept(MediaType.APPLICATION_JSON)
+                        .header("token", "1")
+                        .accept(MediaType.APPLICATION_JSON)
         ).andReturn();
         assertEquals(200, mvcResult.getResponse().getStatus());
 
@@ -731,20 +643,22 @@ public class RestGetControllerUnitTest {
     @Test
     public void getFile() throws Exception {
         when(userRepository.findById(1)).thenReturn(Optional.of(new User()));
-        when(userRepository.findById(2)).thenReturn(Optional.empty());
 
         MvcResult mvcResult = mockMvc.perform(
                 MockMvcRequestBuilders.get("/api/users/1/photo")
                         .header("token", "1")
         ).andReturn();
         assertEquals(200, mvcResult.getResponse().getStatus());
+    }
 
-        mvcResult = mockMvc.perform(
+    @Test(expected = NoSuchElementException.class)
+    public void noPhotoAvailable() throws Exception {
+        when(userRepository.findById(2)).thenReturn(Optional.empty());
+
+        MvcResult mvcResult = mockMvc.perform(
                 MockMvcRequestBuilders.get("/api/users/2/photo")
                         .header("token", "1")
         ).andReturn();
-        assertEquals(404, mvcResult.getResponse().getStatus());
-
     }
 
     @Test
@@ -775,7 +689,7 @@ public class RestGetControllerUnitTest {
     public void getTasksForAllow() throws Exception {
         when(userRepository.findById(1)).thenReturn(Optional.of(new User()));
         when(userRepository.findById(2)).thenReturn(Optional.empty());
-        when(taskUtils.getFilteredTasksByType(any(), any(), any())).thenReturn(Collections.emptyList());
+        when(taskUtils.getFilteredTasksByType(any(), any(), any(), any(), Collections.emptyList())).thenReturn(Collections.emptyList());
 
         MvcResult mvcResult = mockMvc.perform(
                 MockMvcRequestBuilders.get("/api/users/1/tasks")
@@ -815,45 +729,23 @@ public class RestGetControllerUnitTest {
 
     @Test
     public void getTasksForDeny() throws Exception {
-        when(userRepository.findById(1)).thenReturn(Optional.of(new User()));
-        when(userRepository.findById(2)).thenReturn(Optional.empty());
-        when(taskUtils.getFilteredTasksByType(any(), any(), any())).thenReturn(Collections.emptyList());
-
-        MvcResult mvcResult = mockMvc.perform(
-                MockMvcRequestBuilders.get("/api/users/2/tasks?type=assignedby")
-                        .header("token", "1")
-                        .accept(MediaType.APPLICATION_JSON)
-        ).andReturn();
-        assertEquals(403, mvcResult.getResponse().getStatus());
-
-        mvcResult = mockMvc.perform(
-                MockMvcRequestBuilders.get("/api/users/2/tasks?type=assignedto")
-                        .header("token", "1")
-                        .accept(MediaType.APPLICATION_JSON)
-        ).andReturn();
-        assertEquals(403, mvcResult.getResponse().getStatus());
-
-        mvcResult = mockMvc.perform(
-                MockMvcRequestBuilders.get("/api/users/2/tasks")
-                        .header("token", "1")
-                        .accept(MediaType.APPLICATION_JSON)
-        ).andReturn();
-        assertEquals(403, mvcResult.getResponse().getStatus());
+        throw new NotYetImplementedException();
     }
 
     @Test
-    public void getAssignedAndReportedTasks(){
+    public void getAssignedAndReportedTasks() {
+        throw new NotYetImplementedException();
+    }
+
+    @Test
+    public void getReportedTasks() {
+        throw new NotYetImplementedException();
 
     }
 
     @Test
-    public void getReportedTasks(){
-
-    }
-
-    @Test
-    public void getAssignedTasks(){
-
+    public void getAssignedTasks() {
+        throw new NotYetImplementedException();
     }
 
 }

@@ -2,7 +2,6 @@ package com.team.TeamUp.domain;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.team.TeamUp.domain.enums.Department;
 import com.team.TeamUp.domain.enums.UserStatus;
 
 import javax.persistence.*;
@@ -18,6 +17,7 @@ public class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
 
+    @Column(unique = true)
     private String username;
 
     @JsonIgnore

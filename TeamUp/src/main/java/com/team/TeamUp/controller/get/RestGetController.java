@@ -6,7 +6,7 @@ import com.team.TeamUp.dtos.CommentDTO;
 import com.team.TeamUp.dtos.PostDTO;
 import com.team.TeamUp.dtos.ProjectDTO;
 import com.team.TeamUp.dtos.TeamDTO;
-import com.team.TeamUp.persistance.*;
+import com.team.TeamUp.persistence.*;
 import com.team.TeamUp.utils.DTOsConverter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -214,6 +214,9 @@ public class RestGetController {
             Optional<Post> postOptional = postRepository.findByTask(taskOptional.get());
             if (postOptional.isPresent()) {
                 PostDTO postDTO = dtOsConverter.getDTOFromPost(postOptional.get());
+                if(postDTO.getComments() == null){
+                    postDTO.setComments(Collections.emptyList());
+                }
                 Collections.reverse(postDTO.getComments());
                 LOGGER.info(String.format("Returning post: %s", postDTO));
                 return new ResponseEntity<>(postDTO, HttpStatus.OK);

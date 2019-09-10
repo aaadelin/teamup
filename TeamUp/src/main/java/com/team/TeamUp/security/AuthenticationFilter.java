@@ -37,6 +37,7 @@ public class AuthenticationFilter implements Filter {
         String tokenHeader = req.getHeader("token");
 
         if (isAuthorized(req.getRequestURI(), req.getMethod(), tokenHeader)) {
+//            if((userValidation.isUserLoggedIn(tokenHeader) || req.getRequestURI().equals("/api/login") || req.getRequestURI().contains(""))){ // - for swagger
             if((userValidation.isUserLoggedIn(tokenHeader) || req.getRequestURI().equals("/api/login"))){
                 LOGGER.info(String.format("User with token %s is eligible to access %s", tokenHeader, req.getRequestURI()));
                 chain.doFilter(request, response);
@@ -51,6 +52,7 @@ public class AuthenticationFilter implements Filter {
     }
 
     private boolean isAuthorized(String uri, String method, String token) {
+//        List<String> openURIs = List.of("/api/login", ".*"); //- for swagger
         List<String> openURIs = List.of("/api/login");
         List<String> adminAuthenticationPOST = List.of(
                 "/api/users",

@@ -7,8 +7,8 @@ import com.team.TeamUp.domain.enums.TaskStatus;
 import com.team.TeamUp.domain.enums.TaskType;
 import com.team.TeamUp.dtos.ProjectDTO;
 import com.team.TeamUp.dtos.TaskDTO;
-import com.team.TeamUp.persistance.TaskRepository;
-import com.team.TeamUp.persistance.UserRepository;
+import com.team.TeamUp.persistence.TaskRepository;
+import com.team.TeamUp.persistence.UserRepository;
 import com.team.TeamUp.utils.DTOsConverter;
 import com.team.TeamUp.utils.TaskUtils;
 import org.slf4j.Logger;
@@ -56,7 +56,7 @@ public class RestGetTaskController {
                                          @RequestParam(value = "desc", required = false, defaultValue = "false") Boolean desc,
                                          @RequestParam(value = "last", required = false) Long numberOfTasksSortedDesc) {
         LOGGER.info(String.format("Entering get all tasks method with headers: %s, startPage: %s, status: %s and number of last tasks %s", headers.toString(), startPage, status, numberOfTasksSortedDesc));
-        List<TaskDTO> tasks = new ArrayList<>();
+        List<TaskDTO> tasks;
         //TODO
         //returning all tasks
         if(startPage == null && status == null && numberOfTasksSortedDesc == null) {
@@ -154,10 +154,10 @@ public class RestGetTaskController {
     @RequestMapping(value = "/tasks/assigned", method = GET)
     public ResponseEntity<?> getAssignedTasks(@RequestHeader Map<String, String> headers,
                                               @RequestParam(value = "page") Integer startPage,
-                                              @RequestParam(value = "search", required = false) String search,
-                                              @RequestParam(value = "sort", required = false) String sort,
-                                              @RequestParam(value = "desc", required = false) Boolean desc,
-                                              @RequestParam(value = "statuses", required = false) List<TaskStatus> statuses){
+                                              @RequestParam(value = "search", required = false, defaultValue = "") String search,
+                                              @RequestParam(value = "sort", required = false, defaultValue = "") String sort,
+                                              @RequestParam(value = "desc", required = false, defaultValue = "false") Boolean desc,
+                                              @RequestParam(value = "statuses", required = false, defaultValue = "") List<TaskStatus> statuses){
         LOGGER.info(String.format("Entered method to get assigned tasks with parameters: \nheaders: %s \nstart page: %s\nstatuses: %s, search %s, sort %s, desc %s",
                 headers, startPage, statuses, search, sort, desc));
         User user = userRepository.findByHashKey(headers.get("token")).orElseThrow();
@@ -170,16 +170,16 @@ public class RestGetTaskController {
     public ResponseEntity<?> getReportedTasks(@RequestHeader Map<String, String> headers,
                                               @RequestParam(value = "page") Integer startPage,
                                               @RequestParam(value = "search", required = false) String search,
-                                              @RequestParam(value = "status") TaskStatus status){
+                                              @RequestParam(value = "status", required = false, defaultValue = "OPEN") TaskStatus status){
         LOGGER.info(String.format("Entered method to get reported tasks with parameters: \nheaders: %s \nstart page: %s\nstatus: %s \nsearch %s", headers, startPage, status, search));
         User user = userRepository.findByHashKey(headers.get("token")).orElseThrow();
         List<TaskDTO> taskDTOS = taskRepository.findAllByTaskStatusAndReporter(status,
                 user,
                 PageRequest.of(startPage, PAGE_SIZE))
                 .stream().map(dtOsConverter::getDTOFromTask).collect(Collectors.toList());
-        LOGGER.info(String.format("Exiting with list of tasks: %s", taskDTOS));
-
         taskDTOS = taskUtils.filterTasks(search, taskDTOS);
+
+        LOGGER.info(String.format("Exiting with list of tasks: %s", taskDTOS));
         return new ResponseEntity<>(taskDTOS, HttpStatus.OK);
     }
 

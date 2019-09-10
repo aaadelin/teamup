@@ -3,17 +3,12 @@ package com.team.TeamUp.validation;
 import com.team.TeamUp.domain.User;
 import com.team.TeamUp.domain.enums.UserStatus;
 import com.team.TeamUp.dtos.ProjectDTO;
-import com.team.TeamUp.persistance.UserRepository;
-import org.apache.tomcat.util.codec.binary.Base64;
+import com.team.TeamUp.persistence.UserRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import javax.crypto.Cipher;
-import javax.crypto.spec.IvParameterSpec;
-import javax.crypto.spec.SecretKeySpec;
-import java.security.Key;
 import java.time.LocalDateTime;
 import java.util.Map;
 import java.util.Optional;

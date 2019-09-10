@@ -2,7 +2,7 @@ package com.team.TeamUp.controller.unit;
 
 import com.team.TeamUp.domain.User;
 import com.team.TeamUp.domain.enums.UserStatus;
-import com.team.TeamUp.persistance.*;
+import com.team.TeamUp.persistence.*;
 import com.team.TeamUp.utils.DTOsConverter;
 import com.team.TeamUp.utils.TaskUtils;
 import com.team.TeamUp.utils.UserUtils;
@@ -44,6 +44,8 @@ public class RestDeleteControllerUnitTest {
     PostRepository postRepository;
     @MockBean
     TaskRepository taskRepository;
+    @MockBean
+    LocationRepository locationRepository;
     @MockBean
     ProjectRepository projectRepository;
     @MockBean

@@ -4,7 +4,7 @@ import com.team.TeamUp.domain.*;
 import com.team.TeamUp.domain.enums.TaskStatus;
 import com.team.TeamUp.domain.enums.UserStatus;
 import com.team.TeamUp.dtos.*;
-import com.team.TeamUp.persistance.*;
+import com.team.TeamUp.persistence.*;
 import com.team.TeamUp.validation.TaskValidation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -244,6 +244,9 @@ public class DTOsConverter {
         taskDTO.setDepartment(task.getDepartment());
         taskDTO.setTaskType(task.getTaskType());
         taskDTO.setReporterID(task.getReporter().getId());
+        if(task.getAssignees() == null){
+            task.setAssignees(new ArrayList<>());
+        }
         taskDTO.setAssignees(task.getAssignees().stream().map(User::getId).collect(Collectors.toList()));
 
         LOGGER.info(String.format("Instance of type TaskDTO created: %s", taskDTO));
