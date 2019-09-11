@@ -1,7 +1,13 @@
 <template>
   <div class="container" style="text-align: left; padding-top: 5px;margin: 0 0 15px 0; border-top: 1px solid black">
     <div>
-      <h4 style="font-weight: 600">{{project.name}}</h4>
+      <h4 style="font-weight: 600; cursor:pointer" title="Show Project description" @click="displayDescription">{{project.name}}</h4>
+      <transition name="fadeHeight" mode="out-in">
+      <div id="description" class="description" v-if="showDescription">
+        {{project.description}}
+      </div>
+      </transition>
+
       <div class="row" style="padding: auto 15px auto 15px">
       <span class="col-2">
         Progress so far:
@@ -60,6 +66,7 @@ export default {
       inProgressCount: 0,
       doneCount: 0,
       showDate: false,
+      showDescription: false,
 
       options: {
         format: 'YYYY-MM-DD HH:mm:ss',
@@ -71,6 +78,13 @@ export default {
     }
   },
   methods: {
+    displayDescription () {
+      this.showDescription = !this.showDescription
+      this.$emit('show')
+    },
+    hideDescription () {
+      this.showDescription = false
+    },
     async calculatePercentage () {
       this.stats = await getStatisticsByProjectId(this.project.id)
       let total = this.stats[0] + this.stats[1] + this.stats[2]
@@ -119,6 +133,27 @@ export default {
   .deadline :hover {
     padding: 2px;
     border: 1px solid black;
+  }
+
+  .deadline :not(:hover){
+    padding: 2px;
+    border: 1px solid white;
+  }
+
+  .description{
+    margin: 20px;
+  }
+
+  .fadeHeight-enter-active,
+  .fadeHeight-leave-active {
+    transition: all 0.5s;
+    max-height: 230px;
+  }
+  .fadeHeight-enter,
+  .fadeHeight-leave-to
+  {
+    opacity: 0;
+    max-height: 0;
   }
 
 </style>

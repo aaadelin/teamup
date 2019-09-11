@@ -22,9 +22,12 @@
           <p></p>
 
           <span class="row" style="text-align: left"> <strong class="col-3">Deadline: </strong>
-              <date-picker v-if="editMode && canEditAll" v-model="currentDeadline" id="deadline" name="deadline"
+            <span v-if="editMode && canEditAll">
+              <date-picker  v-model="currentDeadline" id="deadline" name="deadline"
                            :config="options" @dp-change="hasChanged"
                            class="form-control col col-4"></date-picker>
+              <p style="font-size: 10px">Project deadline: {{project.deadline}}</p>
+            </span>
             <span @dblclick="editMode = canEditAll" v-else>
               {{task.deadline}}
             </span>
@@ -184,6 +187,7 @@ export default {
       edited: false,
       postId: -1,
       userToAdd: null,
+      project: { deadline: '' },
 
       reporter: { name: '' },
       assignees: [],
@@ -249,6 +253,7 @@ export default {
         this.users = this.users.sort((a, b) => a.department === this.task.department && b.department !== this.task.department ? -1 : 1)
       })
       this.options.maxDate = (await getProjectByTaskId(this.task.id)).deadline
+      this.getProject()
     },
     async reloadComments () {
       this.comments = await getCommentsByPostId(this.postId)
@@ -379,6 +384,11 @@ export default {
       if (this.userToAdd !== null && !this.assignees.map(user => user.id).includes(this.userToAdd.id)) {
         this.assignees.push(this.userToAdd)
         this.hasChanged()
+      }
+    },
+    async getProject() {
+      if (this.canEditAll) {
+        this.project = await getProjectByTaskId(this.task.id)
       }
     }
   },

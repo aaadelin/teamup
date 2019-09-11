@@ -18,16 +18,20 @@
           <b class="category">TO DO </b>
           <span class="quantity">{{ tasks[0].length }}{{ this.showMore[0] ? '+':'' }}</span>
         </span>
-        <div id="todo-category" v-show="todo_category" v-for="task1 in tasks[0]" v-bind:key="task1.id">
-          <task-box v-if="!smallView"
-                    :task="task1"/>
-          <small-task-box v-else
-                    :task="task1"/>
-        </div>
-<!--        duplicated id is needed. if the list is empty, the div is not rendered and the drag&drop will not work. those two elements will never be rendered at the same time-->
+        <transition name="fadeHeight" mode="out-in">
+          <div id="todo-category" v-if="todo_category">
+            <div v-for="task1 in tasks[0]" v-bind:key="task1.id">
+              <task-box v-if="!smallView"
+                        :task="task1"/>
+              <small-task-box v-else
+                              :task="task1"/>
+            </div>
+            </div>
+  <!--        duplicated id is needed. if the list is empty, the div is not rendered and the drag&drop will not work. those two elements will never be rendered at the same time-->
+        </transition>
         <div id="todo-category" v-if="tasks[0].length === 0">
-
         </div>
+
         <div style="color: #6d7fcc; cursor: pointer" v-if="this.showMore[0]" @click="loadMore('todo')">Load more...</div>
       </div>
 
@@ -36,16 +40,20 @@
           <b class="category">IN PROGRESS </b>
           <span class="quantity">{{ tasks[1].length }}{{ this.showMore[1]  ? '+':'' }}</span>
         </span>
-        <div id="in-progress-category" v-show="in_progress_category" v-for="task1 in tasks[1]" v-bind:key="task1.id">
-          <task-box v-if="!smallView"
-                    :task="task1"/>
-          <small-task-box v-else
-                    :task="task1"/>
-        </div>
-        <div id="in-progress-category" v-if="tasks[1].length === 0">
+        <transition name="fadeHeight" mode="out-in">
+          <div id="in-progress-category" v-show="in_progress_category" >
+            <div v-for="task1 in tasks[1]" v-bind:key="task1.id">
+              <task-box v-if="!smallView"
+                        :task="task1"/>
+              <small-task-box v-else
+                              :task="task1"/>
+            </div>
+          </div>
+        </transition>
 
+        <div id="in-progress-category" v-if="tasks[1].length === 0">
         </div>
-        <div style="color: #6d7fcc; cursor: pointer" v-if="this.showMore[1]" @click="loadMore('in-progress')">Load more...</div>
+      <div style="color: #6d7fcc; cursor: pointer" v-if="this.showMore[1]" @click="loadMore('in-progress')">Load more...</div>
       </div>
 
       <div class="col columnCategory">
@@ -53,31 +61,37 @@
           <b class="category">UNDER REVIEW </b>
           <span class="quantity"> {{ tasks[2].length }}{{ this.showMore[2] ? '+':'' }}</span>
         </span>
-        <div id="under-review-category" v-show="under_review_category" v-for="task1 in tasks[2]" v-bind:key="task1.id" >
-          <task-box v-if="!smallView"
-                    :task="task1"/>
-          <small-task-box v-else
-                          :task="task1"/>
-        </div>
+        <transition name="fadeHeight" mode="out-in">
+          <div id="under-review-category" v-show="under_review_category"  >
+            <div v-for="task1 in tasks[2]" v-bind:key="task1.id">
+              <task-box v-if="!smallView"
+                        :task="task1"/>
+              <small-task-box v-else
+                              :task="task1"/>
+            </div>
+          </div>
+        </transition>
         <div id="under-review-category" v-if="tasks[2].length === 0">
-
         </div>
         <div style="color: #6d7fcc; cursor: pointer" v-if="this.showMore[2]" @click="loadMore('under-review')">Load more...</div>
       </div>
 
-      <div class="col columnCategory">
+      <div class="col columnCategory" name="fadeHeight" mode="out-in">
         <span class="header" @click="done_category = !done_category">
           <b class="category">DONE </b>
           <span class="quantity">{{ tasks[3].length }}{{ this.showMore[3]  ? '+':'' }}</span>
         </span>
-        <div id="done-category" v-show="done_category" v-for="task1 in tasks[3]" v-bind:key="task1.id">
-          <task-box v-if="!smallView"
-                    :task="task1"/>
-          <small-task-box v-else
-                          :task="task1"/>
-        </div>
+        <transition name="fadeHeight" mode="out-in">
+          <div id="done-category" v-show="done_category" >
+            <div v-for="task1 in tasks[3]" v-bind:key="task1.id">
+            <task-box v-if="!smallView"
+                      :task="task1"/>
+            <small-task-box v-else
+                            :task="task1"/>
+            </div>
+          </div>
+        </transition>
         <div id="done-category" v-if="tasks[3].length === 0">
-
         </div>
         <div style="color: #6d7fcc; cursor: pointer" v-if="this.showMore[3]" @click="loadMore('done')">Load more...</div>
       </div>
@@ -144,13 +158,14 @@ export default {
         onDrop: async function (event) {
           let ans = await this.isDroppable(event)
           if (ans) {
-            let item = event.items[0]
-            let parent = item.parentNode
-            let target = event.droptarget
-
-            parent.removeChild(item)
-            target.appendChild(item)
             this.changeStatus(event)
+            // used to append node. as long as tasks are refreshed there's no need for this
+            // let item = event.items[0]
+            // let parent = item.parentNode
+            // let target = event.droptarget
+
+            // parent.removeChild(item)
+            // target.appendChild(item)
           } else {
             event.drop()
           }
@@ -171,6 +186,10 @@ export default {
     }
   },
   methods: {
+    showCategory (category) {
+      let column = document.getElementById(category)
+      column.classList.toggle('hide')
+    },
     async changeVisibleTasks () {
       this.reportedTasks = !this.reportedTasks
       this.pages = [0, 0, 0, 0]
@@ -429,6 +448,11 @@ export default {
     color: #999;
   }
 
+  .hide{
+    height: 0;
+    transition: height 3s ease;
+  }
+
   .scroll-up{
     position: sticky;
     bottom: 9px;
@@ -481,5 +505,17 @@ export default {
 
   #tasks{
     display: flex;
+  }
+
+  .fadeHeight-enter-active,
+  .fadeHeight-leave-active {
+    transition: all 0.6s;
+    max-height: 1000vh;
+  }
+  .fadeHeight-enter,
+  .fadeHeight-leave-to
+  {
+    opacity: 0;
+    max-height: 0;
   }
 </style>
