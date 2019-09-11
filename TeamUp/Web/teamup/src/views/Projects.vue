@@ -5,7 +5,7 @@
       <button class="col-2 btn btn-outline-secondary" @click="addProjectVisible = true">+ Create Project</button>
     </div>
     <div v-for="project in projects" :key="project.id">
-      <project-box :project="project"></project-box>
+      <project-box :project="project" :ref="project.id" @show="hideOthers(project.id)"></project-box>
     </div>
     <div v-if="showMoreProjects" @click="loadData" style="text-align: center; color: darkblue; cursor: pointer">
       Show more...
@@ -41,6 +41,13 @@ export default {
     }
   },
   methods: {
+    hideOthers (id) {
+      for (let i in this.$refs) {
+        if (parseInt(i) !== id) {
+          this.$refs[i][0].hideDescription()
+        }
+      }
+    },
     async loadData () {
       let newProjects = await getProjects(this.page++)
       this.projects.push(...newProjects)
