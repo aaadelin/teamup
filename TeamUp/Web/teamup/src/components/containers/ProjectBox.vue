@@ -137,7 +137,7 @@ export default {
 
   .deadline :not(:hover){
     padding: 2px;
-    border: 1px solid white;
+    border: 1px solid transparent;
   }
 
   .description{

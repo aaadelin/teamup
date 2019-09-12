@@ -1,5 +1,5 @@
 <template>
-  <div id="box" @click="openTaskPage" data-toggle="tooltip" data-placement="top" :title="tooltipContent">
+  <div id="box" @click="openTaskPage"   data-toggle="tooltip" data-placement="top" :title="tooltipContent">
     <div id="taskContainer" class="row">
       <span class="col-1" :id="task.id">
         <i v-if="task.priority === 3" class="fas fa-angle-double-up"></i>

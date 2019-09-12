@@ -1,5 +1,6 @@
 package com.team.TeamUp.persistence;
 
+import com.team.TeamUp.domain.Project;
 import com.team.TeamUp.domain.Task;
 import com.team.TeamUp.domain.User;
 import com.team.TeamUp.domain.enums.TaskStatus;
@@ -33,6 +34,9 @@ public interface TaskRepository extends JpaRepository<Task, Integer> {
     List<Task> findAllByTaskStatusInAndAssigneesContainingOrderByPriorityDesc(List<TaskStatus> statuses, User user, Pageable pageable);
     List<Task> findAllByTaskStatusIn(List<TaskStatus> statuses, Pageable pageable);
     List<Task> findAllByAssigneesContainingAndTaskStatusIn(User assignee, List<TaskStatus> statuses, Pageable pageable);
+    List<Task> findAllByProject(Project project);
+    List<Task> findAllByProject(Project project, Pageable pageable);
+    List<Task> findAllByProjectOrderByIdDesc(Project project, Pageable pageable);
 
     @Query(value = "select * from task t\n" +
             "where t.task_status in ?1 and (t.summary like concat('%', ?2, '%') or t.description like concat('%', ?2, '%'))", nativeQuery = true)

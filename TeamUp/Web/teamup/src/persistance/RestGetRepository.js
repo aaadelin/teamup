@@ -203,6 +203,11 @@ export async function getTasksByProjectId (id) {
   return fetchDataFromUrl(url)
 }
 
+export async function getTasksByProjectIdAndPage (id, page = 0) {
+  let url = `${baseURL}/projects/${id}/tasks?page=${page}`
+  return fetchDataFromUrl(url)
+}
+
 export async function getStatisticsByProjectId (id) {
   let url = `${baseURL}/projects/${id}/statistics`
   return fetchDataFromUrl(url)
@@ -216,5 +221,10 @@ export async function getHighRankUsers () {
 export async function getSearchedSortedFilteredTasks (page, statuses, search, sort, desc) {
   search = encodeURI(search)
   let url = `${baseURL}/tasks?page=${page}&statuses=${statuses}&search=${search}&sort=${sort}&desc=${desc}`
+  return fetchDataFromUrl(url)
+}
+
+export async function isAdmin () {
+  let url = `${baseURL}/admin`
   return fetchDataFromUrl(url)
 }

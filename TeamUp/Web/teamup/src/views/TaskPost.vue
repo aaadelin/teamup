@@ -386,7 +386,7 @@ export default {
         this.hasChanged()
       }
     },
-    async getProject() {
+    async getProject () {
       if (this.canEditAll) {
         this.project = await getProjectByTaskId(this.task.id)
       }

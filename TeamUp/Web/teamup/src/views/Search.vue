@@ -1,5 +1,5 @@
 <template>
-  <div id="content" class="container" style="margin-top: 15px;">
+  <div id="content" class="container" style="margin: 15px auto 15px auto;">
 <!--    Search term: {{ searchTerm }}-->
     <div class="" style="background-color: rgba(225,225,225,0.55); padding: 15px;  box-shadow: 5px 5px 12px grey; text-align: left">
       <div>

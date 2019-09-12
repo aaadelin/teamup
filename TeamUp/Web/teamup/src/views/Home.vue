@@ -3,14 +3,14 @@
     <div class="container custom-container" style="text-align: left">
       <div class="welcome">Welcome, {{user}}</div>
       <div class="row" style="padding: 15px">
-        <div class="col" style="text-align: left">
-          <p style="font-size: 25px; padding-left: 15px">Tasks</p>
-          <div style="background: #dedede; padding: 15px; border-radius: 5px">
-            <small-task-box v-for="task in tasks" :key="task.id"
-            :task="task" :style="style">
-            </small-task-box>
-          </div>
-        </div>
+<!--        <div class="col" style="text-align: left">-->
+<!--          <p style="font-size: 25px; padding-left: 15px">Tasks</p>-->
+<!--          <div style="background: #dedede; padding: 15px; border-radius: 5px">-->
+<!--            <small-task-box v-for="task in tasks" :key="task.id"-->
+<!--            :task="task" :style="style">-->
+<!--            </small-task-box>-->
+<!--          </div>-->
+<!--        </div>-->
         <div class="col" style="text-align: left">
           <p style="font-size: 25px; padding-left: 15px">Projects</p>
           <div style="background: #dedede; padding: 15px">
@@ -44,7 +44,7 @@ export default {
   components: { SmallProjectBox, SmallTaskBox },
   mounted () {
     document.title = 'TeamUp'
-    this.getTasks()
+    // this.getTasks()
     this.getProjects()
     NProgress.done()
   },

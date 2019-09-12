@@ -1,5 +1,5 @@
 <template>
-
+<transition name="fadeHeight" mode="out-in">
   <div v-if="isVisible" id="container">
 
     <transition name="modal">
@@ -86,7 +86,7 @@
     </transition>
 
   </div>
-
+</transition>
 </template>
 
 <script>
@@ -246,6 +246,17 @@ export default {
     font-size: 5px;
     line-height: 1.428571429;
     border-radius: 10px;
+  }
+  .fadeHeight-enter-active,
+  .fadeHeight-leave-active {
+    transition: all 0.1s;
+    max-height: 1000vh;
+  }
+  .fadeHeight-enter,
+  .fadeHeight-leave-to
+  {
+    opacity: 0;
+    max-height: 0;
   }
 
 </style>

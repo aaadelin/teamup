@@ -28,14 +28,15 @@
               <img width="30" height="30" class="rounded-circle" :src="image" alt="Profile"/>
               {{ name }}
             </b-nav-item>
+            <b-nav-item to="administrate" v-if="isAdmin === 'true'">Administrate</b-nav-item>
             <b-nav-item @click="logoutMethod" v-if="access_key">Log out</b-nav-item>
 
-            <b-nav-item-dropdown text="Administrate..." v-if="isAdmin === 'true'" right>
-              <b-dropdown-item @click="addUserIsVisible = true">Add User</b-dropdown-item>
-              <b-dropdown-item @click="createTeamIsVisible = true">Add Team</b-dropdown-item>
-              <b-dropdown-item>Administrate users</b-dropdown-item>
-              <b-dropdown-item>Administrate teams</b-dropdown-item>
-            </b-nav-item-dropdown>
+<!--            <b-nav-item-dropdown text="Administrate..." v-if="isAdmin === 'true'" right>-->
+<!--              <b-dropdown-item @click="addUserIsVisible = true">Add User</b-dropdown-item>-->
+<!--              <b-dropdown-item @click="createTeamIsVisible = true">Add Team</b-dropdown-item>-->
+<!--              <b-dropdown-item>Administrate users</b-dropdown-item>-->
+<!--              <b-dropdown-item>Administrate teams</b-dropdown-item>-->
+<!--            </b-nav-item-dropdown>-->
           </b-navbar-nav>
         </b-collapse>
       </b-navbar>
@@ -46,19 +47,6 @@
       :is-visible="addTaskIsVisible"
       ref="createTask"
       @done="closeTask"/>
-
-    <create-user v-if="isAdmin === 'true'" class="overflow-auto"
-      :is-visible="addUserIsVisible"
-      ref="createUser"
-      @done="closeUser"/>
-
-    <create-team v-if="isAdmin === 'true'"
-      class="overflow-auto"
-      :isVisible="createTeamIsVisible"
-      ref="createTeam"
-      @done="closeTeam"
-    >
-    </create-team>
     </div>
   </div>
 </template>
@@ -66,8 +54,6 @@
 <script>
 import { getMyID, getUsersPhoto, logout } from '../persistance/RestGetRepository'
 import CreateTask from './create-components/CreateTask'
-import CreateUser from './create-components/CreateUser'
-import CreateTeam from './create-components/CreateTeam'
 
 function keyPress (e) {
   let eventObj = window.event ? event : e
@@ -95,12 +81,12 @@ export default {
     })
   },
   name: 'NavBar',
-  components: { CreateTask, CreateUser, CreateTeam },
+  components: { CreateTask },
   data () {
     return {
       addTaskIsVisible: false,
       addUserIsVisible: false,
-      createTeamIsVisible: false,
+      // createTeamIsVisible: false,
       searchTerm: '',
       image: ''
     }
@@ -137,10 +123,6 @@ export default {
     closeUser () {
       this.addUserIsVisible = false
       this.$refs.createTeam.getLeaders()
-    },
-    closeTeam () {
-      this.createTeamIsVisible = false
-      this.$refs.createUser.getTeamsArray()
     },
     getPhoto () {
       getMyID().then(rez => {

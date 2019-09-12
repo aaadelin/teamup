@@ -2,12 +2,14 @@ package com.team.TeamUp.controller.get;
 
 import com.team.TeamUp.domain.*;
 import com.team.TeamUp.domain.enums.Department;
+import com.team.TeamUp.domain.enums.UserStatus;
 import com.team.TeamUp.dtos.CommentDTO;
 import com.team.TeamUp.dtos.PostDTO;
 import com.team.TeamUp.dtos.ProjectDTO;
 import com.team.TeamUp.dtos.TeamDTO;
 import com.team.TeamUp.persistence.*;
 import com.team.TeamUp.utils.DTOsConverter;
+import com.team.TeamUp.validation.UserValidation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,11 +40,12 @@ public class RestGetController {
     private PostRepository postRepository;
     private LocationRepository locationRepository;
     private DTOsConverter dtOsConverter;
+    private UserValidation userValidation;
 
     @Autowired
     public RestGetController(TeamRepository teamRepository, UserRepository userRepository, TaskRepository taskRepository,
                              ProjectRepository projectRepository, CommentRepository commentRepository, PostRepository postRepository,
-                             DTOsConverter dtOsConverter, LocationRepository locationRepository) {
+                             DTOsConverter dtOsConverter, LocationRepository locationRepository, UserValidation userValidation) {
         this.teamRepository = teamRepository;
         this.userRepository = userRepository;
         this.taskRepository = taskRepository ;
@@ -51,6 +54,7 @@ public class RestGetController {
         this.postRepository = postRepository;
         this.locationRepository = locationRepository;
         this.dtOsConverter = dtOsConverter;
+        this.userValidation = userValidation;
         LOGGER.info("Creating RestGetController");
     }
 
@@ -184,10 +188,18 @@ public class RestGetController {
     }
 
     @RequestMapping(value = "/projects/{id}/tasks", method = GET)
-    public ResponseEntity<?> getProjectsTasks(@PathVariable int id, @RequestHeader Map<String, String> headers){
-        LOGGER.info(String.format("Entering method to get all tasks from a project with project id %s and headers %s", id, headers));
-        //TODO get only the task id and the status
-        List<Task> tasks = projectRepository.findById(id).orElseThrow().getTasks();
+    public ResponseEntity<?> getProjectsTasks(@PathVariable int id,
+                                              @RequestParam(name = "page", required = false, defaultValue = "0") Integer page,
+                                              @RequestHeader Map<String, String> headers){
+        LOGGER.info(String.format("Entering method to get all tasks from a project with project id %s page %s and headers %s", id, page, headers));
+        Project project = projectRepository.findById(id).orElseThrow();
+        List<Task> tasks;
+        if(page < 0){
+            page = (page * -1) -1;
+            tasks = taskRepository.findAllByProjectOrderByIdDesc(project, PageRequest.of(page, PAGE_SIZE));
+        }else{
+            tasks = taskRepository.findAllByProject(project, PageRequest.of(page, PAGE_SIZE));
+        }
         LOGGER.info(String.format("Exiting with list of tasks: %s", tasks));
         return new ResponseEntity<>(tasks, HttpStatus.OK);
     }
@@ -234,6 +246,14 @@ public class RestGetController {
             LOGGER.info(String.format("No task found with id %s", id));
             return new ResponseEntity<>("NOT FOUND", HttpStatus.NOT_FOUND);
         }
+    }
+
+    @RequestMapping(value = "/admin", method = GET)
+    public ResponseEntity<?> isUserAdmin(@RequestHeader Map<String, String> headers){
+        LOGGER.info(String.format("Entering method to check if user is admin with headers %s", headers));
+        Boolean status = userValidation.isValid(headers, UserStatus.ADMIN);
+        LOGGER.info(String.format("Exiting with status %s", status));
+        return new ResponseEntity<>(status, HttpStatus.OK);
     }
 }
 
