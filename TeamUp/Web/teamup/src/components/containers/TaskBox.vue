@@ -1,5 +1,5 @@
 <template>
-    <div id="box" @click="openTaskPage" data-toggle="tooltip" data-placement="top" :title="tooltipContent">
+    <div id="box" @click="openTaskPage" v-b-tooltip.hover :title="tooltipContent">
       <div class="container" id="taskContainer">
         <span class="container" :id="task.id">
           <p> <b>{{ trimTitle(task.summary) }}</b></p>
@@ -107,7 +107,7 @@ export default {
     getTooltipContent () {
       let description = ''
       let words = this.task.description.split(' ')
-      for (let i = 0; i < (words.length > 15 ? 15 : words.length); i++) {
+      for (let i = 0; i < (words.length > 10 ? 10 : words.length); i++) {
         description += words[i] + ' '
       }
       if (words.length > 5) {

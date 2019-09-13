@@ -106,6 +106,7 @@
     <div>
       <task-category class="overflow-auto"
       :is-visible="showTasks"
+      :user-id="userId"
       :task-category="taskCategory"
       @close="showTasks=false"/>
     </div>

@@ -33,7 +33,9 @@
 </template>
 
 <script>
-import { getUsersAssignedTasksWithStatuses } from '../persistance/RestGetRepository'
+import {
+  getUsersAssignedTasksByUserIdAndTaskStatuses
+} from '../persistance/RestGetRepository'
 import TaskBox from './containers/TaskBox'
 
 export default {
@@ -56,6 +58,11 @@ export default {
         this.closePopup()
       }
     })
+
+    document.addEventListener('click', this.closeAtClick)
+  },
+  beforeDestroy () {
+    document.removeEventListener('click', this.closeAtClick)
   },
   name: 'TaskCategory',
   data () {
@@ -76,9 +83,18 @@ export default {
       required: true,
       default: null,
       type: String
+    },
+    userId: {
+      required: true,
+      default: 1
     }
   },
   methods: {
+    closeAtClick (ev) {
+      if (ev.path[0].classList.contains('modal-wrapper')) {
+        this.closePopup()
+      }
+    },
     closePopup () {
       this.loadMore = true
       this.page = 0
@@ -88,11 +104,11 @@ export default {
     async fetchTasks () {
       let newTasks = []
       if (this.taskCategory === 'TO DO') {
-        newTasks.push(...await getUsersAssignedTasksWithStatuses(this.page, 'OPEN,REOPENED'))
+        newTasks.push(...await getUsersAssignedTasksByUserIdAndTaskStatuses(this.userId, this.page, 'OPEN,REOPENED'))
       } else if (this.taskCategory === 'DONE') {
-        newTasks.push(...await getUsersAssignedTasksWithStatuses(this.page, 'APPROVED'))
+        newTasks.push(...await getUsersAssignedTasksByUserIdAndTaskStatuses(this.userId, this.page, 'APPROVED'))
       } else {
-        newTasks.push(...await getUsersAssignedTasksWithStatuses(this.page, this.taskCategory.replace(' ', '_')))
+        newTasks.push(...await getUsersAssignedTasksByUserIdAndTaskStatuses(this.userId, this.page, this.taskCategory.replace(' ', '_')))
       }
       this.page++
       if (newTasks.length < 10) {

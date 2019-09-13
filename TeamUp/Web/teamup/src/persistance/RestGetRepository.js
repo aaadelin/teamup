@@ -228,3 +228,8 @@ export async function isAdmin () {
   let url = `${baseURL}/admin`
   return fetchDataFromUrl(url)
 }
+
+export async function getUsersAssignedTasksByUserIdAndTaskStatuses (userId, page = 0, statuses = '') {
+  let url = `${baseURL}/users/${userId}/tasks?type=assignedto&page=${page}&statuses=${statuses}`
+  return (await fetchDataFromUrl(url)).assigned
+}

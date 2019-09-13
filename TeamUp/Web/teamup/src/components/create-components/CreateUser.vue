@@ -136,6 +136,10 @@ export default {
         this.cancel()
       }
     })
+    document.addEventListener('click', this.closeAtClick)
+  },
+  beforeDestroy () {
+    document.removeEventListener('click', this.closeAtClick)
   },
   components: {
     // datePicker
@@ -160,6 +164,11 @@ export default {
     }
   },
   methods: {
+    closeAtClick (ev) {
+      if (ev.path[0].classList.contains('modal-wrapper')) {
+        this.cancel()
+      }
+    },
     async finished () {
       let data = this.createData()
 

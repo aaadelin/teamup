@@ -45,12 +45,12 @@
         </div>
       </div>
       <div>
-        <div>
-          <h3 style="cursor: pointer; margin-left: 2%; min-width: 100px">Users</h3>
-        </div>
-        <div>My team</div>
-        <div>My company</div>
-        <div>All</div>
+<!--        <div>-->
+<!--          <h3 style="cursor: pointer; margin-left: 2%; min-width: 100px">Users</h3>-->
+<!--        </div>-->
+<!--        <div>My team</div>-->
+<!--        <div>My company</div>-->
+<!--        <div>All</div>-->
       </div>
       <div>
         <div>
@@ -230,5 +230,9 @@ export default {
 </script>
 
 <style scoped>
+
+  .container{
+    min-width: 380px;
+  }
 
 </style>

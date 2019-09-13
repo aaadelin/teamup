@@ -73,6 +73,7 @@ export default {
 <style scoped>
 
   .search-box{
+    min-width: 300px;
     text-align: left; cursor: pointer;
     background-color: rgba(0,0,0,0.08);
     border: 2px solid rgba(0,0,0,0.35);

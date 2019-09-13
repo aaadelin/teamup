@@ -37,6 +37,7 @@ public interface TaskRepository extends JpaRepository<Task, Integer> {
     List<Task> findAllByProject(Project project);
     List<Task> findAllByProject(Project project, Pageable pageable);
     List<Task> findAllByProjectOrderByIdDesc(Project project, Pageable pageable);
+    List<Task> findAllByTaskStatusInAndAssigneesContaining(List<TaskStatus> taskStatuses, User user);
 
     @Query(value = "select * from task t\n" +
             "where t.task_status in ?1 and (t.summary like concat('%', ?2, '%') or t.description like concat('%', ?2, '%'))", nativeQuery = true)

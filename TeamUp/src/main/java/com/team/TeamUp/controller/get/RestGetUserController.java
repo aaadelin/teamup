@@ -244,12 +244,11 @@ public class RestGetUserController {
         List<Task> statistics;
         if(lastDays == null){
             LOGGER.info("Getting statistics from all time");
-            statistics = taskRepository.findAllByTaskStatusInAndAssigneesContaining(Arrays.asList(TaskStatus.values()), user, PageRequest.of(0, MAX_PAGE_SIZE));
+            statistics = taskRepository.findAllByTaskStatusInAndAssigneesContaining(Arrays.asList(TaskStatus.values()), user);
         }else {
             // todo
             LOGGER.info(String.format("Getting statistics from last %s days", lastDays));
-            statistics = taskRepository.findAllByTaskStatusInAndAssigneesContaining(Arrays.asList(TaskStatus.values()), user, PageRequest.of(0, MAX_PAGE_SIZE));
-//          statistics = taskRepository.findAllByTaskStatusInAndAssigneesContaining(id, List.of(0, 1, 2, 3, 4), PageRequest.of(0, 10000));
+            statistics = taskRepository.findAllByTaskStatusInAndAssigneesContaining(Arrays.asList(TaskStatus.values()), user);
         }
 
         Map<TaskStatus, Integer> statusCount = new HashMap<>();

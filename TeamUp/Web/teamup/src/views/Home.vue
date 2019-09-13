@@ -28,7 +28,6 @@
 // @ is an alias to /src
 // import RightMenu from '../components/RightMenu'
 import NProgress from 'nprogress'
-import SmallTaskBox from '../components/containers/SmallTaskBox'
 import { getMyID, getProjects, getUsersTasks } from '../persistance/RestGetRepository'
 import SmallProjectBox from '../components/containers/SmallProjectBox'
 
@@ -41,10 +40,9 @@ $(document).ready(function () {
 })
 
 export default {
-  components: { SmallProjectBox, SmallTaskBox },
+  components: { SmallProjectBox },
   mounted () {
     document.title = 'TeamUp'
-    // this.getTasks()
     this.getProjects()
     NProgress.done()
   },

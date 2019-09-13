@@ -29,7 +29,7 @@ export default {
   data () {
     return {
       currentTab: null,
-      component: 'ManageUsers'
+      component: 'ManageTeams'
     }
   },
   methods: {
