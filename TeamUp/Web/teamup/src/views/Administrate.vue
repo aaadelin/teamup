@@ -10,7 +10,7 @@
       </div>
       <div class="col container" style="max-width: 1000px; margin-top: 15px" >
         <keep-alive>
-          <comment :is="currentTab" v-if="currentTab"></comment>
+          <comment :is="currentTab" v-if="currentTab" ref="componentRef" @changeContent="componentUpdate"></comment>
         </keep-alive>
       </div>
     </div>
@@ -29,7 +29,8 @@ export default {
   data () {
     return {
       currentTab: null,
-      component: 'ManageTeams'
+      component: 'ManageUsers',
+      updated: false
     }
   },
   methods: {
@@ -41,6 +42,18 @@ export default {
         .then(() => {
           this.currentTab = () => this.loader()
         })
+        .then(() => {
+          // after the component is loaded and mounted, call update on it
+          setTimeout(() => {
+            if (this.updated) {
+              this.$refs.componentRef.update()
+              this.updated = false
+            }
+          }, 100)
+        })
+    },
+    componentUpdate (filter) {
+      this.updated = true
     }
   },
   computed: {

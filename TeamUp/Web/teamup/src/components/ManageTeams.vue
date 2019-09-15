@@ -1,11 +1,11 @@
 <template>
     <div class="container">
-      <div class="row justify-content-end">
+      <div class="row justify-content-between" style="padding: 15px">
+        <input id="team-filter" type="text" class="form-control col-4" placeholder="Filter by name" @keyup="filterTeams" autocomplete="off">
         <button class="col-2 btn btn-outline-secondary" @click="createTeam">+ Create team</button>
       </div>
-      <div class="row" style="margin-bottom: 10px">
-        <input id="team-filter" type="text" class="form-control col-4" placeholder="Filter by name" @keyup="filterTeams" autocomplete="off" required>
-      </div>
+<!--      <div class="row" style="margin-bottom: 10px">-->
+<!--      </div>-->
       <div>
         <table class="table table-hover">
           <thead>
@@ -62,11 +62,16 @@ export default {
     }
   },
   methods: {
+    update () {
+      this.$refs.createTeam.getLeaders()
+    },
     createTeam () {
       this.createTeamIsVisible = true
     },
     closeTeam () {
       this.createTeamIsVisible = false
+      this.getTeams()
+      this.$emit('changeContent')
     },
     async getData () {
       this.users = await getUsers()
@@ -108,6 +113,7 @@ export default {
       }
     },
     async filterTeams () {
+      this.$emit('changeContent')
       let filterText = document.getElementById('team-filter').value
       filterText = filterText.toLowerCase().trim()
       await this.getTeams()
@@ -119,10 +125,6 @@ export default {
         }
       }
       this.teams = newTeams
-    },
-    closeTeam1 () {
-      this.createTeamIsVisible = false
-      // this.$refs.createUser.getTeamsArray()
     }
   }
 }
