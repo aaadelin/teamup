@@ -11,7 +11,8 @@
 
           <div class="row"> <strong class="col-3">Description: </strong>
             <span v-if="editMode && canEditAll" > <textarea @keyup="hasChanged" v-model="currentDescription" cols="50" rows="4"></textarea> </span>
-            <span @dblclick="editMode = canEditAll" v-else v-html="tasksDescription" class="col"></span>
+            <span @dblclick="editMode = canEditAll" v-else v-html="tasksDescription('-')" class="col" id="description-span"></span>
+            <div v-show="showLongDescription" class="col long-description" id="description-over" v-html="tasksDescription('+')"></div>
           </div>
 
           <p></p>
@@ -170,6 +171,16 @@ export default {
   beforeMount () {
     this.loadData()
   },
+  mounted () {
+    let description = document.getElementById('description-span')
+    description.addEventListener('mouseenter', () => {
+      this.showLongDescription = this.task.description.split('\n').length > 7
+    })
+    let descriptionOver = document.getElementById('description-over')
+    descriptionOver.addEventListener('mouseleave', () => {
+      this.showLongDescription = false
+    })
+  },
   data () {
     return {
       task: {
@@ -188,6 +199,7 @@ export default {
       postId: -1,
       userToAdd: null,
       project: { deadline: '' },
+      showLongDescription: false,
 
       reporter: { name: '' },
       assignees: [],
@@ -239,7 +251,7 @@ export default {
       this.taskTypes = await getTaskTypes()
       this.comments = taskPostData.comments
       let me = await getMyID()
-      if (this.task.reporterID === me) {
+      if (this.task.reporterID === me || localStorage.isAdmin === 'true') {
         this.canEditAll = true
       }
       if (this.task.assignees.includes(me)) {
@@ -390,15 +402,23 @@ export default {
       if (this.canEditAll) {
         this.project = await getProjectByTaskId(this.task.id)
       }
+    },
+    tasksDescription (type) {
+      if (this.currentDescription !== null) {
+        if (type === '+') {
+          return this.currentDescription.replace(/\n/g, '<br>')
+        } else {
+          let allDescription = this.currentDescription.split('\n')
+          let newDescription = []
+          for (let i = 0; i < Math.min(allDescription.length, 7); i++) {
+            newDescription.push(allDescription[i])
+          }
+          return newDescription.join('<br>')
+        }
+      }
     }
   },
   computed: {
-    tasksDescription () {
-      if (this.currentDescription !== null) {
-        return this.currentDescription.replace(/\n/g, '<br>')
-      }
-      return this.currentDescription
-    }
   }
 }
 </script>
@@ -458,5 +478,12 @@ export default {
     font-size: 15px;
     line-height: 1.428571429;
     border-radius: 10px;
+  }
+
+  .long-description {
+    background-color: white;
+    position: absolute;
+    box-shadow: 3px 3px 5px gray;
+    z-index: 9;
   }
 </style>
