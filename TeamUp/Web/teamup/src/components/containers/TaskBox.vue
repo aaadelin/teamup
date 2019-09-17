@@ -110,7 +110,7 @@ export default {
       for (let i = 0; i < (words.length > 10 ? 10 : words.length); i++) {
         description += words[i] + ' '
       }
-      if (words.length > 5) {
+      if (words.length > 10) {
         description += '...'
       }
 

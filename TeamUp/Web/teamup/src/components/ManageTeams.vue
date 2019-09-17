@@ -21,7 +21,7 @@
             <td>{{team.department.replace(/_/g, ' ')}}</td>
             <td>{{getLocationToDisplay(team.location)}}</td>
             <td>{{getUserToDisplay(team.leaderID)}}</td>
-            <td :id="'team-members' + team.id" :class="{ 'no-members' : team.members.length === 0 }">{{team.members.length}} members</td>
+            <td :id="'team-members' + team.id" :class="{ 'no-members' : team.members.length === 0 }">{{team.members.length}} member(s)</td>
 
             <b-tooltip :target="'team-members' + team.id" placement="right">
               {{getUsersToDisplay(team.members)}}

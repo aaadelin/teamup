@@ -1,11 +1,17 @@
 package com.team.TeamUp.domain;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
 
 import javax.persistence.*;
 import java.util.List;
 
 @Entity
+@Getter
+@Setter
+@ToString
 public class Location {
 
     @Id
@@ -21,55 +27,4 @@ public class Location {
     @OneToMany(mappedBy = "id")
     @JsonBackReference(value = "teamLocation")
     private List<Team> teams;
-
-    public int getId() {
-        return id;
-    }
-
-    public void setId(int id) {
-        this.id = id;
-    }
-
-    public String getCity() {
-        return city;
-    }
-
-    public void setCity(String city) {
-        this.city = city;
-    }
-
-    public String getCountry() {
-        return country;
-    }
-
-    public void setCountry(String country) {
-        this.country = country;
-    }
-
-    public String getAddress() {
-        return address;
-    }
-
-    public void setAddress(String address) {
-        this.address = address;
-    }
-
-    public List<Team> getTeams() {
-        return teams;
-    }
-
-    public void setTeams(List<Team> teams) {
-        this.teams = teams;
-    }
-
-    @Override
-    public String toString() {
-        return "Location{" +
-                "id=" + id +
-                ", city='" + city + '\'' +
-                ", country='" + country + '\'' +
-                ", address='" + address + '\'' +
-                ", teams=" + teams +
-                '}';
-    }
 }

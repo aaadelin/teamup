@@ -85,7 +85,7 @@ export default {
       this.moreUsers = this.users.length >= MAX_RESULTS
     },
     async filterUsers () {
-      this.$emit('changeContent')
+
     },
     changePage (str) {
       if (str === '+' && this.moreUsers) {

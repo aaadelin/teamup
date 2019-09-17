@@ -36,3 +36,8 @@ export async function updatePassword (id, oldPassword, newPassword, logout) {
 
   return putDataToUrl(data, url)
 }
+
+export async function updatePasswordFromRequest (request) {
+  let url = `${baseURL}/requests`
+  return putDataToUrl(request, url)
+}

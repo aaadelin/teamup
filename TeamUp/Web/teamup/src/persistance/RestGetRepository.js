@@ -59,6 +59,11 @@ export async function getUsers () {
   return fetchDataFromUrl(url, [])
 }
 
+export async function getUsersByPage (page) {
+  let url = `${baseURL}/users?page=${page}`
+  return fetchDataFromUrl(url, [])
+}
+
 export async function getProjects (page = 0) {
   let url = `${baseURL}/projects?page=${page}`
   return fetchDataFromUrl(url, [])

@@ -51,6 +51,11 @@ export const router = new Router({
       component: () => import('./views/Administrate.vue')
     },
     {
+      path: '/reset',
+      name: 'reset',
+      component: () => import('./views/ResetPassword.vue')
+    },
+    {
       path: '*',
       name: '404',
       component: () => import('./views/404.vue')
@@ -60,9 +65,9 @@ export const router = new Router({
 
 router.beforeEach((to, from, next) => {
   NProgress.start()
-  const publicPages = ['/login', '/']
+  const publicPages = ['/login', '/', '/reset']
   const adminPages = ['/administrate']
-  const authRequired = !publicPages.includes(to.fullPath)
+  const authRequired = !publicPages.includes(to.path)
   const adminRequired = adminPages.includes(to.fullPath)
 
   const loggedIn = localStorage.getItem('access_key')

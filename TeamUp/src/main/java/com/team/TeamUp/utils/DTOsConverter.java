@@ -6,8 +6,7 @@ import com.team.TeamUp.domain.enums.UserStatus;
 import com.team.TeamUp.dtos.*;
 import com.team.TeamUp.persistence.*;
 import com.team.TeamUp.validation.TaskValidation;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
@@ -21,9 +20,8 @@ import java.util.stream.Collectors;
  * Utility class used to convert from DTOs to Domain entities and backwards.
  */
 @Component
+@Slf4j
 public class DTOsConverter {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(DTOsConverter.class);
 
     private UserRepository userRepository;
     private TeamRepository teamRepository;
@@ -32,6 +30,7 @@ public class DTOsConverter {
     private PostRepository postRepository;
     private CommentRepository commentRepository;
     private LocationRepository locationRepository;
+    private ResetRequestRepository resetRequestRepository;
     private TaskValidation taskValidation;
 
     public DTOsConverter(UserRepository userRepository,
@@ -40,7 +39,8 @@ public class DTOsConverter {
                          ProjectRepository projectRepository,
                          PostRepository postRepository,
                          LocationRepository locationRepository,
-                         CommentRepository commentRepository) {
+                         CommentRepository commentRepository,
+                         ResetRequestRepository resetRequestRepository) {
 
         this.userRepository = userRepository;
         this.teamRepository = teamRepository;
@@ -49,10 +49,10 @@ public class DTOsConverter {
         this.postRepository = postRepository;
         this.locationRepository = locationRepository;
         this.commentRepository = commentRepository;
-
+        this.resetRequestRepository = resetRequestRepository;
         this.taskValidation = new TaskValidation();
 
-        LOGGER.info("Instance of class DtosConverter created");
+        log.info("Instance of class DtosConverter created");
     }
 
     /**
@@ -60,7 +60,7 @@ public class DTOsConverter {
      * @return userDTO instance containing user parameters data
      */
     public UserDTO getDTOFromUser(User user) {
-        LOGGER.info(String.format("Method get UserDTO from User called with user parameter: %s", user));
+        log.info(String.format("Method get UserDTO from User called with user parameter: %s", user));
         UserDTO userDTO = new UserDTO();
 
         userDTO.setId(user.getId());
@@ -72,6 +72,13 @@ public class DTOsConverter {
         userDTO.setStatus(user.getStatus());
         userDTO.setPhoto(user.getPhoto());
         userDTO.setJoinedAt(user.getJoinedAt());
+        if(user.getMail() == null){
+            user.setMail("");
+        }
+        if(user.getMail() == null){
+            user.setMail("");
+        }
+        userDTO.setMail(user.getMail());
         if (user.getTeam() != null) {
             userDTO.setTeamID(user.getTeam().getId());
             userDTO.setDepartment(user.getTeam().getDepartment());
@@ -79,7 +86,7 @@ public class DTOsConverter {
             userDTO.setTeamID(-1);
         }
 
-        LOGGER.info(String.format("UserDTO instance created: %s", userDTO));
+        log.info(String.format("UserDTO instance created: %s", userDTO));
         return userDTO;
     }
 
@@ -88,7 +95,7 @@ public class DTOsConverter {
      * @return user entity containing userDTO data
      */
     public User getUserFromDTO(UserDTO userDTO, UserStatus requesterStatus) {
-        LOGGER.info(String.format("Method create User from UserDTO called with parameter %s", userDTO));
+        log.info(String.format("Method create User from UserDTO called with parameter %s", userDTO));
 
         Optional<User> userOptional = userRepository.findById(userDTO.getId());
         User user;
@@ -112,6 +119,9 @@ public class DTOsConverter {
         if((userOptional.isPresent() && userOptional.get().getJoinedAt() == null) || userOptional.isEmpty()){
             user.setJoinedAt(LocalDate.now());
         }
+        if(user.getMail() == null){
+            userDTO.setMail(user.getMail());
+        }
         user.setMinutesUntilLogout(60);
         user.setStatus(userDTO.getStatus());
         user.setPassword(TokenUtils.getMD5Token(userDTO.getPassword()));
@@ -123,7 +133,7 @@ public class DTOsConverter {
             user.setHashKey(TokenUtils.getMD5Token());
         }
 
-        LOGGER.info(String.format("Instance of type User created: %s", user));
+        log.info(String.format("Instance of type User created: %s", user));
         return user;
     }
 
@@ -132,7 +142,7 @@ public class DTOsConverter {
      * @return Task object containing taskDTO data
      */
     public Task getTaskFromDTO(TaskDTO taskDTO, String reporterKey) {
-        LOGGER.info(String.format("Method create Task from TaskDto called with parameter: %s", taskDTO));
+        log.info(String.format("Method create Task from TaskDto called with parameter: %s", taskDTO));
 
         Optional<Task> taskOptional = taskRepository.findById(taskDTO.getId());
         Task task = taskOptional.orElseGet(Task::new);
@@ -175,12 +185,12 @@ public class DTOsConverter {
         }
         task.setAssignees(list);
 
-        LOGGER.info(String.format("Instance of type Task created: %s", task));
+        log.info(String.format("Instance of type Task created: %s", task));
         return task;
     }
 
     public Task getTaskFromDTOForUpdate(TaskDTO taskDTO, User user) {
-        LOGGER.info(String.format("Method to update Task from TaskDto called with parameter: %s", taskDTO));
+        log.info(String.format("Method to update Task from TaskDto called with parameter: %s", taskDTO));
 
         Optional<Task> taskOptional = taskRepository.findById(taskDTO.getId());
         Task task = taskOptional.orElseThrow();
@@ -227,7 +237,7 @@ public class DTOsConverter {
      * @return TaskDTO instance containing task data
      */
     public TaskDTO getDTOFromTask(Task task) {
-        LOGGER.info(String.format("Method to create TaskDTO from Task called with parameter :%s", task));
+        log.info(String.format("Method to create TaskDTO from Task called with parameter :%s", task));
         TaskDTO taskDTO = new TaskDTO();
 
         taskDTO.setId(task.getId());
@@ -249,7 +259,7 @@ public class DTOsConverter {
         }
         taskDTO.setAssignees(task.getAssignees().stream().map(User::getId).collect(Collectors.toList()));
 
-        LOGGER.info(String.format("Instance of type TaskDTO created: %s", taskDTO));
+        log.info(String.format("Instance of type TaskDTO created: %s", taskDTO));
         return taskDTO;
     }
 
@@ -258,7 +268,7 @@ public class DTOsConverter {
      * @return Project object containing projectDTO data
      */
     public Project getProjectFromDTO(ProjectDTO projectDTO) {
-        LOGGER.info(String.format("Method to create Project from ProjectDTO called with parameter: %s", projectDTO));
+        log.info(String.format("Method to create Project from ProjectDTO called with parameter: %s", projectDTO));
         Optional<Project> projectOptional = projectRepository.findById(projectDTO.getId());
 
         Project project = projectOptional.orElseGet(Project::new);
@@ -283,7 +293,7 @@ public class DTOsConverter {
             project.setVersion("0.0.1");
         }
 
-        LOGGER.info(String.format("Instance of type Project created: %s", project));
+        log.info(String.format("Instance of type Project created: %s", project));
         return project;
     }
 
@@ -292,7 +302,7 @@ public class DTOsConverter {
      * @return ProjectDTO instance containing project data
      */
     public ProjectDTO getDTOFromProject(Project project) {
-        LOGGER.info(String.format("Method to create ProjectDTO from Projecct called with parameter: %s", project));
+        log.info(String.format("Method to create ProjectDTO from Projecct called with parameter: %s", project));
         ProjectDTO projectDTO = new ProjectDTO();
 
         projectDTO.setId(project.getId());
@@ -303,7 +313,7 @@ public class DTOsConverter {
         projectDTO.setTasksIDs(project.getTasks().stream().map(Task::getId).collect(Collectors.toList()));
         projectDTO.setOwnerID(project.getOwner().getId());
 
-        LOGGER.info(String.format("Instance of type ProjectDTO created: %s", projectDTO));
+        log.info(String.format("Instance of type ProjectDTO created: %s", projectDTO));
         return projectDTO;
     }
 
@@ -312,7 +322,7 @@ public class DTOsConverter {
      * @return Team model instance containing the information from teamDTO
      */
     private Team getTeamFromDTO(TeamDTO teamDTO) {
-        LOGGER.info(String.format("Method to create Team from DTO called with parameter: %s", teamDTO));
+        log.info(String.format("Method to create Team from DTO called with parameter: %s", teamDTO));
         Optional<Team> teamOptional = teamRepository.findById(teamDTO.getId());
         Team team = teamOptional.orElseGet(Team::new);
 
@@ -321,7 +331,7 @@ public class DTOsConverter {
         team.setLocation(locationRepository.getOne(teamDTO.getLocation()));
         team.setDepartment(teamDTO.getDepartment());
 
-        LOGGER.info(String.format("Instance of type Team created: %s", team));
+        log.info(String.format("Instance of type Team created: %s", team));
         return team;
     }
 
@@ -332,16 +342,16 @@ public class DTOsConverter {
      * @return Team model instance containing the information from teamDTO
      */
     public Team getTeamFromDTO(TeamDTO teamDTO, UserStatus status) {
-        LOGGER.info(String.format("Method to create instance Team from TeamDTO called with %s and user status %s", teamDTO, status));
+        log.info(String.format("Method to create instance Team from TeamDTO called with %s and user status %s", teamDTO, status));
         Team team = getTeamFromDTO(teamDTO);
 
         if (status == UserStatus.ADMIN) {
-            LOGGER.info("User is able to create such instances");
+            log.info("User is able to create such instances");
             Optional<User> leader = userRepository.findById(teamDTO.getLeaderID());
             leader.ifPresent(team::setLeader);
         }
 
-        LOGGER.info(String.format("Instance of type Team returned: %s", team));
+        log.info(String.format("Instance of type Team returned: %s", team));
         return team;
     }
 
@@ -350,7 +360,7 @@ public class DTOsConverter {
      * @return TeamDTO instance containing team object data
      */
     public TeamDTO getDTOFromTeam(Team team) {
-        LOGGER.info(String.format("Method to convert from Team to TeamDTO called with parameter: %s", team));
+        log.info(String.format("Method to convert from Team to TeamDTO called with parameter: %s", team));
         TeamDTO teamDTO = new TeamDTO();
 
         teamDTO.setId(team.getId());
@@ -363,12 +373,12 @@ public class DTOsConverter {
         }
         teamDTO.setMembers(team.getMembers().stream().map(User::getId).collect(Collectors.toList()));
 
-        LOGGER.info(String.format("Instance of type team created: %s", teamDTO));
+        log.info(String.format("Instance of type team created: %s", teamDTO));
         return teamDTO;
     }
 
     public LocationDTO getDTOFromLocation(Location location){
-        LOGGER.info(String.format("Method to convert from location to DTO entered with parameter: %s", location));
+        log.info(String.format("Method to convert from location to DTO entered with parameter: %s", location));
         LocationDTO locationDTO = new LocationDTO();
 
         locationDTO.setId(location.getId());
@@ -377,12 +387,12 @@ public class DTOsConverter {
         locationDTO.setCountry(location.getCountry());
         locationDTO.setTeams(location.getTeams().stream().map(Team::getId).collect(Collectors.toList()));
 
-        LOGGER.info(String.format("Exiting with entity: %s", locationDTO));
+        log.info(String.format("Exiting with entity: %s", locationDTO));
         return locationDTO;
     }
 
     public Location getLocationFromDTO(LocationDTO locationDTO){
-        LOGGER.info(String.format("Method to convert from locationDTO to Location entered with parameter: %s", locationDTO));
+        log.info(String.format("Method to convert from locationDTO to Location entered with parameter: %s", locationDTO));
 
         Optional<Location> locationOptional = locationRepository.findById(locationDTO.getId());
         Location location = new Location();
@@ -392,13 +402,13 @@ public class DTOsConverter {
         location.setCity(locationDTO.getCity());
         location.setCountry(locationDTO.getCountry());
         location.setTeams(teamRepository.findAllById(locationDTO.getTeams()));
-        LOGGER.info(String.format("Exiting with entity: %s", location));
+        log.info(String.format("Exiting with entity: %s", location));
 
         return location;
     }
 
     public Comment getCommentFromDTO(CommentDTO commentDTO) {
-        LOGGER.info(String.format("Method to convert from CommentDTO to Comment called with parameter: %s", commentDTO));
+        log.info(String.format("Method to convert from CommentDTO to Comment called with parameter: %s", commentDTO));
         Comment comment = commentRepository.findById(commentDTO.getId()).orElseGet(Comment::new);
         comment.setTitle(commentDTO.getTitle());
         comment.setContent(commentDTO.getContent());
@@ -412,12 +422,12 @@ public class DTOsConverter {
             commentDTO.setDatePosted(LocalDateTime.now());
         }
         comment.setDatePosted(commentDTO.getDatePosted());
-        LOGGER.info(String.format("Instance of type Comment created: %s", comment));
+        log.info(String.format("Instance of type Comment created: %s", comment));
         return comment;
     }
 
     public CommentDTO getDTOFromComment(Comment comment) {
-        LOGGER.info(String.format("Method to convert from Comment to CommentDTO called with parameter: %s", comment));
+        log.info(String.format("Method to convert from Comment to CommentDTO called with parameter: %s", comment));
         CommentDTO commentDTO = new CommentDTO();
         commentDTO.setId(comment.getId());
         commentDTO.setTitle(comment.getTitle());
@@ -428,23 +438,23 @@ public class DTOsConverter {
         int parentId = comment.getParent() != null?comment.getParent().getId() : 0;
         commentDTO.setParent(parentId);
         commentDTO.setPostId(comment.getPost().getId());
-        LOGGER.info(String.format("Instance of type CommentDTO created: %s", commentDTO));
+        log.info(String.format("Instance of type CommentDTO created: %s", commentDTO));
         return commentDTO;
     }
 
     public Post getPostFromDTO(PostDTO postDTO) {
-        LOGGER.info(String.format("Method to convert from PostDTO to Post called with parameter: %s", postDTO));
+        log.info(String.format("Method to convert from PostDTO to Post called with parameter: %s", postDTO));
         Post post = postRepository.findById(postDTO.getId()).orElseGet(Post::new);
 
         post.setTask(taskRepository.findById(postDTO.getTaskDTO().getId()).orElseThrow());
         post.setComments(postDTO.getComments().stream().map(this::getCommentFromDTO).collect(Collectors.toList()));
 
-        LOGGER.info(String.format("Instance of type Post created: %s", post));
+        log.info(String.format("Instance of type Post created: %s", post));
         return post;
     }
 
     public PostDTO getDTOFromPost(Post post) {
-        LOGGER.info(String.format("Method to convert from Post to PostDTO called with parameter: %s", post));
+        log.info(String.format("Method to convert from Post to PostDTO called with parameter: %s", post));
 
         PostDTO postDTO = new PostDTO();
         postDTO.setId(post.getId());
@@ -455,7 +465,27 @@ public class DTOsConverter {
             postDTO.setComments(new ArrayList<>());
         }
 
-        LOGGER.info(String.format("Instance of type PostDTO created: %s", postDTO));
+        log.info(String.format("Instance of type PostDTO created: %s", postDTO));
         return postDTO;
+    }
+
+    public ResetRequestDTO getDTOFromResetRequest(ResetRequest resetRequest){
+        ResetRequestDTO resetRequestDTO = new ResetRequestDTO();
+        resetRequestDTO.setId(resetRequest.getId());
+        resetRequestDTO.setCreatedAt(resetRequest.getCreatedAt());
+        resetRequestDTO.setUserId(resetRequest.getUser().getId());
+
+        return resetRequestDTO;
+    }
+
+    public ResetRequest getResetRequestFromDTO(ResetRequestDTO resetRequestDTO){
+        ResetRequest resetRequest = resetRequestRepository.findById(resetRequestDTO.getId()).orElse(new ResetRequest());
+        resetRequest.setUser(userRepository.findById(resetRequestDTO.getUserId()).orElseThrow());
+        if(resetRequestDTO.getCreatedAt() == null){
+            resetRequest.setCreatedAt(LocalDateTime.now());
+        }else{
+            resetRequest.setCreatedAt(resetRequestDTO.getCreatedAt());
+        }
+        return resetRequest;
     }
 }

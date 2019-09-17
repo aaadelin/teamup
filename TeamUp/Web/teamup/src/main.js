@@ -17,6 +17,8 @@ import VueApexCharts from 'vue-apexcharts'
 
 import { library } from '@fortawesome/fontawesome-svg-core'
 import {
+  faCaretLeft,
+  faCaretRight,
   faCamera,
   faClock,
   faCalendar,
@@ -39,14 +41,17 @@ import {
   faPlus,
   faExchangeAlt,
   faArrowAltCircleUp,
-  faSave
+  faSave,
+  faRedo,
+  faTimes
 } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 import VueDraggable from 'vue-draggable'
 
 library.add(faCamera, faClock, faCalendar, faChevronLeft, faChevronRight, faCalendarCheck, faTrashAlt,
   faTimesCircle, faArrowUp, faArrowDown, faAngleUp, faAngleDoubleUp, faSortUp, faEdit, faEyeSlash, faEye,
-  faAngleRight, faAngleDown, faMinus, faPlus, faExchangeAlt, faArrowAltCircleUp, faSave)
+  faAngleRight, faAngleDown, faMinus, faPlus, faExchangeAlt, faArrowAltCircleUp, faSave, faCaretLeft,
+  faCaretRight, faRedo, faTimes)
 
 Vue.component('fas', FontAwesomeIcon)
 

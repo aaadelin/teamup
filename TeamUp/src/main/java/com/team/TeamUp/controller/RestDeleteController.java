@@ -5,8 +5,7 @@ import com.team.TeamUp.domain.enums.UserEventType;
 import com.team.TeamUp.domain.enums.UserStatus;
 import com.team.TeamUp.persistence.UserRepository;
 import com.team.TeamUp.utils.UserUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.HttpStatus;
@@ -22,10 +21,9 @@ import java.util.Optional;
 @RestController
 @RequestMapping("/api")
 @CrossOrigin
+@Slf4j
 public class RestDeleteController {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(RestDeleteController.class);
-
+    
     private UserRepository userRepository;
     private UserUtils userUtils;
 
@@ -33,7 +31,7 @@ public class RestDeleteController {
     public RestDeleteController(UserRepository userRepository, UserUtils userUtils) {
         this.userRepository = userRepository;
         this.userUtils = userUtils;
-        LOGGER.info("Creating RestDeleteController");
+        log.info("Creating RestDeleteController");
     }
 
     /**
@@ -42,24 +40,24 @@ public class RestDeleteController {
      */
     @RequestMapping(value = "/users/{id}", method = RequestMethod.DELETE)
     public ResponseEntity<?> deleteUser(@PathVariable int id, @RequestHeader Map<String, String> headers) {
-        LOGGER.info(String.format("Entering delete user method with user id: %s \n and headers: %s", id, headers.toString()));
+        log.info(String.format("Entering delete user method with user id: %s \n and headers: %s", id, headers.toString()));
         Optional<User> userOptional = userRepository.findById(id);
         if (userOptional.isPresent()){
             userUtils.createEvent(userRepository.findByHashKey(headers.get("token")).orElseThrow(),
                     String.format("Deleted user \"%s %s\"", userOptional.get().getFirstName(), userOptional.get().getLastName()),
                     UserEventType.DELETE);
             userRepository.deleteById(id);
-            LOGGER.info(String.format("User with id %s has been successfully deleted", id));
+            log.info(String.format("User with id %s has been successfully deleted", id));
             return new ResponseEntity<>("OK", HttpStatus.OK);
         }
-        LOGGER.info(String.format("User with id %s has not been found", id));
+        log.info(String.format("User with id %s has not been found", id));
         return new ResponseEntity<>("Not found", HttpStatus.NOT_FOUND);
     }
 
     @RequestMapping(value = "/user/{id}/photo", method = RequestMethod.DELETE)
     public ResponseEntity<?> deletePhoto(@PathVariable int id,
                                          @RequestHeader Map<String, String> headers) throws IOException {
-        LOGGER.info(String.format("Entered delete photo with headers: %s", headers));
+        log.info(String.format("Entered delete photo with headers: %s", headers));
         Optional<User> userOptional = userRepository.findByHashKey(headers.get("token"));
         if(userOptional.isPresent() && (userOptional.get().getStatus() == UserStatus.ADMIN || userOptional.get().getId() == id)){
             ClassPathResource resource = new ClassPathResource("static/img/" + userOptional.get().getPhoto());
@@ -68,7 +66,7 @@ public class RestDeleteController {
                 userOptional.get().setPhoto(null);
                 userRepository.save(userOptional.get());
                 if(deleted){
-                    LOGGER.info("Photo deleted successfully");
+                    log.info("Photo deleted successfully");
                     return new ResponseEntity<>(HttpStatus.OK);
                 }
             }

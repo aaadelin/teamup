@@ -1,12 +1,12 @@
 <template>
-  <div id="box" @click="openTaskPage" v-b-tooltip.hover  data-toggle="tooltip" data-placement="top" :title="tooltipContent">
+  <div id="box" @click="openTaskPage"   data-toggle="tooltip" data-placement="top" :title="tooltipContent">
     <div id="taskContainer" class="row">
       <span class="col-1" :id="task.id">
         <i v-if="task.priority === 3" class="fas fa-angle-double-up"></i>
         <i v-if="task.priority === 2" class="fas fa-angle-up"></i>
         <i v-if="task.priority === 1" class="fas fa-sort-up"></i>
       </span>
-      <p class="col"> <strong> {{task.summary}} </strong></p>
+      <p class="col"> <strong> {{summary}} </strong></p>
     </div>
   </div>
 </template>
@@ -63,6 +63,21 @@ export default {
         box.style.width = this.styleProp.width
         box.style.height = this.styleProp.height
       }
+    }
+  },
+  computed: {
+    summary () {
+      let words = this.task.summary.split(' ')
+      let wordCount = words.length > 9 ? 9 : words.length
+      let finalSummary = []
+      for (let i = 0; i < wordCount; i++) {
+        finalSummary.push(words[i])
+      }
+      finalSummary = finalSummary.join(' ')
+      if (words.length > wordCount) {
+        finalSummary += '...'
+      }
+      return finalSummary
     }
   }
 }

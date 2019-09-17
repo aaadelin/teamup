@@ -44,6 +44,15 @@
 
               <slot name="body">
               <div class="row">
+                <label for="mail" class="col-md-3">Mail </label>
+                <input id="mail" type="text" v-model="mail" name="mail" class="form-control col-md-8"  :class="{ 'is-invalid': dataFailed && !username }"/>
+              </div>
+              </slot>
+
+              <br/>
+
+              <slot name="body">
+              <div class="row">
                 <label for="password" class="col-md-3">Password </label>
                 <div class="input-group col-md-8 no-left-padding" id="show_hide_password">
 
@@ -155,6 +164,7 @@ export default {
       passwordAgain: '',
       status: '',
       team: '',
+      mail: '',
       localStorage: localStorage,
       dataFailed: false,
 
@@ -173,8 +183,8 @@ export default {
       let data = this.createData()
 
       if (data !== null) {
-        let ansewer = await saveUser(data)
-        if (ansewer) {
+        let answer = await saveUser(data)
+        if (answer) {
           this.dataFailed = false
           this.$notify({
             group: 'notificationsGroup',
@@ -212,7 +222,8 @@ export default {
           firstName: this.firstName,
           lastName: this.lastName,
           teamID: this.team.id,
-          status: this.status
+          status: this.status,
+          mail: this.mail
         }
       } else {
         this.$notify({

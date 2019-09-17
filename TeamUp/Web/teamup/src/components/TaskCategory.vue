@@ -12,7 +12,7 @@
                 {{taskCategory.replace('_', ' ')}}
               </div>
               <div name="header" class="col-1" >
-                <p @click="closePopup" style="cursor: pointer">X</p>
+                <p @click="closePopup" style="cursor: pointer; font-size: 23px">X</p>
               </div>
 
             </div>

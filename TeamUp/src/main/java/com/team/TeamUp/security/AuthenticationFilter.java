@@ -1,10 +1,8 @@
 package com.team.TeamUp.security;
 
-import com.team.TeamUp.controller.get.RestGetController;
 import com.team.TeamUp.domain.enums.UserStatus;
 import com.team.TeamUp.validation.UserValidation;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
@@ -19,9 +17,8 @@ import java.util.List;
 @Component
 @Order
 @CrossOrigin
+@Slf4j
 public class AuthenticationFilter implements Filter {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(RestGetController.class);
 
     private final UserValidation userValidation;
 
@@ -39,14 +36,14 @@ public class AuthenticationFilter implements Filter {
         if (isAuthorized(req.getRequestURI(), req.getMethod(), tokenHeader)) {
 //            if((userValidation.isUserLoggedIn(tokenHeader) || req.getRequestURI().equals("/api/login") || req.getRequestURI().contains(""))){ // - for swagger
             if((userValidation.isUserLoggedIn(tokenHeader) || req.getRequestURI().equals("/api/login"))){
-                LOGGER.info(String.format("User with token %s is eligible to access %s", tokenHeader, req.getRequestURI()));
+                log.info(String.format("User with token %s is eligible to access %s", tokenHeader, req.getRequestURI()));
                 chain.doFilter(request, response);
             }else{
-                LOGGER.info("User is or just has been logged out");
+                log.info("User is or just has been logged out");
                 res.sendError(405);
             }
         } else {
-            LOGGER.info("User not eligible");
+            log.info("User not eligible");
             res.sendError(403);
         }
     }

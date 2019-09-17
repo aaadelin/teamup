@@ -1,32 +1,26 @@
 package com.team.TeamUp.controller;
 
-import com.team.TeamUp.domain.Project;
-import com.team.TeamUp.domain.Task;
-import com.team.TeamUp.domain.Team;
-import com.team.TeamUp.domain.User;
+import com.team.TeamUp.domain.*;
 import com.team.TeamUp.domain.enums.UserEventType;
 import com.team.TeamUp.domain.enums.UserStatus;
-import com.team.TeamUp.dtos.ProjectDTO;
-import com.team.TeamUp.dtos.TaskDTO;
-import com.team.TeamUp.dtos.TeamDTO;
-import com.team.TeamUp.dtos.UserDTO;
-import com.team.TeamUp.persistence.ProjectRepository;
-import com.team.TeamUp.persistence.TaskRepository;
-import com.team.TeamUp.persistence.TeamRepository;
-import com.team.TeamUp.persistence.UserRepository;
+import com.team.TeamUp.dtos.*;
+import com.team.TeamUp.persistence.*;
 import com.team.TeamUp.utils.DTOsConverter;
+import com.team.TeamUp.utils.MailUtils;
 import com.team.TeamUp.utils.TokenUtils;
 import com.team.TeamUp.utils.UserUtils;
 import com.team.TeamUp.validation.UserValidation;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
 import java.util.Map;
 import java.util.Optional;
+
+import static org.springframework.web.bind.annotation.RequestMethod.PUT;
 
 //PUT methods - for updating
 
@@ -34,9 +28,8 @@ import java.util.Optional;
 @RestController
 @RequestMapping("/api")
 @CrossOrigin
+@Slf4j
 public class RestPutController{
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(RestPutController.class);
 
     private UserUtils userUtils;
     private UserValidation userValidation;
@@ -45,30 +38,35 @@ public class RestPutController{
     private UserRepository userRepository;
     private TaskRepository taskRepository;
     private ProjectRepository projectRepository;
+    private ResetRequestRepository resetRequestRepository;
     private DTOsConverter dtOsConverter;
+    private MailUtils mailUtils;
+
 
     @Autowired
     public RestPutController(TeamRepository teamRepository, UserRepository userRepository, TaskRepository taskRepository,
-                             ProjectRepository projectRepository, UserValidation userValidation, DTOsConverter dtOsConverter, UserUtils userUtils) {
+                             ProjectRepository projectRepository, UserValidation userValidation, DTOsConverter dtOsConverter,
+                             ResetRequestRepository resetRequestRepository, UserUtils userUtils, MailUtils mailUtils) {
 
         this.teamRepository = teamRepository;
         this.userRepository = userRepository;
         this.taskRepository = taskRepository;
         this.projectRepository = projectRepository;
         this.dtOsConverter = dtOsConverter;
-
+        this.resetRequestRepository = resetRequestRepository;
         this.userValidation = userValidation;
+        this.mailUtils = mailUtils;
         this.userUtils = userUtils;
-        LOGGER.info("Creating RestPutController");
+        log.info("Creating RestPutController");
     }
 
     @RequestMapping(value = "/user", method = RequestMethod.PUT)
     public ResponseEntity<?> updateUser(@RequestBody UserDTO user, @RequestHeader Map<String, String> headers) {
-        LOGGER.info(String.format("Entering update user method with user: %s and headers: %s", user, headers));
+        log.info(String.format("Entering update user method with user: %s and headers: %s", user, headers));
 
         Optional<User> userOptional = userRepository.findById(user.getId());
         if (userOptional.isEmpty()) {
-            LOGGER.info(String.format("User with id %s has not been found to update", user.getId()));
+            log.info(String.format("User with id %s has not been found to update", user.getId()));
             return new ResponseEntity<>("NOT FOUND", HttpStatus.NOT_FOUND);
         } else {
             userUtils.createEvent(userRepository.findByHashKey(headers.get("token")).orElseThrow(),
@@ -77,20 +75,20 @@ public class RestPutController{
 
             User realUser = dtOsConverter.getUserFromDTO(user, UserStatus.ADMIN);
             userRepository.save(realUser);
-            LOGGER.info(String.format("User with id %s has been successfully updated in database", user.getId()));
+            log.info(String.format("User with id %s has been successfully updated in database", user.getId()));
             return new ResponseEntity<>("OK", HttpStatus.OK);
         }
     }
 
     @RequestMapping(value = "/project", method = RequestMethod.PUT)
     public ResponseEntity<?> updateProject(@RequestBody ProjectDTO projectDTO, @RequestHeader Map<String, String> headers) {
-        LOGGER.info(String.format("Entering update project with project: %s and headers: %s", projectDTO, headers));
+        log.info(String.format("Entering update project with project: %s and headers: %s", projectDTO, headers));
 
 
         if (userValidation.isValid(headers, UserStatus.ADMIN) || userValidation.isOwner(headers, projectDTO)) {
             Optional<Project> projectOptional = projectRepository.findById(projectDTO.getId());
             if (projectOptional.isEmpty()) {
-                LOGGER.info(String.format("Project with id %s has not been found to update", projectDTO.getId()));
+                log.info(String.format("Project with id %s has not been found to update", projectDTO.getId()));
                 return new ResponseEntity<>("NOT FOUND", HttpStatus.NOT_FOUND);
             } else {
                 userUtils.createEvent(userRepository.findByHashKey(headers.get("token")).orElseThrow(),
@@ -98,11 +96,11 @@ public class RestPutController{
                         UserEventType.UPDATE);
                 Project project = dtOsConverter.getProjectFromDTO(projectDTO);
                 projectRepository.save(project);
-                LOGGER.info(String.format("Project with id %s has been successfully updated in database", project.getId()));
+                log.info(String.format("Project with id %s has been successfully updated in database", project.getId()));
                 return new ResponseEntity<>("OK", HttpStatus.OK);
             }
         }
-        LOGGER.error("User not eligible");
+        log.error("User not eligible");
         return new ResponseEntity<>("FORBIDDEN", HttpStatus.FORBIDDEN);
     }
 
@@ -115,7 +113,7 @@ public class RestPutController{
      */
     @RequestMapping(value = "/task", method = RequestMethod.PUT)
     public ResponseEntity<?> updateTask(@RequestBody TaskDTO taskDTO, @RequestHeader Map<String, String> headers) {
-        LOGGER.info(String.format("Entering update task with task: %s and headers: %s", taskDTO, headers));
+        log.info(String.format("Entering update task with task: %s and headers: %s", taskDTO, headers));
 
         Optional<Task> taskOptional = taskRepository.findById(taskDTO.getId());
         if (taskOptional.isPresent()) {
@@ -130,14 +128,14 @@ public class RestPutController{
 
                 Task task = dtOsConverter.getTaskFromDTOForUpdate(taskDTO, userOptional.get());
                 taskRepository.save(task);
-                LOGGER.info(String.format("Task with id %s has been successfully updated in database", task.getId()));
+                log.info(String.format("Task with id %s has been successfully updated in database", task.getId()));
                 return new ResponseEntity<>("OK", HttpStatus.OK);
             } else {
-                LOGGER.error("User not eligible");
+                log.error("User not eligible");
                 return new ResponseEntity<>("FORBIDDEN", HttpStatus.FORBIDDEN);
             }
         } else {
-            LOGGER.info(String.format("Task with id %s has not been found to update", taskDTO.getId()));
+            log.info(String.format("Task with id %s has not been found to update", taskDTO.getId()));
             return new ResponseEntity<>("NOT FOUND", HttpStatus.NOT_FOUND);
         }
 
@@ -145,14 +143,14 @@ public class RestPutController{
 
     @RequestMapping(value = "/team", method = RequestMethod.PUT)
     public ResponseEntity<?> updateTeam(@RequestBody TeamDTO team, @RequestHeader Map<String, String> headers) {
-        LOGGER.info(String.format("Entering update team with team: %s and headers: %s", team, headers));
+        log.info(String.format("Entering update team with team: %s and headers: %s", team, headers));
 
         User user = userRepository.findByHashKey(headers.get("token")).orElseThrow();
         if (team.getLeaderID() == user.getId() || user.getStatus().equals(UserStatus.ADMIN)) { //only the leader or admin can change AND only the admin can change the leader
 
             Optional<Team> teamOptional = teamRepository.findById(team.getId());
             if (teamOptional.isEmpty()) {
-                LOGGER.info(String.format("Team with id %s has not been found to update", team.getId()));
+                log.info(String.format("Team with id %s has not been found to update", team.getId()));
                 return new ResponseEntity<>("NOT FOUND", HttpStatus.NOT_FOUND);
             } else {
                 userUtils.createEvent(userRepository.findByHashKey(headers.get("token")).orElseThrow(),
@@ -160,11 +158,11 @@ public class RestPutController{
                         UserEventType.UPDATE);
                 Team newTeam = dtOsConverter.getTeamFromDTO(team, user.getStatus());
                 teamRepository.save(newTeam);
-                LOGGER.info(String.format("Team with id %s has been successfully updated in database", newTeam.getId()));
+                log.info(String.format("Team with id %s has been successfully updated in database", newTeam.getId()));
                 return new ResponseEntity<>("OK", HttpStatus.OK);
             }
         }
-        LOGGER.error("User not eligible");
+        log.error("User not eligible");
         return new ResponseEntity<>("FORBIDDEN", HttpStatus.FORBIDDEN);
     }
 
@@ -172,13 +170,13 @@ public class RestPutController{
     public ResponseEntity<?> updateUserPassword(@PathVariable int id,
                                                 @RequestParam Map<String, String> parameters,
                                                 @RequestHeader Map<String, String> headers){
-        LOGGER.info(String.format("Entered changing password with id %s, parameters %s and headers %s", id, parameters, headers));
+        log.info(String.format("Entered changing password with id %s, parameters %s and headers %s", id, parameters, headers));
 
         User requester = userRepository.findByHashKey(headers.get("token")).orElseThrow();
         User userToChange = userRepository.findById(id).orElseThrow();
 
         if(parameters.get("newPassword").length() < 6) {
-            LOGGER.info("New password is too short");
+            log.info("New password is too short");
             return new ResponseEntity<>(HttpStatus.NOT_ACCEPTABLE);
         }
 
@@ -189,20 +187,41 @@ public class RestPutController{
 
             if(userToChange.getPassword().toLowerCase().equals(oldPassword)){
                 userToChange.setPassword(newPassword);
-                LOGGER.info("Password successfully changed");
+                log.info("Password successfully changed");
                 if(parameters.get("logout").equals("true")){
                     userToChange.setActive(false);
-                    LOGGER.info("User has been logged out");
+                    log.info("User has been logged out");
                 }
                 userRepository.save(userToChange);
                 return new ResponseEntity<>(HttpStatus.OK);
             }
-            LOGGER.info("Passwords don't match");
+            log.info("Passwords don't match");
             return new ResponseEntity<>(HttpStatus.NOT_ACCEPTABLE);
         }else{
-            LOGGER.info("User not eligible");
+            log.info("User not eligible");
             return new ResponseEntity<>(HttpStatus.FORBIDDEN);
         }
     }
 
+
+    @RequestMapping(value = "/requests", method = PUT)
+    public ResponseEntity<?> updateRequest(@RequestBody ResetRequestDTO resetRequestDTO){
+        log.info(String.format("Entered method to save new request with requestBody %s", resetRequestDTO));
+
+        ResetRequest resetRequest = resetRequestRepository.save(dtOsConverter.getResetRequestFromDTO(resetRequestDTO));
+
+        if(LocalDateTime.now().isBefore(resetRequest.getCreatedAt().plusMinutes(ResetRequest.MAX_MINUTES)) && //if now if before expiration time
+                resetRequestDTO.getNewPassword().length() >= 5 && resetRequestDTO.getUsername().equals(resetRequest.getUser().getUsername())) {
+
+            User user = resetRequest.getUser();
+            user.setPassword(TokenUtils.getMD5Token(resetRequestDTO.getNewPassword()));
+            userRepository.save(user);
+
+            resetRequest.setCreatedAt(LocalDateTime.MIN);
+            resetRequestRepository.save(resetRequest);
+        }
+
+        log.info("Exiting method to create a new request with status OK");
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
 }

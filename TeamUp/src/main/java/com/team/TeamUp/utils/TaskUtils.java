@@ -1,13 +1,11 @@
 package com.team.TeamUp.utils;
 
-import com.team.TeamUp.controller.get.RestGetTaskController;
 import com.team.TeamUp.domain.Task;
 import com.team.TeamUp.domain.User;
 import com.team.TeamUp.domain.enums.TaskStatus;
 import com.team.TeamUp.dtos.TaskDTO;
 import com.team.TeamUp.persistence.TaskRepository;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Component;
@@ -18,9 +16,9 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Component
+@Slf4j
 public class TaskUtils {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(RestGetTaskController.class);
+    
     private static final int PAGE_SIZE = 10;
 
     private TaskRepository taskRepository;
@@ -113,7 +111,7 @@ public class TaskUtils {
 
     public List<TaskDTO> findAssignedTasksByParameters(User user, Integer page, List<TaskStatus> statuses, String search, String sort, Boolean desc){
         List<Task> tasks;
-        LOGGER.info("Filter method preferred: by multiple statuses");
+        log.info("Filter method preferred: by multiple statuses");
         if(statuses == null){
             statuses = List.of(TaskStatus.values());
         }
@@ -127,12 +125,12 @@ public class TaskUtils {
         }
         List<TaskDTO> taskDTOS = tasks.stream().map(dtOsConverter::getDTOFromTask).collect(Collectors.toList());
         taskDTOS = filterTasks(search, taskDTOS);
-        LOGGER.info(String.format("Returning list of tasks: %s", taskDTOS));
+        log.info(String.format("Returning list of tasks: %s", taskDTOS));
         return taskDTOS;
     }
 
     public List<TaskDTO> findTasksByParameters(Integer page, List<TaskStatus> statuses, String search, String sort, Boolean desc){
-        LOGGER.info(String.format("Entering method to find tasks with statuses %s in page %s containing string %s sorted %s %s", statuses, page, search, sort, desc));
+        log.info(String.format("Entering method to find tasks with statuses %s in page %s containing string %s sorted %s %s", statuses, page, search, sort, desc));
         List<Task> tasks;
 
         if(search == null){
@@ -151,7 +149,7 @@ public class TaskUtils {
 
         List<TaskDTO> taskDTOS = tasks.stream().map(dtOsConverter::getDTOFromTask).collect(Collectors.toList());
 
-        LOGGER.info(String.format("Exiting with tasks: %s", taskDTOS));
+        log.info(String.format("Exiting with tasks: %s", taskDTOS));
         return taskDTOS;
     }
 

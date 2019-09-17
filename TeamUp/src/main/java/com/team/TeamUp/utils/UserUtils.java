@@ -1,14 +1,12 @@
 package com.team.TeamUp.utils;
 
-import com.team.TeamUp.controller.get.RestGetController;
 import com.team.TeamUp.domain.User;
 import com.team.TeamUp.domain.UserEvent;
 import com.team.TeamUp.domain.enums.UserEventType;
 import com.team.TeamUp.persistence.UserEventRepository;
 import com.team.TeamUp.persistence.UserRepository;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.tomcat.util.codec.binary.Base64;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -21,9 +19,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Component
+@Slf4j
 public class UserUtils {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(RestGetController.class);
 
     private final UserRepository userRepository;
     private UserEventRepository userEventRepository;
@@ -59,7 +56,7 @@ public class UserUtils {
     }
 
     public void createEvent(User creator, String description, UserEventType eventType){
-        LOGGER.info(String.format("Entered method to create event with user %s, description %s and type %s", creator, description, eventType));
+        log.info(String.format("Entered method to create event with user %s, description %s and type %s", creator, description, eventType));
         UserEvent userEvent = new UserEvent();
         userEvent.setCreator(creator);
         userEvent.setDescription(description);
@@ -74,6 +71,6 @@ public class UserUtils {
         history.add(userEvent);
         creator.setHistory(history);
         userRepository.save(creator);
-        LOGGER.info("Event successfully created");
+        log.info("Event successfully created");
     }
 }

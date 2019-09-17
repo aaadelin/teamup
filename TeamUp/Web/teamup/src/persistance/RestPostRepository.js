@@ -85,3 +85,8 @@ export async function saveProject (project) {
   let url = `${baseURL}/project`
   return postDataToUrl(project, url)
 }
+
+export async function createRequest (request) {
+  let url = `${baseURL}/requests`
+  return postDataToUrl(request, url)
+}

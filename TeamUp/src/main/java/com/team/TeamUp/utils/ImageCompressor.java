@@ -1,7 +1,6 @@
 package com.team.TeamUp.utils;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 
 import javax.imageio.IIOImage;
 import javax.imageio.ImageIO;
@@ -14,12 +13,11 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 
+@Slf4j
 public class ImageCompressor {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(ImageCompressor.class);
-
     public static void compressAndSave(String tempPath, String path){
-        LOGGER.info(String.format("Entering compressing image with temp path: %s and fimal path %s", tempPath, path ));
+        log.info(String.format("Entering compressing image with temp path: %s and fimal path %s", tempPath, path ));
         try {
             File file = new File(tempPath);
             BufferedImage image = ImageIO.read(file);
@@ -41,9 +39,9 @@ public class ImageCompressor {
             imageOutputStream.close();
             writer.dispose();
             boolean deleted = file.delete();
-            LOGGER.info("Image successfully compressed");
+            log.info("Image successfully compressed");
         } catch (IOException e) {
-            LOGGER.info(String.format("Error occured %s ", e.getMessage()));
+            log.info(String.format("Error occured %s ", e.getMessage()));
             e.printStackTrace();
         }
     }
