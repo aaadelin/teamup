@@ -83,11 +83,13 @@ export default {
     async getUsers () {
       this.users = await getUsersByPage(this.page)
       this.moreUsers = this.users.length >= MAX_RESULTS
+      this.$emit('changeContent')
     },
     async filterUsers () {
 
     },
     changePage (str) {
+      this.toggleHeader('cancel')
       if (str === '+' && this.moreUsers) {
         this.page++
       } else if (str === '-' && this.page !== 0) {
@@ -96,19 +98,17 @@ export default {
       this.getUsers()
     },
     toggleHeader (type) {
-      if (type === 'enable') { this.editCount++ } else { this.editCount-- }
+      if (type === 'enable') { this.editCount++ } else if (this.editCount > 0) { this.editCount-- }
 
       let appeared = this.appears(this.headers, 'Mail')
 
       if (type === 'cancel' && this.editCount === 0) {
         this.headers[this.getIndex(this.headers, 'Mail')] = 'Last Active'
-        // this.headers.splice(this.headers.length - 1, 1)
-        // this.headers.splice(4, 0, 'Last Active')
+        // this.headers.splice(this.headers.length - 1, 1); this.headers.splice(4, 0, 'Last Active')
         this.hideColumn = true
       } else if (!appeared && this.editCount !== 0) {
         this.headers[this.getIndex(this.headers, 'Last Active')] = 'Mail'
-        // this.headers.push('Mail')
-        // this.headers.splice(this.getIndex(this.headers, 'Last Active'), 1)
+        // this.headers.push('Mail'); this.headers.splice(this.getIndex(this.headers, 'Last Active'), 1)
         this.hideColumn = false
       }
     },

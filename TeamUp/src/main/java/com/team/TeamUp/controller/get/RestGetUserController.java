@@ -62,6 +62,7 @@ public class RestGetUserController {
     @RequestMapping(value = "/users", method = GET)
     public ResponseEntity<?> getAllUsers(@RequestParam(name = "ids", required = false) List<Integer> ids,
                                          @RequestParam(name = "page", required = false, defaultValue = "-1") Integer page,
+                                         @RequestParam(name = "sort", required = false) String sort,
                                          @RequestHeader Map<String, String> headers) {
         if(ids != null) {
             log.info(String.format("Entering get users by ids method with userIds: %s /n and headers: %s", ids, headers.toString()));

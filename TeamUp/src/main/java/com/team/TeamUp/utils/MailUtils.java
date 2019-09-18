@@ -26,9 +26,10 @@ public class MailUtils {
 
         executorService.execute(()->{
             log.info("Sending mail from thread {}", Thread.currentThread().getName());
+            String userName = resetRequest.getUser().getFirstName() + " " + resetRequest.getUser().getLastName();
             Email email = EmailBuilder.startingBlank()
                     .from("TeamUp Support", "teamup.open@gmail.com")
-                    .to(resetRequest.getUser().getUsername(), resetRequest.getUser().getMail())
+                    .to(userName, resetRequest.getUser().getMail())
                     .withSubject("Reset password")
                     .withHTMLText(getMessage(resetRequest))
                     .buildEmail();
@@ -45,7 +46,6 @@ public class MailUtils {
             File file = new ClassPathResource("static/mail-template.html").getFile();
             List<String> messageLines = Files.readAllLines(file.toPath());
             String message = String.join("\n", messageLines);
-            message = message.replace("<username>", resetRequest.getUser().getUsername());
             message = message.replace("<token>", String.valueOf(resetRequest.getId()));
             return message;
         } catch (IOException e) {

@@ -53,7 +53,7 @@ public class AuthenticationFilter implements Filter {
         List<String> openURIs = List.of("/api/login");
         List<String> adminAuthenticationPOST = List.of(
                 "/api/users",
-                "/api/project",
+//                "/api/project",
                 "/api/team"
         );
         List<String> adminAuthenticationPUT = List.of(

@@ -100,8 +100,11 @@
           <div>
             <div class="row">
                 <strong class="col-3">Assignees: </strong>
-                <select size="5" v-if="editMode && canEditAll" @click="addPersons" v-model="userToAdd" class="form-control col">
-                  <option v-for="user in users" :key="user.id" :value="user">{{user.firstName}} {{user.lastName}} ({{user.department.replace(/_/g, ' ')}})</option>
+                <select id="select-users" size="5" v-show="editMode && canEditAll" @click="addPersons" v-model="userToAdd" class="form-control col">
+                  <option v-for="user in users" :key="user.id" :value="user">{{user.firstName}} {{user.lastName}} ({{user.department == null ? '' : user.department.replace(/_/g, ' ')}})</option>
+                  <option v-if="users.length % 10 === 0">
+                    <button>Load more</button>
+                  </option>
                 </select>
             </div>
             <div class="row">
@@ -150,16 +153,16 @@
 </template>
 git
 <script>
-import {
-  getCommentsByPostId,
-  getMyID,
-  getPostByTaskId, getProjectByTaskId,
-  getTaskStatus,
-  getTaskTypes,
-  getUserById,
-  getUsers,
-  getUsersByIds
-} from '../persistance/RestGetRepository'
+    import {
+        getCommentsByPostId,
+        getMyID,
+        getPostByTaskId, getProjectByTaskId,
+        getTaskStatus,
+        getTaskTypes,
+        getUserById,
+        getUsers,
+        getUsersByIds, getUsersByPage
+    } from '../persistance/RestGetRepository'
 import { updateTask } from '../persistance/RestPutRepository'
 import CommentForm from '../components/CommentForm'
 import SimpleComment from '../components/containers/SimpleComment'
@@ -179,6 +182,13 @@ export default {
     let descriptionOver = document.getElementById('description-over')
     descriptionOver.addEventListener('mouseleave', () => {
       this.showLongDescription = false
+    })
+    let selectUsers = document.getElementById('select-users')
+    selectUsers.addEventListener('scroll', (ev) => {
+      // console.log(selectUsers.offsetHeight, selectUsers.scrollTop, selectUsers.scrollHeight)
+      if (selectUsers.offsetHeight + selectUsers.scrollTop >= selectUsers.scrollHeight) {
+        this.loadMoreUsers()
+      }
     })
   },
   data () {
@@ -200,6 +210,7 @@ export default {
       userToAdd: null,
       project: { deadline: '' },
       showLongDescription: false,
+      usersPage: 0,
 
       reporter: { name: '' },
       assignees: [],
@@ -260,7 +271,7 @@ export default {
       this.reporter = await getUserById(this.task.reporterID)
       this.assignees = await getUsersByIds(this.task.assignees)
       this.currentAssignees.push(...this.assignees)
-      getUsers().then(answer => {
+      getUsersByPage(this.usersPage).then(answer => {
         this.users = answer.filter(elem => elem.status !== 'ADMIN')
         this.users = this.users.sort((a, b) => a.department === this.task.department && b.department !== this.task.department ? -1 : 1)
       })
@@ -280,6 +291,12 @@ export default {
           this.task.priority !== parseInt(this.currentPriority) || this.currentType !== this.task.taskType ||
           this.currentAssignees !== this.assignees
       }
+    },
+    loadMoreUsers () {
+      this.usersPage += 1
+      getUsersByPage(this.usersPage).then(users => {
+        this.users.push(...users)
+      })
     },
     revertEdit () {
       this.currentDescription = this.task.description

@@ -48,7 +48,7 @@ export default {
       let response = {
         id: this.token,
         username: this.username,
-        password: this.password
+        newPassword: this.password
       }
 
       updatePasswordFromRequest(response)

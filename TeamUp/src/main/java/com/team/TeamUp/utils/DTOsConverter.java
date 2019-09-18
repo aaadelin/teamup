@@ -75,9 +75,6 @@ public class DTOsConverter {
         if(user.getMail() == null){
             user.setMail("");
         }
-        if(user.getMail() == null){
-            user.setMail("");
-        }
         userDTO.setMail(user.getMail());
         if (user.getTeam() != null) {
             userDTO.setTeamID(user.getTeam().getId());
@@ -119,12 +116,15 @@ public class DTOsConverter {
         if((userOptional.isPresent() && userOptional.get().getJoinedAt() == null) || userOptional.isEmpty()){
             user.setJoinedAt(LocalDate.now());
         }
-        if(user.getMail() == null){
-            userDTO.setMail(user.getMail());
+        if(userDTO.getMail() == null){
+            userDTO.setMail("");
         }
+        user.setMail(userDTO.getMail());
         user.setMinutesUntilLogout(60);
         user.setStatus(userDTO.getStatus());
-        user.setPassword(TokenUtils.getMD5Token(userDTO.getPassword()));
+        if (userDTO.getPassword() != null){
+            user.setPassword(TokenUtils.getMD5Token(userDTO.getPassword()));
+        }
 
         Optional<Team> team = teamRepository.findById(userDTO.getTeamID());
 
@@ -480,7 +480,9 @@ public class DTOsConverter {
 
     public ResetRequest getResetRequestFromDTO(ResetRequestDTO resetRequestDTO){
         ResetRequest resetRequest = resetRequestRepository.findById(resetRequestDTO.getId()).orElse(new ResetRequest());
-        resetRequest.setUser(userRepository.findById(resetRequestDTO.getUserId()).orElseThrow());
+        if(resetRequestDTO.getUserId() != 0){
+            resetRequest.setUser(userRepository.findById(resetRequestDTO.getUserId()).orElseThrow());
+        }
         if(resetRequestDTO.getCreatedAt() == null){
             resetRequest.setCreatedAt(LocalDateTime.now());
         }else{

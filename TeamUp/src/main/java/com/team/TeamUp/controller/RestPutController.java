@@ -60,7 +60,7 @@ public class RestPutController{
         log.info("Creating RestPutController");
     }
 
-    @RequestMapping(value = "/user", method = RequestMethod.PUT)
+    @RequestMapping(value = "/users", method = RequestMethod.PUT)
     public ResponseEntity<?> updateUser(@RequestBody UserDTO user, @RequestHeader Map<String, String> headers) {
         log.info(String.format("Entering update user method with user: %s and headers: %s", user, headers));
 
@@ -208,7 +208,7 @@ public class RestPutController{
     public ResponseEntity<?> updateRequest(@RequestBody ResetRequestDTO resetRequestDTO){
         log.info(String.format("Entered method to save new request with requestBody %s", resetRequestDTO));
 
-        ResetRequest resetRequest = resetRequestRepository.save(dtOsConverter.getResetRequestFromDTO(resetRequestDTO));
+        ResetRequest resetRequest = dtOsConverter.getResetRequestFromDTO(resetRequestDTO);
 
         if(LocalDateTime.now().isBefore(resetRequest.getCreatedAt().plusMinutes(ResetRequest.MAX_MINUTES)) && //if now if before expiration time
                 resetRequestDTO.getNewPassword().length() >= 5 && resetRequestDTO.getUsername().equals(resetRequest.getUser().getUsername())) {
@@ -217,7 +217,7 @@ public class RestPutController{
             user.setPassword(TokenUtils.getMD5Token(resetRequestDTO.getNewPassword()));
             userRepository.save(user);
 
-            resetRequest.setCreatedAt(LocalDateTime.MIN);
+            resetRequest.setCreatedAt(resetRequest.getCreatedAt().minusMinutes(60));
             resetRequestRepository.save(resetRequest);
         }
 

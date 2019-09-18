@@ -88,6 +88,7 @@
                 <label for="team" class="col-md-3">Team </label>
 
                 <select v-model="team" name="status" id="team" class="form-control col-md-8">
+                  <option value="-1" selected>Select team</option>
                   <option v-for="(team) in teams" :key="team.id" :value="team">{{ team.name }}</option>
                 </select>
               </div>
@@ -215,7 +216,7 @@ export default {
     createData () {
       if (this.firstName !== '' && this.lastName !== '' && this.username !== '' &&
           this.password.length >= 6 && this.password === this.passwordAgain &&
-          this.teams.includes(this.team) && this.statuses.includes(this.status)) {
+          this.statuses.includes(this.status)) {
         return {
           username: this.username,
           password: this.password,
@@ -240,6 +241,7 @@ export default {
       this.firstName = ''
       this.lastName = ''
       this.username = ''
+      this.mail = ''
       this.password = Math.random().toString(36).slice(-8)
       this.passwordAgain = this.password
     },

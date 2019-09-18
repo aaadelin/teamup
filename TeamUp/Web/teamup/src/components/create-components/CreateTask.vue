@@ -1,6 +1,6 @@
 <template>
   <transition name="fadeHeight" mode="out-in">
-  <div v-if="isVisible && dataReady" id="container">
+  <div v-show="isVisible && dataReady" id="container">
 
     <transition name="modal">
       <div class="modal-mask">
@@ -86,8 +86,8 @@
 
                 <div class="row">
                   <label for="assigneesList" class="col-md-3">Assignees </label>
-                  <select id="assigneesList" name="assignees" class="form-control col-md-8" @change="add" v-model="currentlySelected">
-                    <option v-for="assignee in filterAdmins(assigneesList)" :key="assignee.id" :value="assignee">{{ assignee.firstName }} {{ assignee.lastName }} ({{ assignee.department.replace(/_/g, ' ') }})</option>
+                  <select size="4" id="assigneesList" name="assignees" class="form-control col-md-8" @change="add" v-model="currentlySelected">
+                    <option v-for="assignee in filterAdmins(assigneesList)" :key="assignee.id" :value="assignee">{{ assignee.firstName }} {{ assignee.lastName }} ({{ assignee.department == null ? '' : assignee.department.replace(/_/g, ' ') }})</option>
                   </select>
                 </div>
                 <span v-if="localStorage.getItem('isAdmin')==='false'" @click="assignToMe" style="cursor: pointer" tabindex="0" @keyup="keyAssignToMe">Assign to me</span>
@@ -125,7 +125,14 @@
 
 <script>
 import 'pc-bootstrap4-datetimepicker/build/css/bootstrap-datetimepicker.css'
-import { getDepartments, getMyID, getProjects, getTaskTypes, getUsers } from '../../persistance/RestGetRepository'
+import {
+    getDepartments,
+    getMyID,
+    getProjects,
+    getTaskTypes,
+    getUsers,
+    getUsersByPage
+} from '../../persistance/RestGetRepository'
 import { saveTask } from '../../persistance/RestPostRepository'
 // import Datepicker from 'vuejs-datetimepicker'
 // import datePicker from 'vue-bootstrap-datetimepicker'
@@ -158,6 +165,12 @@ export default {
     }
 
     document.addEventListener('click', this.closeAtClick)
+    let selectUsers = document.getElementById('assigneesList')
+    selectUsers.addEventListener('scroll', (ev) => {
+      if (selectUsers.offsetHeight + selectUsers.scrollTop >= selectUsers.scrollHeight) {
+          this.loadMoreUsers()
+      }
+    })
   },
   beforeDestroy () {
     document.removeEventListener('click', this.closeAtClick)
@@ -182,6 +195,7 @@ export default {
       localStorage: localStorage,
       assignees: [],
       project: { deadline: '' },
+      usersPage: 0,
 
       taskTypes: [],
       projects: [],
@@ -263,7 +277,7 @@ export default {
           department: this.department,
           reporter: this.$store.state.access_key,
           assignees: assigneesIds,
-          project: this.project.id
+          project: this.project.id,
         }
       } else {
         this.$notify({
@@ -312,12 +326,21 @@ export default {
       this.currentlySelected = null
       this.project = { deadline: '' }
     },
+    async loadMoreUsers () {
+      this.assigneesList.push(...await getUsersByPage(++this.usersPage))
+    },
+    async refreshUsersWithNewDepartment () {
+      this.usersPage = 0
+      this.assigneesList = await getUsersByPage(this.usersPage)
+    },
     async getDataArrays () {
       this.taskTypes = await getTaskTypes()
+      this.taskType = this.taskTypes.length > 1 ? this.taskTypes[0] : ''
 
       this.departments = await getDepartments()
+      this.department = this.departments.length > 1 ? this.departments[0] : ''
 
-      this.assigneesList = await getUsers()
+      this.assigneesList = await getUsersByPage(this.usersPage)
 
       this.projects = await getProjects()
 

@@ -40,6 +40,7 @@
     <td v-show="!editMode">{{getUserTeam(user.teamID).name}}</td>
     <td v-show="editMode" class="editable-td">
       <select class="form-control" v-model="user.teamID">
+        <option value="-1">No team</option>
         <option v-for="team in teams" :key="team.id" :value="team.id">{{team.name.replace(/_/g, ' ')}}</option>
       </select>
     </td>
@@ -52,6 +53,7 @@
 
 <script>
 import { createRequest } from '../../persistance/RestPostRepository'
+import {updateUser} from "../../persistance/RestPutRepository";
 
 export default {
   name: 'UserRow',
@@ -80,9 +82,11 @@ export default {
       return team === undefined ? { name: '' } : team
     },
     save () {
+      updateUser(this.user).then(_ => {
+          this.$emit('reload')
+          this.$emit('cancel')
+      })
       this.editMode = false
-      this.$emit('reload')
-      // updateUser(this.user) // todo
     },
     resetPassword () {
       let request = {
