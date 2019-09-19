@@ -43,8 +43,14 @@ export default {
           content: this.comment,
           postId: this.postId
         }
-
-        await saveComment(comment)
+        saveComment(comment).then(_ => {
+          this.$notify({
+            group: 'notificationsGroup',
+            title: 'Error',
+            type: 'error',
+            text: 'An error occurred while saving the comment. Maybe the content is too long (max=1000 characters)'
+          })
+        })
         this.title = ''
         this.comment = ''
         this.$emit('reloadComments')

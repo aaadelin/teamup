@@ -238,3 +238,8 @@ export async function getUsersAssignedTasksByUserIdAndTaskStatuses (userId, page
   let url = `${baseURL}/users/${userId}/tasks?type=assignedto&page=${page}&statuses=${statuses}`
   return (await fetchDataFromUrl(url)).assigned
 }
+
+export async function getTeam (teamId) {
+  let url = `${baseURL}/teams/${teamId}`
+  return fetchDataFromUrl(url)
+}

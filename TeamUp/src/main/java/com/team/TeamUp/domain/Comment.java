@@ -23,11 +23,13 @@ public class Comment {
 
     private String title;
 
+    @Column(length = 1000)
     private String content;
 
     private LocalDateTime datePosted;
 
     @OneToOne
+    @ToString.Exclude
     private Post post;
 
     @ManyToOne

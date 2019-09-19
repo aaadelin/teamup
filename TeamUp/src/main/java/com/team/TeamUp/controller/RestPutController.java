@@ -111,7 +111,7 @@ public class RestPutController{
      * @param headers request headers containing token
      * @return response ok, not_found, Forbidden
      */
-    @RequestMapping(value = "/task", method = RequestMethod.PUT)
+    @RequestMapping(value = "/tasks", method = RequestMethod.PUT)
     public ResponseEntity<?> updateTask(@RequestBody TaskDTO taskDTO, @RequestHeader Map<String, String> headers) {
         log.info(String.format("Entering update task with task: %s and headers: %s", taskDTO, headers));
 
@@ -141,7 +141,7 @@ public class RestPutController{
 
     }
 
-    @RequestMapping(value = "/team", method = RequestMethod.PUT)
+    @RequestMapping(value = "/teams", method = RequestMethod.PUT)
     public ResponseEntity<?> updateTeam(@RequestBody TeamDTO team, @RequestHeader Map<String, String> headers) {
         log.info(String.format("Entering update team with team: %s and headers: %s", team, headers));
 

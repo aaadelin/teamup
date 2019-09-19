@@ -17,7 +17,7 @@ async function putDataToUrl (data, url) {
 }
 
 export async function updateTask (task) {
-  let url = `${baseURL}/task`
+  let url = `${baseURL}/tasks`
   return putDataToUrl(task, url)
 }
 
@@ -42,7 +42,12 @@ export async function updatePasswordFromRequest (request) {
   return putDataToUrl(request, url)
 }
 
-export async function updateUser(user) {
+export async function updateUser (user) {
   let url = `${baseURL}/users`
   return putDataToUrl(user, url)
+}
+
+export async function updateTeam (team) {
+  let url = `${baseURL}/teams`
+  return putDataToUrl(team, url)
 }

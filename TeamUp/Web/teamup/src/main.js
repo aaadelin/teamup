@@ -43,7 +43,8 @@ import {
   faArrowAltCircleUp,
   faSave,
   faRedo,
-  faTimes
+  faTimes,
+  faBan
 } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 import VueDraggable from 'vue-draggable'
@@ -51,7 +52,7 @@ import VueDraggable from 'vue-draggable'
 library.add(faCamera, faClock, faCalendar, faChevronLeft, faChevronRight, faCalendarCheck, faTrashAlt,
   faTimesCircle, faArrowUp, faArrowDown, faAngleUp, faAngleDoubleUp, faSortUp, faEdit, faEyeSlash, faEye,
   faAngleRight, faAngleDown, faMinus, faPlus, faExchangeAlt, faArrowAltCircleUp, faSave, faCaretLeft,
-  faCaretRight, faRedo, faTimes)
+  faCaretRight, faRedo, faTimes, faBan)
 
 Vue.component('fas', FontAwesomeIcon)
 

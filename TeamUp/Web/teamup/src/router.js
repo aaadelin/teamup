@@ -46,6 +46,11 @@ export const router = new Router({
       component: () => import('./views/Search.vue')
     },
     {
+      path: '/team',
+      name: 'team',
+      component: () => import('./views/Team.vue')
+    },
+    {
       path: '/administrate',
       name: 'administrate',
       component: () => import('./views/Administrate.vue')

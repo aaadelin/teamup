@@ -126,12 +126,11 @@
 <script>
 import 'pc-bootstrap4-datetimepicker/build/css/bootstrap-datetimepicker.css'
 import {
-    getDepartments,
-    getMyID,
-    getProjects,
-    getTaskTypes,
-    getUsers,
-    getUsersByPage
+  getDepartments,
+  getMyID,
+  getProjects,
+  getTaskTypes,
+  getUsersByPage
 } from '../../persistance/RestGetRepository'
 import { saveTask } from '../../persistance/RestPostRepository'
 // import Datepicker from 'vuejs-datetimepicker'
@@ -168,7 +167,7 @@ export default {
     let selectUsers = document.getElementById('assigneesList')
     selectUsers.addEventListener('scroll', (ev) => {
       if (selectUsers.offsetHeight + selectUsers.scrollTop >= selectUsers.scrollHeight) {
-          this.loadMoreUsers()
+        this.loadMoreUsers()
       }
     })
   },
@@ -277,7 +276,7 @@ export default {
           department: this.department,
           reporter: this.$store.state.access_key,
           assignees: assigneesIds,
-          project: this.project.id,
+          project: this.project.id
         }
       } else {
         this.$notify({
@@ -318,13 +317,13 @@ export default {
       this.deadline = null
       this.difficulty = 3
       this.priority = 3
-      this.taskType = null
-      this.department = null
+      this.taskType = this.taskTypes.length > 1 ? this.taskTypes[0] : ''
+      this.department = this.departments.length > 1 ? this.departments[0] : ''
       this.reporter = null
       this.assignees = []
       this.localStorage = localStorage
       this.currentlySelected = null
-      this.project = { deadline: '' }
+      this.project = this.projects.length > 1 ? this.projects[0] : ''
     },
     async loadMoreUsers () {
       this.assigneesList.push(...await getUsersByPage(++this.usersPage))
@@ -343,6 +342,7 @@ export default {
       this.assigneesList = await getUsersByPage(this.usersPage)
 
       this.projects = await getProjects()
+      this.project = this.projects.length > 1 ? this.projects[0] : ''
 
       if (this.projects.length > 0) {
         this.project = this.projects[0]

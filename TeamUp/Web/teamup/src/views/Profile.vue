@@ -33,6 +33,8 @@
       </strong>
       <br>
       {{ user.status }} {{ user.department }}
+      <br>
+      Team: <strong @click="redirectToTeam" style="cursor:pointer;"> {{ team.name }} </strong>
       <br><br>
       Joined: {{ user.joinedAt }} ({{ yearsSinceJoined }} years ago) <br>
       Last active: {{ user.lastActive }}
@@ -116,7 +118,7 @@
 
 <script>
 
-import { getMyID, getUserById, getUsersPhoto, getUserStatistics } from '../persistance/RestGetRepository'
+import { getMyID, getTeam, getUserById, getUsersPhoto, getUserStatistics } from '../persistance/RestGetRepository'
 import UserProfileTimeLine from '../components/UserProfileTimeLine'
 import { diffYears } from '../utils/DateUtils'
 import TaskCategory from '../components/TaskCategory'
@@ -210,7 +212,8 @@ export default {
       logout: false,
       myId: -1,
       uploadPercentage: 0,
-      progressStyle: ''
+      progressStyle: '',
+      team: ''
     }
   },
   methods: {
@@ -232,6 +235,7 @@ export default {
         this.$router.push('404')
       }
       this.canEdit = (this.myId === parseInt(this.userId))
+      this.team = (await getTeam(this.user.teamID))
       document.title = 'TeamUp | ' + this.user.firstName + ' ' + this.user.lastName
     },
     async getUserStatistics () {
@@ -326,6 +330,14 @@ export default {
         eye.classList.remove('fa-eye-slash')
         eye.classList.add('fa-eye')
       }
+    },
+    redirectToTeam () {
+      this.$router.push({
+        path: '/team',
+        query: {
+          teamID: this.team.id
+        }
+      })
     }
   },
   computed: {

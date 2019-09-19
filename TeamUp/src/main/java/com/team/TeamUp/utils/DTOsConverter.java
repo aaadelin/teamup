@@ -348,7 +348,7 @@ public class DTOsConverter {
         if (status == UserStatus.ADMIN) {
             log.info("User is able to create such instances");
             Optional<User> leader = userRepository.findById(teamDTO.getLeaderID());
-            leader.ifPresent(team::setLeader);
+            team.setLeader(leader.orElse(null));
         }
 
         log.info(String.format("Instance of type Team returned: %s", team));

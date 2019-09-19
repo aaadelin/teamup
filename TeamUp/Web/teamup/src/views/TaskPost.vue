@@ -2,7 +2,7 @@
     <div class='taskDetails container'>
       <h2> {{ task.summary }} </h2>
       <div class="edit-post" v-if="canEditAll || canEditStatus">
-        <div @click="editMode = !editMode">
+        <div @click="cancelEditMode">
           <i class="fas fa-edit pointer"></i>
         </div>
       </div>
@@ -11,8 +11,8 @@
 
           <div class="row"> <strong class="col-3">Description: </strong>
             <span v-if="editMode && canEditAll" > <textarea @keyup="hasChanged" v-model="currentDescription" cols="50" rows="4"></textarea> </span>
-            <span @dblclick="editMode = canEditAll" v-else v-html="tasksDescription('-')" class="col" id="description-span"></span>
-            <div v-show="showLongDescription" class="col long-description" id="description-over" v-html="tasksDescription('+')"></div>
+            <span  v-else v-html="tasksDescription('-')" class="col" id="description-span"></span>
+            <div @dblclick="editMode = canEditAll" v-show="showLongDescription" class="col long-description" id="description-over" v-html="tasksDescription('+')"></div>
           </div>
 
           <p></p>
@@ -153,16 +153,15 @@
 </template>
 git
 <script>
-    import {
-        getCommentsByPostId,
-        getMyID,
-        getPostByTaskId, getProjectByTaskId,
-        getTaskStatus,
-        getTaskTypes,
-        getUserById,
-        getUsers,
-        getUsersByIds, getUsersByPage
-    } from '../persistance/RestGetRepository'
+import {
+  getCommentsByPostId,
+  getMyID,
+  getPostByTaskId, getProjectByTaskId,
+  getTaskStatus,
+  getTaskTypes,
+  getUserById,
+  getUsersByIds, getUsersByPage
+} from '../persistance/RestGetRepository'
 import { updateTask } from '../persistance/RestPutRepository'
 import CommentForm from '../components/CommentForm'
 import SimpleComment from '../components/containers/SimpleComment'
@@ -173,12 +172,10 @@ export default {
   components: { SimpleComment, CommentForm },
   beforeMount () {
     this.loadData()
+    document.addEventListener('keyup', this.toggleEditMode)
   },
   mounted () {
-    let description = document.getElementById('description-span')
-    description.addEventListener('mouseenter', () => {
-      this.showLongDescription = this.task.description.split('\n').length > 7
-    })
+    this.listenOnDescriptionDiv()
     let descriptionOver = document.getElementById('description-over')
     descriptionOver.addEventListener('mouseleave', () => {
       this.showLongDescription = false
@@ -190,6 +187,9 @@ export default {
         this.loadMoreUsers()
       }
     })
+  },
+  beforeDestroy () {
+    document.removeEventListener('keyup', this.toggleEditMode)
   },
   data () {
     return {
@@ -231,6 +231,32 @@ export default {
     }
   },
   methods: {
+    toggleEditMode (ev) {
+      if (ev.key.toLowerCase() === 'e' && !this.editMode &&
+        document.activeElement.tagName !== 'INPUT' &&
+        document.activeElement.tagName !== 'TEXTAREA') {
+        this.cancelEditMode()
+      }
+      if (ev.key.toLowerCase() === 'escape' && this.editMode &&
+        document.activeElement.tagName !== 'INPUT' &&
+        document.activeElement.tagName !== 'TEXTAREA') {
+        this.cancelEditMode()
+      }
+    },
+    cancelEditMode () {
+      this.editMode = !this.editMode
+      this.listenOnDescriptionDiv()
+    },
+    listenOnDescriptionDiv () {
+      setTimeout(() => {
+        let description = document.getElementById('description-span')
+        if (description !== null) {
+          description.addEventListener('mouseenter', () => {
+            this.showLongDescription = this.task.description.split('\n').length > 7
+          })
+        }
+      }, 100)
+    },
     async loadData () {
       let taskPostData
       try {

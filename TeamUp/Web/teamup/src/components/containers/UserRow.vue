@@ -1,6 +1,10 @@
 <template>
   <tr>
-    <td v-show="!editMode" @click="enableEdit" style="cursor:pointer;" title="Edit user">{{user.id}}</td>
+    <td v-show="!editMode && !showEditIcon" @mouseenter="showEditIcon = true">{{user.id}}</td>
+    <td v-show="!editMode && showEditIcon" @mouseleave="showEditIcon = false" style="cursor:pointer;" title="Edit user" @click="enableEdit">
+      <i class="fas fa-edit"></i>
+    </td>
+
     <td v-show="editMode" >
       <div @click="save" title="Save user">
         <i class="fas fa-save" style="cursor: pointer"></i>
@@ -45,15 +49,20 @@
       </select>
     </td>
 
-    <td v-show="editMode" @click="resetPassword" title="Reset password">
-      <i class="fas fa-redo" style="cursor:pointer" ></i>
+    <td v-show="editMode">
+      <div @click="deleteUser" title="Remove user">
+        <i class="fas fa-ban" style="cursor:pointer" ></i>
+      </div>
+      <div @click="resetPassword" title="Reset password">
+        <i class="fas fa-redo" style="cursor:pointer" ></i>
+      </div>
     </td>
   </tr>
 </template>
 
 <script>
 import { createRequest } from '../../persistance/RestPostRepository'
-import {updateUser} from "../../persistance/RestPutRepository";
+import { updateUser } from '../../persistance/RestPutRepository'
 
 export default {
   name: 'UserRow',
@@ -73,7 +82,8 @@ export default {
   },
   data () {
     return {
-      editMode: false
+      editMode: false,
+      showEditIcon: false
     }
   },
   methods: {
@@ -83,8 +93,8 @@ export default {
     },
     save () {
       updateUser(this.user).then(_ => {
-          this.$emit('reload')
-          this.$emit('cancel')
+        this.$emit('reload')
+        this.$emit('cancel')
       })
       this.editMode = false
     },
@@ -109,6 +119,9 @@ export default {
     enableEdit () {
       this.editMode = true
       this.$emit('edit')
+    },
+    deleteUser () {
+      alert('todo')
     }
   }
 }
