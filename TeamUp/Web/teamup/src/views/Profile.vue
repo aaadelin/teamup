@@ -32,9 +32,10 @@
         {{user.firstName}} {{ user.lastName }}
       </strong>
       <br>
-      {{ user.status }} {{ user.department }}
+      {{ user.status === null ? '' : user.status.replace(/_/g, ' ') }},
+      {{ user.department === null ? '' : user.department.replace(/_/g, ' ') }}
       <br>
-      Team: <strong @click="redirectToTeam" style="cursor:pointer;"> {{ team.name }} </strong>
+      Team: <strong @click="redirectToTeam" style="cursor:pointer;"> {{ team == null ? '' : team.name }} </strong>
       <br><br>
       Joined: {{ user.joinedAt }} ({{ yearsSinceJoined }} years ago) <br>
       Last active: {{ user.lastActive }}
@@ -213,7 +214,7 @@ export default {
       myId: -1,
       uploadPercentage: 0,
       progressStyle: '',
-      team: ''
+      team: null
     }
   },
   methods: {

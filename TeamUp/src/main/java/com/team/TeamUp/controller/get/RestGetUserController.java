@@ -6,6 +6,7 @@ import com.team.TeamUp.domain.UserEvent;
 import com.team.TeamUp.domain.enums.TaskStatus;
 import com.team.TeamUp.domain.enums.UserStatus;
 import com.team.TeamUp.dtos.TaskDTO;
+import com.team.TeamUp.dtos.TeamDTO;
 import com.team.TeamUp.dtos.UserDTO;
 import com.team.TeamUp.persistence.TaskRepository;
 import com.team.TeamUp.persistence.UserEventRepository;
@@ -291,4 +292,16 @@ public class RestGetUserController {
         return new ResponseEntity<>(dtos, HttpStatus.OK);
     }
 
+    @RequestMapping(value = "/users/{id}/team", method = GET)
+    public ResponseEntity<?> getUsersTeam(@PathVariable int id){
+        log.info("Entering get team that contains the user method with user id {}", id);
+        User user = userRepository.findById(id).orElseThrow();
+        if (user.getTeam() != null){
+            TeamDTO teamDTO = dtOsConverter.getDTOFromTeam(user.getTeam());
+            log.info("Exiting method with teamDTO {}", teamDTO);
+            return new ResponseEntity<>(teamDTO, HttpStatus.OK);
+        }else {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+    }
 }

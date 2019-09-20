@@ -243,3 +243,8 @@ export async function getTeam (teamId) {
   let url = `${baseURL}/teams/${teamId}`
   return fetchDataFromUrl(url)
 }
+
+export async function getUsersTeam (userId) {
+  let url = `${baseURL}/users/${userId}/team`
+  return fetchDataFromUrl(url)
+}

@@ -24,6 +24,7 @@ export default {
   name: 'Administrate',
   mounted () {
     this.updateComponent(null)
+    document.title = 'TeamUp | Administrate'
     NProgress.done()
   },
   data () {
