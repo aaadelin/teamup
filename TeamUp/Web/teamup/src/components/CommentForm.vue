@@ -44,6 +44,10 @@ export default {
           postId: this.postId
         }
         saveComment(comment).then(_ => {
+          this.title = ''
+          this.comment = ''
+          this.$emit('reloadComments')
+        }).catch(_ => {
           this.$notify({
             group: 'notificationsGroup',
             title: 'Error',
@@ -51,9 +55,6 @@ export default {
             text: 'An error occurred while saving the comment. Maybe the content is too long (max=1000 characters)'
           })
         })
-        this.title = ''
-        this.comment = ''
-        this.$emit('reloadComments')
       }
     },
     focusOnComment (ev) {

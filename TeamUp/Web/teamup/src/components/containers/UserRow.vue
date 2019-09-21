@@ -1,19 +1,5 @@
 <template>
   <tr>
-    <td v-show="!editMode && !showEditIcon" @mouseenter="showEditIcon = true">{{user.id}}</td>
-    <td v-show="!editMode && showEditIcon" @mouseleave="showEditIcon = false" style="cursor:pointer;" title="Edit user" @click="enableEdit">
-      <i class="fas fa-edit"></i>
-    </td>
-
-    <td v-show="editMode" >
-      <div @click="save" title="Save user">
-        <i class="fas fa-save" style="cursor: pointer"></i>
-      </div>
-      <div @click="cancelEdit" title="Cancel edit">
-        <i class="fas fa-times" style="cursor: pointer"></i>
-      </div>
-    </td>
-
     <td v-show="!editMode" style="min-width: 120px">{{user.firstName}}</td>
     <td v-show="editMode" class="editable-td">
       <input type="text" v-model="user.firstName" style=" max-height: 63px; padding: 5px" class="form-control">
@@ -26,7 +12,7 @@
 
     <td style="min-width: 120px">{{user.joinedAt}}<br><br></td>
 
-    <td v-show="hideColumn" style="min-width: 160px">{{user.lastActive}}</td>
+    <td v-show="hideColumn" style="min-width: 130px">{{user.lastActive}}</td>
 
     <td v-show="!hideColumn && !editMode" style="min-width: 120px;">{{user.mail}}<br><br></td>
 
@@ -49,14 +35,24 @@
       </select>
     </td>
 
-    <td v-show="editMode">
-      <div @click="deleteUser" title="Remove user">
-        <i class="fas fa-ban" style="cursor:pointer" ></i>
-      </div>
-      <div @click="resetPassword" title="Reset password">
-        <i class="fas fa-redo" style="cursor:pointer" ></i>
-      </div>
+    <td class="row" style="width: 150px; margin-left: 10px; margin-right: 10px">
+      <button v-show="!editMode" class="btn btn-outline-secondary" @click="enableEdit" title="Edit user" v-b-tooltip.hover>
+        <i class="fas fa-edit"></i>
+      </button>
+      <button v-show="editMode" class="btn btn-outline-secondary" @click="cancelEdit" title="Cancel edit" v-b-tooltip.hover>
+        <i class="fas fa-times" style="cursor: pointer"></i>
+      </button>
+      <button class="btn btn-outline-secondary" @click="resetPassword" title="Reset password" v-b-tooltip.hover>
+        <i class="fas fa-redo"></i>
+      </button>
+      <button v-show="editMode" class="btn btn-outline-secondary" @click="save" title="Save user" v-b-tooltip.hover>
+        <i class="fas fa-save"></i>
+      </button>
+      <button v-show="!editMode" class="btn btn-outline-secondary" @click="deleteUser" title="Remove user" v-b-tooltip.hover>
+        <i class="fas fa-ban"></i>
+      </button>
     </td>
+
   </tr>
 </template>
 
@@ -133,5 +129,10 @@ export default {
     padding: 5px 0 5px 0;
     margin: auto;
     max-width: 120px;
+  }
+
+  .btn{
+    width: 40px;
+    height: 40px;
   }
 </style>

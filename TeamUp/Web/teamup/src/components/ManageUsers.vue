@@ -58,7 +58,7 @@ export default {
   data () {
     return {
       addUserIsVisible: false,
-      headers: ['Id', 'First Name', 'Last Name', 'Joined', 'Last Active', 'Status', 'Team'],
+      headers: ['First Name', 'Last Name', 'Joined', 'Last Active', 'Status', 'Team', 'Options'],
       users: [],
       page: 0,
       moreUsers: true,

@@ -46,7 +46,7 @@ export default {
   data () {
     return {
       createTeamIsVisible: false,
-      headers: ['Id', 'Name', 'Description', 'Department', 'Location', 'Leader', 'Members'],
+      headers: ['Name', 'Description', 'Department', 'Location', 'Leader', 'Members', 'Options'],
       teams: [],
       users: [],
       locations: []
@@ -93,4 +93,5 @@ export default {
   /*.table-hover tbody tr:hover td, .table-hover tbody tr:hover th {*/
   /*  background-color: #42b983;*/
   /*}*/
+
 </style>

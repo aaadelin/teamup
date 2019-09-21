@@ -1,21 +1,5 @@
 <template>
   <tr>
-    <td v-show="!editMode && !showEditIcon" style="min-width: 45px" @mouseenter="showEditIcon = true">{{team.id}}</td>
-    <td @click="editMode = true" v-show="!editMode && showEditIcon" style="cursor: pointer" @mouseleave="showEditIcon = false" title="Edit team">
-      <i class="fas fa-edit"></i>
-    </td>
-    <td v-show="editMode" class="">
-<!--      <div class="row">-->
-        <div @click="editMode = false" style="cursor: pointer" title="Cancel edit">
-          <i class="fas fa-times"></i>
-        </div>
-
-        <div @click="saveTeam" style="cursor: pointer" title="Save team">
-          <i class="fas fa-save"></i>
-        </div>
-<!--      </div>-->
-    </td>
-
     <td v-if="!editMode">{{team.name}}</td>
     <td v-else class="editable-td">
       <input type="text" v-model="team.name" class="form-control">
@@ -40,8 +24,18 @@
 
     <td :id="'team-members' + team.id" :class="{ 'no-members' : team.members.length === 0 }">{{team.members.length}} member(s)</td>
 
-<!--    <td v-if="editMode">-->
-<!--    </td>-->
+    <td style="width: 130px">
+    <button class="btn btn-outline-secondary"  @click="editMode = true" v-show="!editMode" title="Edit team" v-b-tooltip.hover>
+      <i class="fas fa-edit"></i>
+    </button>
+    <button class="btn btn-outline-secondary" @click="editMode = false" v-show="editMode" title="Cancel edit" v-b-tooltip.hover>
+      <i class="fas fa-times"></i>
+    </button>
+    <button class="btn btn-outline-secondary" v-show="editMode" @click="saveTeam" title="Save team" v-b-tooltip.hover >
+      <i class="fas fa-save"></i>
+    </button>
+
+    </td>
     <b-tooltip :target="'team-members' + team.id" placement="right">
       {{getUsersToDisplay(team.members)}}
     </b-tooltip>
@@ -132,4 +126,8 @@ export default {
     max-width: 120px;
   }
 
+  .btn{
+    width: 40px;
+    height: 40px;
+  }
 </style>
