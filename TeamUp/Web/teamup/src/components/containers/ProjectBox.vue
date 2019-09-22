@@ -1,10 +1,41 @@
 <template>
   <div class="container" style="text-align: left; padding-top: 5px;margin: 0 0 15px 0; border-top: 1px solid black">
     <div>
-      <h4 style="font-weight: 600; cursor:pointer" title="Show Project description" @click="displayDescription">{{project.name}}</h4>
+      <div class="row">
+        <h4 style="font-weight: 600; cursor:pointer" title="Show Project description" @click="displayDescription">{{project.name}}</h4>
+        <div style="padding: 5px; padding-left: 10px; font-size: 15px"> (v {{project.version}})</div>
+      </div>
       <transition name="fadeHeight" mode="out-in">
       <div id="description" class="description" v-if="showDescription">
-        {{project.description}}
+        <div v-show="!showVersion">
+          {{project.description}}
+        </div>
+        <div v-show="showVersion">
+          <textarea class="form-control" type="text" v-model="newProject.description"></textarea>
+        </div>
+        <br>
+        <div class="row">
+
+          <transition name="fadeWidth" mode="in-out">
+
+            <div v-show="showVersion" class="col-3 row" style="max-height: 38px; margin-left: 0">
+              <input type="text" v-model="newProject.version" placeholder="Version" class="form-control" style="width: 120px">
+              <button @click="saveProject" class="btn btn-outline-secondary" title="Save new project version" v-b-tooltip.hover>
+                <i class="fas fa-save"></i>
+              </button>
+              <button @click="showVersion = false" class="btn btn-outline-secondary" title="Cancel" v-b-tooltip.hover>
+                <i class="fas fa-times"></i>
+              </button>
+            </div>
+
+          </transition>
+
+          <transition name="fadeWidth" mode="in-out">
+          <button @click="showVersion = true" v-show="!showVersion" class="btn btn-outline-secondary col-1" style="margin-left: 15px; max-width: 120px; min-width: 120px">
+            New version
+          </button>
+          </transition>
+        </div>
       </div>
       </transition>
 
@@ -24,9 +55,9 @@
         </span>
         <span v-else style="text-align: right" class="row justify-content-end">
           <date-picker :config="options" v-model="project.deadline" class="form-control col-md-5" />
-          <span style="margin: 10px; cursor: pointer" @click="saveDeadline" title="Save">
+          <button class="btn btn-outline-secondary" @click="saveDeadline" title="Save" v-b-tooltip.hover>
            <i class="fas fa-save" ></i>
-          </span>
+          </button>
         </span>
       </span>
       </div>
@@ -38,6 +69,7 @@
 <script>
 import { getMyID, getStatisticsByProjectId } from '../../persistance/RestGetRepository'
 import { updateProject } from '../../persistance/RestPutRepository'
+import {saveProject} from "../../persistance/RestPostRepository";
 
 export default {
   watch: {
@@ -46,6 +78,8 @@ export default {
     }
   },
   mounted () {
+    this.newProject.version = this.project.version
+    this.newProject.description = this.project.description
     this.calculatePercentage()
     this.enableEdit()
   },
@@ -67,6 +101,8 @@ export default {
       doneCount: 0,
       showDate: false,
       showDescription: false,
+      showVersion: false,
+      newProject: {version: ''},
 
       options: {
         format: 'YYYY-MM-DD HH:mm:ss',
@@ -119,6 +155,19 @@ export default {
         ownerID: this.project.ownerID
       }
       updateProject(project)
+    },
+    saveProject () {
+      let project = {
+          id: 0,
+          name: this.project.name,
+          description: this.newProject.description,
+          deadline: this.project.deadline,
+          ownerID: this.project.ownerID,
+          version: this.newProject.version
+      }
+      saveProject(project).then(_ => {
+          this.$emit('updates')
+      })
     }
   }
 }
@@ -153,6 +202,20 @@ export default {
   .fadeHeight-leave-to
   {
     opacity: 0;
+    max-height: 0;
+  }
+
+  .fadeWidth-enter-active,
+  .fadeWidth-leave-active {
+    transition: all 0.2s;
+    max-width: 200px;
+    max-height: 100px;
+  }
+  .fadeWidth-enter,
+  .fadeWidth-leave-to
+  {
+    opacity: 0;
+    max-width: 0;
     max-height: 0;
   }
 

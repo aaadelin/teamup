@@ -32,8 +32,8 @@
         {{user.firstName}} {{ user.lastName }}
       </strong>
       <br>
-      {{ user.status === null ? '' : user.status.replace(/_/g, ' ') }},
-      {{ user.department === null ? '' : user.department.replace(/_/g, ' ') }}
+      {{ user.status === undefined ? '' : user.status.replace(/_/g, ' ') }},
+      {{ user.department === undefined ? '' : user.department.replace(/_/g, ' ') }}
       <br>
       Team: <strong @click="redirectToTeam" style="cursor:pointer;"> {{ team == null ? '' : team.name }} </strong>
       <br><br>

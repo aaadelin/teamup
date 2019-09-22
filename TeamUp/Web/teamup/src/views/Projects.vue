@@ -5,7 +5,7 @@
       <button class="col-2 btn btn-outline-secondary" @click="addProjectVisible = true">+ Create Project</button>
     </div>
     <div v-for="project in projects" :key="project.id">
-      <project-box :project="project" :ref="project.id" @show="hideOthers(project.id)"></project-box>
+      <project-box :project="project" :ref="project.id" @show="hideOthers(project.id)" @updates="reload"></project-box>
     </div>
     <div v-if="showMoreProjects" @click="loadData" style="text-align: center; color: darkblue; cursor: pointer">
       Show more...
@@ -56,6 +56,11 @@ export default {
     },
     closeAddProject () {
       this.addProjectVisible = false
+      this.loadData()
+    },
+    reload () {
+      this.page = 0
+      this.projects = []
       this.loadData()
     }
   }

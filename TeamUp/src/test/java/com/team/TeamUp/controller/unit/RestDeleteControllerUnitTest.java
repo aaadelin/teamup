@@ -4,6 +4,7 @@ import com.team.TeamUp.domain.User;
 import com.team.TeamUp.domain.enums.UserStatus;
 import com.team.TeamUp.persistence.*;
 import com.team.TeamUp.utils.DTOsConverter;
+import com.team.TeamUp.utils.MailUtils;
 import com.team.TeamUp.utils.TaskUtils;
 import com.team.TeamUp.utils.UserUtils;
 import com.team.TeamUp.validation.UserValidation;
@@ -35,6 +36,8 @@ public class RestDeleteControllerUnitTest {
     MockMvc mockMvc;
 
     @MockBean
+    MailUtils mailUtils;
+    @MockBean
     UserEventRepository userEventRepository;
     @MockBean
     UserRepository userRepository;
@@ -46,6 +49,8 @@ public class RestDeleteControllerUnitTest {
     TaskRepository taskRepository;
     @MockBean
     LocationRepository locationRepository;
+    @MockBean
+    ResetRequestRepository resetRequestRepository;
     @MockBean
     ProjectRepository projectRepository;
     @MockBean

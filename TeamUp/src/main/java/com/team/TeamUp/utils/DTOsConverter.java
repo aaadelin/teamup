@@ -287,7 +287,7 @@ public class DTOsConverter {
             project.setOwner(userRepository.findById(projectDTO.getOwnerID()).get());
         }
 
-        if(projectDTO.getVersion() == null || projectDTO.getVersion().equals("")){
+        if(projectDTO.getVersion() != null){
             project.setVersion(projectDTO.getVersion());
         }else{
             project.setVersion("0.0.1");

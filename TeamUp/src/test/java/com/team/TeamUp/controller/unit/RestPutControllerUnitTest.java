@@ -2,6 +2,7 @@ package com.team.TeamUp.controller.unit;
 
 import com.team.TeamUp.persistence.*;
 import com.team.TeamUp.utils.DTOsConverter;
+import com.team.TeamUp.utils.MailUtils;
 import com.team.TeamUp.utils.TaskUtils;
 import com.team.TeamUp.utils.UserUtils;
 import com.team.TeamUp.validation.UserValidation;
@@ -21,6 +22,10 @@ public class RestPutControllerUnitTest {
     @Autowired
     MockMvc mockMvc;
 
+    @MockBean
+    MailUtils mailUtils;
+    @MockBean
+    ResetRequestRepository resetRequestRepository;
     @MockBean
     UserRepository userRepository;
     @MockBean
