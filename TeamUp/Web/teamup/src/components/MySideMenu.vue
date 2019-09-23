@@ -1,62 +1,68 @@
 <template>
-    <div id="sidebar">
-    <div class="sidebar-header">
-      <h3>{{ name }}</h3>
+    <transition name="fadeHeight" mode="out-in">
+      <div id="sidebar" v-show="showMenu">
+      <div class="sidebar-header">
+        <div style="text-align: right">
+          <button class="btn" @click="hide" style="height: 30px">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+        <h3>{{ name }}</h3>
+      </div>
+
+      <ul class="list-unstyled components">
+        <p>Filter:</p>
+        <li>
+          <input type="text" class="form-control" v-model="filter" placeholder="Key words" style="width: 200px; margin: auto" @change="filterChanged" >
+          <small>*Filtering is case insensitive</small>
+        </li>
+        <li>
+          <label style="padding-left: 15px">
+            <input type="checkbox" @change="reportedChanged">
+            Also see reported issues
+          </label>
+        </li>
+      </ul>
+      <ul class="components">
+        <li>
+          <p>Sort:</p>
+        </li>
+        <li style="text-align: left; padding-left: 20px">
+          <label>
+          <input name="sort" type="radio" checked="checked" value="" @change="sortChanged">
+            None
+          </label>
+          <br>
+          <label>
+            <input name="sort" type="radio" value="deadline" @change="sortChanged">
+            By deadline
+          </label>
+          <br>
+          <label>
+            <input name="sort" type="radio" value="priority" @change="sortChanged">
+            By priority
+          </label>
+          <br>
+          <label>
+            <input name="sort" type="radio" value="modified" @change="sortChanged">
+            By last modified
+          </label>
+          <br>
+          <label>
+            <input value="descending" type="checkbox" id="desc" @change="sortChanged"> <strong style="margin-left: 5px">Descending</strong>
+          </label>
+        </li>
+      </ul>
+      <ul class="list-unstyled components">
+        <li style="text-align: left; padding-left: 5px">
+          <label style="padding-left: 15px">
+            <input type="checkbox" @change="smallView">
+            Switch to small view
+        </label>
+        </li>
+      </ul>
     </div>
-
-    <ul class="list-unstyled components">
-      <p>Filter:</p>
-      <li>
-        <input type="text" class="form-control" v-model="filter" placeholder="Key words" style="width: 200px; margin: auto" @change="filterChanged" >
-        <small>*Filtering is case insensitive</small>
-      </li>
-      <li>
-        <label style="padding-left: 15px">
-          <input type="checkbox" @change="reportedChanged">
-          Also see reported issues
-        </label>
-      </li>
-    </ul>
-    <ul class="components">
-      <li>
-        <p>Sort:</p>
-      </li>
-      <li style="text-align: left; padding-left: 20px">
-        <label>
-        <input name="sort" type="radio" checked="checked" value="" @change="sortChanged">
-          None
-        </label>
-        <br>
-        <label>
-          <input name="sort" type="radio" value="deadline" @change="sortChanged">
-          By deadline
-        </label>
-        <br>
-        <label>
-          <input name="sort" type="radio" value="priority" @change="sortChanged">
-          By priority
-        </label>
-        <br>
-        <label>
-          <input name="sort" type="radio" value="modified" @change="sortChanged">
-          By last modified
-        </label>
-        <br>
-        <label>
-          <input value="descending" type="checkbox" id="desc" @change="sortChanged"> <strong style="margin-left: 5px">Descending</strong>
-        </label>
-      </li>
-    </ul>
-    <ul class="list-unstyled components">
-      <li style="text-align: left; padding-left: 5px">
-        <label style="padding-left: 15px">
-          <input type="checkbox" @change="smallView">
-          Switch to small view
-      </label>
-      </li>
-    </ul>
-  </div>
-
+  </transition>
 </template>
 
 <script>
@@ -74,6 +80,10 @@ export default {
       default () {
         return []
       }
+    },
+    showMenu: {
+      required: true,
+      default: true
     }
   },
   data () {
@@ -96,6 +106,9 @@ export default {
     },
     smallView () {
       this.$emit('smallView')
+    },
+    hide () {
+      this.$emit('hide')
     }
   }
 }
@@ -116,15 +129,14 @@ export default {
     margin-left: -250px;
   }
 
-  @media (max-width: 768px) {
-    #sidebar {
-      /*margin-left: -250px; -- Pentru a nu aparea deloc*/
-      margin-left: -250px;
-    }
-    #sidebar.active {
-      margin-left: 0;
-    }
-  }
+  /*@media (max-width: 768px) {*/
+  /*  #sidebar {*/
+  /*    margin-left: -250px;*/
+  /*  }*/
+  /*  #sidebar.active {*/
+  /*    margin-left: 0;*/
+  /*  }*/
+  /*}*/
 
   #sidebar {
     /* don't forget to add all the previously mentioned styles here too */
@@ -182,4 +194,14 @@ export default {
     /*padding: 10px 0 10px 0*/
   }
 
+  .fadeHeight-enter-active,
+  .fadeHeight-leave-active {
+    transition: all 0.6s;
+  }
+  .fadeHeight-enter,
+  .fadeHeight-leave-to
+  {
+    opacity: 0;
+    margin-left: -250px;
+  }
 </style>

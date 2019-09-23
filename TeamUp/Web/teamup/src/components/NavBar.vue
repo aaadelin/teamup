@@ -21,15 +21,23 @@
 
             <b-nav-item v-if="!access_key"  ><router-link to="/login">Log in</router-link></b-nav-item>
 
-            <b-nav-form  v-if="access_key" @submit="openSearchPage">
-              <b-form-input id="searchBox" size="sm" class="mr-sm-2" placeholder="Search" @submit="openSearchPage" v-model="searchTerm" autocomplete="off"></b-form-input>
+            <b-nav-form v-if="access_key" @submit="openSearchPage">
+              <div v-show="!showSearch" style="margin-right: 20px" @mouseenter="showAndFocusSearch">
+                <i class="fas fa-search"></i>
+              </div>
+              <transition name="fadeHeight" mode="out-in">
+              <b-form-input v-show="showSearch" @mouseleave="hideSearch"
+                            id="searchBox"
+                            size="sm" class="mr-sm-2" placeholder="Search"
+                            @submit="openSearchPage" v-model="searchTerm" autocomplete="off"></b-form-input>
+              </transition>
             </b-nav-form>
             <b-nav-item v-if="access_key" @click="openProfile">
               <img width="30" height="30" class="rounded-circle" :src="image" alt="Profile"/>
               {{ name }}
             </b-nav-item>
-            <b-nav-item to="administrate" v-if="isAdmin === 'true'">Administrate</b-nav-item>
-            <b-nav-item @click="logoutMethod" v-if="access_key">Log out</b-nav-item>
+            <b-nav-item style="padding-top: 2px" to="administrate" v-if="isAdmin === 'true'">Administrate</b-nav-item>
+            <b-nav-item style="padding-top: 2px" @click="logoutMethod" v-if="access_key">Log out</b-nav-item>
 
 <!--            <b-nav-item-dropdown text="Administrate..." v-if="isAdmin === 'true'" right>-->
 <!--              <b-dropdown-item @click="addUserIsVisible = true">Add User</b-dropdown-item>-->
@@ -55,18 +63,6 @@
 import { getMyID, getUsersPhoto, logout } from '../persistance/RestGetRepository'
 import CreateTask from './create-components/CreateTask'
 
-function keyPress (e) {
-  let eventObj = window.event ? event : e
-  if (eventObj.ctrlKey && eventObj.keyCode === 81) {
-    let search = document.getElementById('searchBox')
-    if (search !== null) {
-      search.focus()
-    }
-  }
-}
-
-document.onkeydown = keyPress
-
 export default {
   beforeMount () {
     if (this.access_key) {
@@ -80,6 +76,12 @@ export default {
       }
     })
   },
+  mounted () {
+    document.addEventListener('keyup', this.keyPress)
+  },
+  beforeDestroy () {
+    document.removeEventListener('keyup', this.keyPress)
+  },
   name: 'NavBar',
   components: { CreateTask },
   data () {
@@ -88,7 +90,8 @@ export default {
       addUserIsVisible: false,
       // createTeamIsVisible: false,
       searchTerm: '',
-      image: ''
+      image: '',
+      showSearch: window.innerWidth <= 991
     }
   },
   computed: {
@@ -103,6 +106,29 @@ export default {
     }
   },
   methods: {
+    keyPress (e) {
+      let eventObj = window.event ? event : e
+      if (eventObj.ctrlKey && eventObj.keyCode === 81) {
+        this.showAndFocusSearch()
+      }
+      if (eventObj.key === 'Escape') {
+        this.hideSearch()
+      }
+    },
+    showAndFocusSearch () {
+      this.showSearch = true
+      let interval = setInterval(() => {
+        let search = document.getElementById('searchBox')
+        if (search !== null) {
+          search.focus()
+        } else {
+          clearInterval(interval)
+        }
+      }, 100)
+    },
+    hideSearch () {
+      this.showSearch = window.innerWidth <= 991
+    },
     logoutMethod () {
       logout()
       localStorage.clear()
@@ -165,5 +191,17 @@ export default {
         color: #000000;
       }
     }
+  }
+
+  .fadeHeight-enter-active,
+  .fadeHeight-leave-active {
+    transition: all 0.3s;
+    max-width: 400px;
+  }
+  .fadeHeight-enter,
+  .fadeHeight-leave-to
+  {
+    opacity: 0;
+    max-width: 0;
   }
 </style>

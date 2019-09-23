@@ -1,10 +1,15 @@
 <template xmlns:v-drag-and-drop="http://www.w3.org/1999/xhtml">
   <div id="tasks">
     <right-menu :name="navName" :menu="menu"
+                :show-menu="showMenu"
                 @reportedChanged="changeVisibleTasks"
                 @filter="filterTasks"
                 @sort="sortTasks"
-                @smallView="smallView = !smallView"/>
+                @smallView="smallView = !smallView"
+                @hide="showMenu = false"/>
+    <button v-show="!showMenu" class="btn btn-outline-secondary menu-button" @click="showMenu = true">
+      &#9776;
+    </button>
   <div id="content" class="container-fluid" >
 <!--      <div class="row" style="text-align: left">-->
 <!--        <div class="col-4" style="margin-top: 5px">-->
@@ -98,7 +103,7 @@
       <div></div>
     </div>
 
-    <div id="scroll-div" class="scroll-up">
+    <div v-show="showScroll" id="scroll-div" class="scroll-up">
       <span @click="scrollUp">
         <i class="fas fa-arrow-alt-circle-up"></i>
       </span>
@@ -127,6 +132,13 @@ export default {
     await this.getUsersTasks()
     document.title = 'TeamUp | Tasks'
   },
+  mounted () {
+    this.showScroll = false
+    document.addEventListener('scroll', this.hideScroll)
+  },
+  beforeDestroy () {
+    document.removeEventListener('scroll', this.hideScroll)
+  },
   name: 'Tasks',
   components: { SmallTaskBox, RightMenu, TaskBox },
   data () {
@@ -147,6 +159,7 @@ export default {
       query: 'sort=&desc=false',
       smallView: false,
       showScroll: false,
+      showMenu: true,
 
       draggable_options: {
         dropzoneSelector: 'div',
@@ -186,6 +199,13 @@ export default {
     }
   },
   methods: {
+    hideScroll () {
+      if (window.scrollY > 130) {
+        this.showScroll = false
+      } else {
+        this.showScroll = true
+      }
+    },
     showCategory (category) {
       let column = document.getElementById(category)
       column.classList.toggle('hide')
@@ -496,7 +516,7 @@ export default {
     border-radius: 5px;
     margin: 15px;
     min-width: 330px;
-    max-width: 500px;
+    max-width: 400px;
   }
 
   .droppable {
@@ -517,5 +537,19 @@ export default {
   {
     opacity: 0;
     max-height: 0;
+  }
+
+  .menu-button{
+    margin-top: 15px;
+    width: 40px;
+    height: 40px;
+    border-radius: 0 3px 3px 0;
+  }
+
+  @media (max-width: 768px) {
+    .menu-button{
+      max-width: 20px;
+      padding: 0;
+    }
   }
 </style>

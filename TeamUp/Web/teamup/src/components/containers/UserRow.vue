@@ -14,7 +14,7 @@
 
     <td v-show="hideColumn" style="min-width: 130px">{{user.lastActive}}</td>
 
-    <td v-show="!hideColumn && !editMode" style="min-width: 120px;">{{user.mail}}<br><br></td>
+    <td v-show="!hideColumn && !editMode" style="min-width: 120px; max-width: 200px">{{trimMail()}}<br><br></td>
 
     <td v-show="editMode" class="editable-td" style="min-width: 170px">
       <input type="text" v-model="user.mail" style=" max-height: 63px; padding: 5px" class="form-control">
@@ -48,20 +48,26 @@
       <button v-show="editMode" class="btn btn-outline-secondary" @click="save" title="Save user" v-b-tooltip.hover>
         <i class="fas fa-save"></i>
       </button>
-      <button v-show="!editMode" class="btn btn-outline-secondary" @click="deleteUser" title="Remove user" v-b-tooltip.hover>
+      <button v-show="!editMode && user.status !== 'ADMIN'" class="btn btn-outline-secondary" @click="deleteUser" title="Remove user" v-b-tooltip.hover>
         <i class="fas fa-ban"></i>
       </button>
     </td>
 
+    <confirm-user-delete
+      :user="this.user" :is-visible="showDeleteMessage"
+      @reload="finishDelete" @cancel="showDeleteMessage = false">
+    </confirm-user-delete>
   </tr>
 </template>
 
 <script>
 import { createRequest } from '../../persistance/RestPostRepository'
 import { updateUser } from '../../persistance/RestPutRepository'
+import ConfirmUserDelete from '../ConfirmUserDelete'
 
 export default {
   name: 'UserRow',
+  components: { ConfirmUserDelete },
   props: {
     user: {
       required: true
@@ -79,7 +85,8 @@ export default {
   data () {
     return {
       editMode: false,
-      showEditIcon: false
+      showEditIcon: false,
+      showDeleteMessage: false
     }
   },
   methods: {
@@ -107,6 +114,11 @@ export default {
         text: 'Reset link sent!'
       })
     },
+    finishDelete () {
+      this.showDeleteMessage = false
+      this.$emit('reload')
+      this.$emit('cancel')
+    },
     cancelEdit () {
       this.editMode = false
       this.$emit('reload')
@@ -116,8 +128,17 @@ export default {
       this.editMode = true
       this.$emit('edit')
     },
+    trimMail () {
+      if (this.user.mail !== null) {
+        let mail = this.user.mail.split('@')[0]
+        if (mail.length > 20) {
+          return (mail.substr(0, 20) + '...')
+        }
+        return mail
+      }
+    },
     deleteUser () {
-      alert('todo')
+      this.showDeleteMessage = true
     }
   }
 }

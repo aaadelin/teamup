@@ -69,7 +69,7 @@
 <script>
 import { getMyID, getStatisticsByProjectId } from '../../persistance/RestGetRepository'
 import { updateProject } from '../../persistance/RestPutRepository'
-import {saveProject} from "../../persistance/RestPostRepository";
+import { saveProject } from '../../persistance/RestPostRepository'
 
 export default {
   watch: {
@@ -102,7 +102,7 @@ export default {
       showDate: false,
       showDescription: false,
       showVersion: false,
-      newProject: {version: ''},
+      newProject: { version: '' },
 
       options: {
         format: 'YYYY-MM-DD HH:mm:ss',
@@ -158,15 +158,15 @@ export default {
     },
     saveProject () {
       let project = {
-          id: 0,
-          name: this.project.name,
-          description: this.newProject.description,
-          deadline: this.project.deadline,
-          ownerID: this.project.ownerID,
-          version: this.newProject.version
+        id: 0,
+        name: this.project.name,
+        description: this.newProject.description,
+        deadline: this.project.deadline,
+        ownerID: this.project.ownerID,
+        version: this.newProject.version
       }
       saveProject(project).then(_ => {
-          this.$emit('updates')
+        this.$emit('updates')
       })
     }
   }
