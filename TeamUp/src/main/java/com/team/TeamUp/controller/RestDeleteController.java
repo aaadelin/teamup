@@ -42,11 +42,12 @@ public class RestDeleteController {
     public ResponseEntity<?> deleteUser(@PathVariable int id, @RequestHeader Map<String, String> headers) {
         log.info(String.format("Entering delete user method with user id: %s \n and headers: %s", id, headers.toString()));
         Optional<User> userOptional = userRepository.findById(id);
-        if (userOptional.isPresent()){
+        if (userOptional.isPresent() && userOptional.get().getStatus() != UserStatus.ADMIN){ //users with status admin cannot be deleted
             userUtils.createEvent(userRepository.findByHashKey(headers.get("token")).orElseThrow(),
                     String.format("Deleted user \"%s %s\"", userOptional.get().getFirstName(), userOptional.get().getLastName()),
                     UserEventType.DELETE);
-            userRepository.deleteById(id);
+            userUtils.deleteUserInitiated(userOptional.get());
+//            userRepository.deleteById(id); // todo de-comment this line
             log.info(String.format("User with id %s has been successfully deleted", id));
             return new ResponseEntity<>("OK", HttpStatus.OK);
         }
