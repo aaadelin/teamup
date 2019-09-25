@@ -2,8 +2,13 @@
   <div class="container" style="box-shadow: 5px 5px 12px grey; margin: 20px auto 20px auto; padding-bottom: 15px">
     <div class="row justify-content-between" style="padding: 15px">
       <h3 class="col-2">Projects</h3>
-      <button class="col-2 btn btn-outline-secondary" @click="addProjectVisible = true">+ Create Project</button>
-    </div>
+      <div class="col-3" style="text-align: right; padding: 0" >
+        <button class="btn btn-outline-secondary" style="height: 40px" title="Archived projects" v-b-tooltip.hover>
+          <i class="fas fa-archive"></i>
+        </button>
+        <button class="btn btn-outline-secondary" style="height: 40px; width: 180px" @click="addProjectVisible = true">+ Create Project</button>
+      </div>
+      </div>
     <div v-for="project in projects" :key="project.id">
       <project-box :project="project" :ref="project.id" @show="hideOthers(project.id)" @updates="reload"></project-box>
     </div>

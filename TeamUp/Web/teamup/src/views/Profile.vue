@@ -235,8 +235,11 @@ export default {
       if (this.user === null) {
         this.$router.push('404')
       }
+      if (this.user.department === null) {
+        this.user.department = ''
+      }
       this.canEdit = (this.myId === parseInt(this.userId))
-      this.team = (await getTeam(this.user.teamID))
+      this.team = this.user.teamID !== -1 ? (await getTeam(this.user.teamID)) : {}
       document.title = 'TeamUp | ' + this.user.firstName + ' ' + this.user.lastName
     },
     async getUserStatistics () {

@@ -200,11 +200,7 @@ export default {
   },
   methods: {
     hideScroll () {
-      if (window.scrollY > 130) {
-        this.showScroll = false
-      } else {
-        this.showScroll = true
-      }
+      this.showScroll = window.scrollY >= 130
     },
     showCategory (category) {
       let column = document.getElementById(category)

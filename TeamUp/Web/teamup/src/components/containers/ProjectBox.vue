@@ -2,6 +2,17 @@
   <div class="container" style="text-align: left; padding-top: 5px;margin: 0 0 15px 0; border-top: 1px solid black">
     <div>
       <div class="row">
+        <div style="width: 15px; padding-top: 2px;" :style="[enableArchive ? {'cursor': 'pointer'} : {}]" :class=" {'disabled-options': !enableArchive} " :title="enableArchive ? 'Options' : ''"
+             @click="showMenu = !showMenu">
+          <i class="fas fa-ellipsis-v"></i>
+        </div>
+<!--        <div v-else style="width: 15px">-->
+<!--        </div>-->
+        <transition name="fadeWidth" mode="in-out">
+          <div v-show="showMenu && enableArchive" class="project-options">
+            <div class="project-option" @click="archiveProject"> Archive </div>
+          </div>
+        </transition>
         <h4 style="font-weight: 600; cursor:pointer" title="Show Project description" @click="displayDescription">{{project.name}}</h4>
         <div style="padding: 5px; padding-left: 10px; font-size: 15px"> (v {{project.version}})</div>
       </div>
@@ -103,6 +114,8 @@ export default {
       showDescription: false,
       showVersion: false,
       newProject: { version: '' },
+      showMenu: false,
+      enableArchive: false,
 
       options: {
         format: 'YYYY-MM-DD HH:mm:ss',
@@ -136,7 +149,9 @@ export default {
     async enableEdit () {
       let myId = await getMyID()
       let isAdmin = localStorage.getItem('isAdmin')
-      if (myId === this.project.ownerID || isAdmin === 'true') {
+      let isAbleToEdit = myId === this.project.ownerID || isAdmin === 'true'
+      this.enableArchive = isAbleToEdit
+      if (isAbleToEdit) {
         let deadline = document.getElementById('deadline' + this.project.id)
         deadline.classList.add('deadline')
         deadline.title = 'Edit'
@@ -155,6 +170,10 @@ export default {
         ownerID: this.project.ownerID
       }
       updateProject(project)
+    },
+    archiveProject () {
+      this.showMenu = false
+      alert('todo')
     },
     saveProject () {
       let project = {
@@ -217,6 +236,30 @@ export default {
     opacity: 0;
     max-width: 0;
     max-height: 0;
+  }
+
+  .project-options{
+    position: absolute;
+    margin-top: 10px;
+    margin-left: 10px;
+    z-index: 2
+  }
+
+  .project-option{
+    height: 40px;
+    padding: 7px 13px 7px 13px;
+    background-color: rgb(246, 246, 246);
+    border: 1px solid grey;
+    cursor: pointer;
+  }
+
+  .project-option:hover{
+    background-color: #dedede;
+  }
+
+  .disabled-options {
+    /*cursor: not-allowed;*/
+    color: #acacac;
   }
 
 </style>

@@ -1,10 +1,14 @@
 package com.team.TeamUp.dtos;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
+@Getter
+@Setter
 public class ProjectDTO {
 
     private int id;
@@ -21,61 +25,11 @@ public class ProjectDTO {
 
     private String version;
 
-    public int getId() {
-        return id;
-    }
-
-    public void setId(int id) {
-        this.id = id;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
-    }
+    private boolean archived;
 
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     public LocalDateTime getDeadline() {
         return deadline;
-    }
-
-    public void setDeadline(LocalDateTime deadline) {
-        this.deadline = deadline;
-    }
-
-    public List<Integer> getTasksIDs() {
-        return tasksIDs;
-    }
-
-    public void setTasksIDs(List<Integer> tasksIDs) {
-        this.tasksIDs = tasksIDs;
-    }
-
-    public int getOwnerID() {
-        return ownerID;
-    }
-
-    public void setOwnerID(int ownerID) {
-        this.ownerID = ownerID;
-    }
-
-    public String getVersion() {
-        return version;
-    }
-
-    public void setVersion(String version) {
-        this.version = version;
     }
 
     @Override

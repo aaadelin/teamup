@@ -40,6 +40,8 @@ public class Project {
     @Column (columnDefinition = "varchar(50) default '0.0.1'")
     private String version;
 
+    private boolean archived;
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

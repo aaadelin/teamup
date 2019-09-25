@@ -286,6 +286,7 @@ public class DTOsConverter {
         if(projectDTO.getOwnerID() != 0){
             project.setOwner(userRepository.findById(projectDTO.getOwnerID()).get());
         }
+        project.setArchived(projectDTO.isArchived());
 
         if(projectDTO.getVersion() != null){
             project.setVersion(projectDTO.getVersion());
@@ -302,7 +303,7 @@ public class DTOsConverter {
      * @return ProjectDTO instance containing project data
      */
     public ProjectDTO getDTOFromProject(Project project) {
-        log.info(String.format("Method to create ProjectDTO from Projecct called with parameter: %s", project));
+        log.info(String.format("Method to create ProjectDTO from Project called with parameter: %s", project));
         ProjectDTO projectDTO = new ProjectDTO();
 
         projectDTO.setId(project.getId());
@@ -312,6 +313,7 @@ public class DTOsConverter {
         projectDTO.setVersion(project.getVersion());
         projectDTO.setTasksIDs(project.getTasks().stream().map(Task::getId).collect(Collectors.toList()));
         projectDTO.setOwnerID(project.getOwner().getId());
+        projectDTO.setArchived(project.isArchived());
 
         log.info(String.format("Instance of type ProjectDTO created: %s", projectDTO));
         return projectDTO;

@@ -1,6 +1,6 @@
 <template>
-  <transition name="fadeHeight" mode="out-in">
-  <div v-show="isVisible && dataReady" id="container">
+  <transition name="fadeHeight" mode="in-out" style="z-index: 10000">
+  <div v-show="isVisible && dataReady" id="container" style="z-index: 1000">
 
     <transition name="modal">
       <div class="modal-mask">
@@ -86,8 +86,11 @@
 
                 <div class="row">
                   <label for="assigneesList" class="col-md-3">Assignees </label>
-                  <select size="4" id="assigneesList" name="assignees" class="form-control col-md-8" @change="add" v-model="currentlySelected">
+                  <select id="assigneesList" name="assignees" class="form-control col-md-8" @change="add" v-model="currentlySelected"
+                          onfocus='this.size=5 ;' onblur='this.size=1;'>
                     <option v-for="assignee in filterAdmins(assigneesList)" :key="assignee.id" :value="assignee">{{ assignee.firstName }} {{ assignee.lastName }} ({{ assignee.department == null ? '' : assignee.department.replace(/_/g, ' ') }})</option>
+                    <option disabled></option>
+                    <option disabled></option>
                   </select>
                 </div>
                 <span v-if="localStorage.getItem('isAdmin')==='false'" @click="assignToMe" style="cursor: pointer" tabindex="0" @keyup="keyAssignToMe">Assign to me</span>
@@ -166,7 +169,7 @@ export default {
     document.addEventListener('click', this.closeAtClick)
     let selectUsers = document.getElementById('assigneesList')
     selectUsers.addEventListener('scroll', (ev) => {
-      if (selectUsers.offsetHeight + selectUsers.scrollTop >= selectUsers.scrollHeight) {
+      if (selectUsers.offsetHeight + selectUsers.scrollTop >= selectUsers.scrollHeight + 1) {
         this.loadMoreUsers()
       }
     })
