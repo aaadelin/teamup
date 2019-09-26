@@ -75,6 +75,7 @@ public class DTOsConverter {
         if(user.getMail() == null){
             user.setMail("");
         }
+        userDTO.setLocked(user.isLocked());
         userDTO.setMail(user.getMail());
         if (user.getTeam() != null) {
             userDTO.setTeamID(user.getTeam().getId());
@@ -122,6 +123,7 @@ public class DTOsConverter {
         user.setMail(userDTO.getMail());
         user.setMinutesUntilLogout(60);
         user.setStatus(userDTO.getStatus());
+        user.setLocked(userDTO.isLocked());
         if (userDTO.getPassword() != null){
             user.setPassword(TokenUtils.getMD5Token(userDTO.getPassword()));
         }

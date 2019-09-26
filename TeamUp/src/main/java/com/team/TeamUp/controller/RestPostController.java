@@ -70,6 +70,7 @@ public class RestPostController {
                             UserEventType.CREATE);
         log.info(String.format("Entering method create user with user: %s and headers: %s", user, headers));
         User userToSave = dtOsConverter.getUserFromDTO(user, UserStatus.ADMIN);
+        userToSave.setActive(false);
         userRepository.save(userToSave);
 
         log.info("User has been successfully created and saved in database");
@@ -152,7 +153,7 @@ public class RestPostController {
             password = TokenUtils.getMD5Token(password);
 
             Optional<User> user = userRepository.findByUsernameAndPassword(username, password);
-            if (user.isPresent()) {
+            if (user.isPresent() && !user.get().isLocked()) {
                 boolean isAdmin = false;
 
                 User realUser = user.get();
@@ -173,7 +174,7 @@ public class RestPostController {
                 log.info(String.format("User has been successfully logged in and key sent :%s", user.get().getHashKey()));
                 return new ResponseEntity<>(answer.toString(), HttpStatus.OK);
             } else {
-                log.info("User with specified credentials has not been found");
+                log.info("User with specified credentials has not been found or is locked");
                 return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
             }
         }

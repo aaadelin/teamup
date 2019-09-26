@@ -41,7 +41,7 @@
                 <div class="row">
                   <label for="project" class="col-md-3">Project </label>
                   <select id="project" name="difficulty" v-model="project" class="form-control col-md-8" @change="adjustMaxDate"  :class="{ 'is-invalid': dataFailed && !project }">
-                    <option v-for="proj in projects" :key="proj.id" :value="proj" >{{ proj.name }}</option>
+                    <option v-for="proj in visibleProjects" :key="proj.id" :value="proj" >{{ proj.name }} (v {{proj.version}})</option>
                   </select>
                 </div>
                 <p v-show="project.deadline !== ''" style="font-size: 10px; margin-bottom: 0">Deadline: {{project.deadline}}</p>
@@ -396,6 +396,17 @@ export default {
     },
     sortUsers () {
       this.assigneesList = this.assigneesList.sort((a, b) => a.department === this.department && b.department !== this.department ? -1 : 1)
+    }
+  },
+  computed: {
+    visibleProjects () {
+      let projects = []
+      for (let i = 0; i < this.projects.length; i++) {
+        if (!this.projects[i].archived) {
+          projects.push(this.projects[i])
+        }
+      }
+      return projects
     }
   }
 }

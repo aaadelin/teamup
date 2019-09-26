@@ -10,11 +10,12 @@
 <!--        </div>-->
         <transition name="fadeWidth" mode="in-out">
           <div v-show="showMenu && enableArchive" class="project-options">
-            <div class="project-option" @click="archiveProject"> Archive </div>
+            <div v-show="!project.archived" class="project-option" @click="toggleArchiveProject"> Archive </div>
+            <div v-show="project.archived" class="project-option" @click="toggleArchiveProject"> Unarchive </div>
           </div>
         </transition>
         <h4 style="font-weight: 600; cursor:pointer" title="Show Project description" @click="displayDescription">{{project.name}}</h4>
-        <div style="padding: 5px; padding-left: 10px; font-size: 15px"> (v {{project.version}})</div>
+        <div style="padding: 5px; padding-left: 10px; font-size: 15px"> (v {{project.version}}) <span v-show="project.archived">[ARCHIVED]</span> </div>
       </div>
       <transition name="fadeHeight" mode="out-in">
       <div id="description" class="description" v-if="showDescription">
@@ -171,9 +172,11 @@ export default {
       }
       updateProject(project)
     },
-    archiveProject () {
+    toggleArchiveProject () {
+      this.project.archived = !this.project.archived
       this.showMenu = false
-      alert('todo')
+      updateProject(this.project)
+      this.$emit('reload')
     },
     saveProject () {
       let project = {

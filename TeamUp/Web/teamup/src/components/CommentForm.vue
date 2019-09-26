@@ -8,8 +8,9 @@
     <label class="row" for="comment">Comment:
       <textarea id="comment" type="text" v-model="comment" name="comment" class="form-control" rows="5" cols="40"></textarea>
     </label>
-
-    <button class="btn btn-outline-success">Add comment</button>
+    <span class="row">
+      <button class="btn btn-outline-success" style="margin: 0">Add comment</button>
+    </span>
   </form>
 </template>
 

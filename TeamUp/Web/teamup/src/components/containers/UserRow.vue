@@ -42,13 +42,20 @@
       <button v-show="editMode" class="btn btn-outline-secondary" @click="cancelEdit" title="Cancel edit" v-b-tooltip.hover>
         <i class="fas fa-times" style="cursor: pointer"></i>
       </button>
-      <button class="btn btn-outline-secondary" @click="resetPassword" title="Reset password" v-b-tooltip.hover>
+      <button v-show="!editMode" class="btn btn-outline-secondary" @click="resetPassword" title="Reset password" v-b-tooltip.hover>
         <i class="fas fa-redo"></i>
+      </button>
+      <button v-show="editMode && user.locked" class="btn btn-outline-secondary" @click="unlockUser" title="Unlock" v-b-tooltip.hover>
+        <i class="fas fa-lock-open"></i>
+      </button>
+      <button v-show="editMode && !user.locked" class="btn btn-outline-secondary" @click="lockUser" title="Lock" v-b-tooltip.hover>
+        <i class="fas fa-lock"></i>
       </button>
       <button v-show="editMode" class="btn btn-outline-secondary" @click="save" title="Save user" v-b-tooltip.hover>
         <i class="fas fa-save"></i>
       </button>
-      <button v-show="!editMode && user.status !== 'ADMIN'" class="btn btn-outline-secondary" @click="deleteUser" title="Remove user" v-b-tooltip.hover>
+      <button v-show="!editMode && user.status !== 'ADMIN'" class="btn btn-outline-danger" @click="deleteUser" title="Remove user" v-b-tooltip.hover>
+<!--        do not show delete tot the admin-->
         <i class="fas fa-ban"></i>
       </button>
     </td>
@@ -139,6 +146,17 @@ export default {
     },
     deleteUser () {
       this.showDeleteMessage = true
+    },
+    unlockUser () {
+      this.user.locked = false
+      updateUser(this.user)
+      this.$emit('reload')
+    },
+    lockUser () {
+      this.user.locked = true
+      this.user.active = false
+      updateUser(this.user)
+      this.$emit('reload')
     }
   }
 }

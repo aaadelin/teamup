@@ -61,6 +61,8 @@ public class User {
 
     private String mail;
 
+    private boolean locked;
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

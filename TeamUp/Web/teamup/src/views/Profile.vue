@@ -8,7 +8,7 @@
 
     <div class="col page">
     <div class="row justify-content-between">
-      <div v-show="editMode" class="col-3" id="uploadDiv" style="text-align: right; cursor: pointer" >
+      <div v-show="editMode" class="col-3" id="uploadDiv" style="text-align: center; cursor: pointer" >
         <input type="file" style="display: none" id="hiddenFileUpload" @change="uploadInput">
         <div title="Click or drag photo to upload" @click="chosePhoto" >
           <img width="200" height="200" class="rounded-circle" :src="image" alt="Profile" style="margin: 5px; opacity: 0.5"/>
@@ -17,10 +17,10 @@
         <div class="progress" >
           <div class="progress-bar bg-info" :style="progressStyle"  aria-valuenow="10" aria-valuemin="0" aria-valuemax="100">{{uploadPercentage}}%</div>
         </div>
-        <div @click="deletePhoto" style="cursor: pointer" title="Delete photo">X</div>
+        <div @click="deletePhoto" style="cursor: pointer; text-align: right" title="Delete photo">X</div>
       </div>
 
-      <div v-show="!editMode" class="col-3" style="text-align: right">
+      <div v-show="!editMode" class="col-3" style="text-align: center">
         <img width="200" height="200" class="rounded-circle" :src="image" alt="Profile" style="margin: 5px"/>
       </div>
       <div class="col-6" style="text-align: center">
@@ -165,10 +165,11 @@ export default {
   async mounted () {
     this.loadAllData()
     document.addEventListener('keyup', ev => {
+      console.log(document.activeElement.tagName)
       if (ev.key.toLocaleLowerCase() === 'e' &&
           !this.editMode && this.canEdit &&
-          (document.activeElement.tagName !== 'INPUT' ||
-          document.activeElement.tagName !== 'TEXTAREA')) {
+          !(document.activeElement.tagName === 'INPUT' ||
+          document.activeElement.tagName === 'TEXTAREA')) {
         this.editMode = true
       }
     })
@@ -379,7 +380,7 @@ export default {
   .centered {
     position: absolute;
     top: 50%;
-    left: 50%;
+    left: 45%;
     transform: translate(-30%, -150%);
     user-select: none;
   }

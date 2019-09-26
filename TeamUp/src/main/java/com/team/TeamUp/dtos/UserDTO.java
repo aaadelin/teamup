@@ -41,6 +41,8 @@ public class UserDTO {
 
     private String mail;
 
+    private boolean locked;
+
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     public LocalDateTime getLastActive() {
         return lastActive;
