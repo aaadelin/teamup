@@ -14,6 +14,7 @@ import BootstrapVue from 'bootstrap-vue'
 import datePicker from 'vue-bootstrap-datetimepicker'
 import fontawesome from '@fortawesome/fontawesome-free'
 import VueApexCharts from 'vue-apexcharts'
+import NProgress from 'nprogress'
 
 import { library } from '@fortawesome/fontawesome-svg-core'
 import {
@@ -53,6 +54,7 @@ import {
 } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 import VueDraggable from 'vue-draggable'
+NProgress.configure({ showSpinner: false })
 
 library.add(faCamera, faClock, faCalendar, faChevronLeft, faChevronRight, faCalendarCheck, faTrashAlt,
   faTimesCircle, faArrowUp, faArrowDown, faAngleUp, faAngleDoubleUp, faSortUp, faEdit, faEyeSlash, faEye,

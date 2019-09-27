@@ -1,14 +1,14 @@
 <template>
 <div class="container">
   <div class="row justify-content-between" style="padding: 15px">
-    <input id="team-filter" type="text" class="form-control col-4" placeholder="Filter by name" @keyup="filterUsers" autocomplete="off">
+    <input id="team-filter" type="text" class="form-control col-4" v-model="userFilter" placeholder="Filter by name" @keyup="filterUsers" autocomplete="off">
     <button class="col-2 btn btn-outline-secondary" @click="createUser">+ Create user</button>
   </div>
   <div>
     <table class="table table-hover">
       <thead>
       <tr>
-        <th v-for="header in headers" :key="header" scope="col">{{header}}</th>
+        <th v-for="header in headers" :key="header[0]" scope="col" @click="sort(header[1])" style="cursor: pointer" title="Sort">{{ header[0] }}</th>
       </tr>
       </thead>
       <tbody>
@@ -38,9 +38,10 @@
 
 <script>
 import CreateUser from './create-components/CreateUser'
-import { getUsersByPage } from '../persistance/RestGetRepository'
+import { getFilteredUsers, getUsersSortBy } from '../persistance/RestGetRepository'
 import { MAX_RESULTS } from '../persistance/Repository'
 import UserRow from './containers/UserRow'
+import NProgress from 'nprogress'
 
 export default {
   name: 'ManageUsers',
@@ -58,14 +59,16 @@ export default {
   data () {
     return {
       addUserIsVisible: false,
-      headers: ['First Name', 'Last Name', 'Joined', 'Last Active', 'Status', 'Team', 'Options'],
+      headers: [['First Name', 'firstName'], ['Last Name', 'lastName'], ['Joined', 'joinedAt'], ['Last Active', 'lastActive'], ['Status', 'status'], ['Team', 'team'], ['Options', '']],
       users: [],
       page: 0,
       moreUsers: true,
       teams: [],
       statuses: [],
       editCount: 0,
-      hideColumn: true
+      hideColumn: true,
+      userFilter: '',
+      sortType: ''
     }
   },
   methods: {
@@ -81,12 +84,19 @@ export default {
       this.$emit('changeContent')
     },
     async getUsers () {
-      this.users = await getUsersByPage(this.page)
+      // this.users = await getUsersByPage(this.page)
+      this.users = await getUsersSortBy(this.sortType, this.page)
       this.moreUsers = this.users.length >= MAX_RESULTS
       this.$emit('changeContent')
     },
     async filterUsers () {
-
+      NProgress.start()
+      if (this.userFilter.length >= 2) {
+        this.users = await getFilteredUsers(this.userFilter)
+      } else if (this.userFilter === '') {
+        this.getUsers()
+      }
+      NProgress.done()
     },
     changePage (str) {
       this.toggleHeader('cancel')
@@ -127,6 +137,12 @@ export default {
         }
       }
       return -1
+    },
+    async sort (type) {
+      NProgress.start()
+      this.sortType = type
+      await this.getUsers()
+      NProgress.done()
     }
   }
 }

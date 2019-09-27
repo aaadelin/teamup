@@ -14,6 +14,10 @@ import com.team.TeamUp.persistence.UserRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.tomcat.util.codec.binary.Base64;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 
 import javax.crypto.Cipher;
@@ -23,10 +27,14 @@ import java.security.Key;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Component
 @Slf4j
 public class UserUtils {
+
+    private static final int MAX_PAGE_SIZE = 10000;
 
     private final UserRepository userRepository;
     private UserEventRepository userEventRepository;
@@ -131,5 +139,53 @@ public class UserUtils {
         User user = dtOsConverter.getUserFromDTO(userDTO, UserStatus.ADMIN);
         user = userRepository.save(user);
         return user;
+    }
+
+    public ResponseEntity<?> getUsersByIds(List<Integer> ids){
+        List<UserDTO> users = new ArrayList<>();
+        for (int id : ids) {
+            Optional<User> userOptional = userRepository.findById(id);
+            if (userOptional.isPresent()) {
+                log.info(String.format("Adding user: %s", userOptional.get()));
+                users.add(dtOsConverter.getDTOFromUser(userOptional.get()));
+            } else {
+                log.info(String.format("No user found with id %s", id));
+                return new ResponseEntity<>("NOT FOUND", HttpStatus.NOT_FOUND);
+            }
+        }
+        return new ResponseEntity<>(users, HttpStatus.OK);
+    }
+
+    public List<UserDTO> filterUsers(String filter){
+        List<UserDTO> users = userRepository.findAllByFirstNameContainingOrLastNameContaining(filter, filter)
+                .stream().map(dtOsConverter::getDTOFromUser).collect(Collectors.toList());
+        return users;
+    }
+
+    public List<UserDTO> sortUsers(Integer page, String sort, Boolean isAdmin, Integer pageSize){
+        if (sort == null || sort.equals("")){
+            sort = "id";
+        }
+        List<UserDTO> users;
+        if(page == -1){
+            if(isAdmin){
+                //if is admin, return all users
+                users = userRepository.findAll(PageRequest.of(0, MAX_PAGE_SIZE, Sort.by(sort))).stream()
+                        .map(dtOsConverter::getDTOFromUser).collect(Collectors.toList());
+            }else{
+                users = userRepository.findAll(PageRequest.of(0, MAX_PAGE_SIZE, Sort.by(sort))).stream()
+                        .filter(user -> user.getStatus() != UserStatus.ADMIN).map(dtOsConverter::getDTOFromUser).collect(Collectors.toList());
+            }
+        }else {
+            if(isAdmin){
+                //if is admin, return all users
+                users = userRepository.findAll(PageRequest.of(page, pageSize, Sort.by(sort))).stream()
+                        .map(dtOsConverter::getDTOFromUser).collect(Collectors.toList());
+            }else{
+                users = userRepository.findAll(PageRequest.of(page, pageSize, Sort.by(sort))).stream()
+                        .filter(user -> user.getStatus() != UserStatus.ADMIN).map(dtOsConverter::getDTOFromUser).collect(Collectors.toList());
+            }
+        }
+        return users;
     }
 }

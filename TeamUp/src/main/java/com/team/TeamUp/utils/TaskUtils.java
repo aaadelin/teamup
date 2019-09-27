@@ -8,6 +8,7 @@ import com.team.TeamUp.persistence.TaskRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
@@ -154,47 +155,23 @@ public class TaskUtils {
     }
 
     private List<Task> findAllTasksWithTaskStatusInAndSummaryOrDescriptionContainingSordedBy(List<Integer> statuses, String search, String sort, Boolean desc, Integer page) {
-        switch(sort) {
-            case "deadline":
-                if (desc) {
-                    return taskRepository.findAllByTaskStatusInAndDescriptionContainingOrSummaryContainingOrderByDeadlineDesc(statuses, search, search, PageRequest.of(page, PAGE_SIZE));
-                }
-                return taskRepository.findAllByTaskStatusInAndDescriptionContainingOrSummaryContainingOrderByDeadline(statuses, search, search, PageRequest.of(page, PAGE_SIZE));
-            case "priority":
-                if (desc) {
-                    return taskRepository.findAllByTaskStatusInAndDescriptionContainingOrSummaryContainingOrderByPriorityDesc(statuses, search, search, PageRequest.of(page, PAGE_SIZE));
-                }
-                return taskRepository.findAllByTaskStatusInAndDescriptionContainingOrSummaryContainingOrderByPriority(statuses, search, search, PageRequest.of(page, PAGE_SIZE));
-            case "modified":
-                if (desc) {
-                    return taskRepository.findAllByTaskStatusInAndDescriptionContainingOrSummaryContainingOrderByLastChangedDesc(statuses, search, search, PageRequest.of(page, PAGE_SIZE));
-                }
-                return taskRepository.findAllByTaskStatusInAndDescriptionContainingOrSummaryContainingOrderByLastChanged(statuses, search, search, PageRequest.of(page, PAGE_SIZE));
-            default:
-                return taskRepository.findAllByTaskStatusInAndDescriptionContainingOrSummaryContaining(statuses, search, search, PageRequest.of(page, PAGE_SIZE));
+        if(sort.equals("")){
+            return taskRepository.findAllByTaskStatusInAndDescriptionContainingOrSummaryContaining(statuses, search, search, PageRequest.of(page, PAGE_SIZE));
         }
+        if(sort.equals("modified")){
+            sort = "lastChanged";
+        }
+        return taskRepository.findAllByTaskStatusInAndDescriptionContainingOrSummaryContaining(statuses, search, search, PageRequest.of(page, PAGE_SIZE, Sort.by(desc ? Sort.Direction.DESC : Sort.Direction.ASC, sort)));
     }
 
     private List<Task> getAssignedSortedTasks(User user, List<TaskStatus> statuses, Integer page, String sort, Boolean desc){
-        switch(sort){
-            case "deadline":
-                if(desc){
-                    return taskRepository.findAllByTaskStatusInAndAssigneesContainingOrderByDeadlineDesc(statuses, user, PageRequest.of(page, PAGE_SIZE));
-                }
-                return taskRepository.findAllByTaskStatusInAndAssigneesContainingOrderByDeadlineAsc(statuses, user, PageRequest.of(page, PAGE_SIZE));
-            case "priority":
-                if(desc){
-                    return taskRepository.findAllByTaskStatusInAndAssigneesContainingOrderByPriorityDesc(statuses, user, PageRequest.of(page, PAGE_SIZE));
-                }
-                return taskRepository.findAllByTaskStatusInAndAssigneesContainingOrderByPriorityAsc(statuses, user, PageRequest.of(page, PAGE_SIZE));
-            case "modified":
-                if(desc){
-                    return taskRepository.findAllByTaskStatusInAndAssigneesContainingOrderByLastChangedDesc(statuses, user, PageRequest.of(page, PAGE_SIZE));
-                }
-                return taskRepository.findAllByTaskStatusInAndAssigneesContainingOrderByDeadlineAsc(statuses, user, PageRequest.of(page, PAGE_SIZE));
-            default:
-                return taskRepository.findAllByTaskStatusInAndAssigneesContaining(statuses, user, PageRequest.of(page, PAGE_SIZE));
+        if(sort.equals("")){
+            return taskRepository.findAllByTaskStatusInAndAssigneesContaining(statuses, user, PageRequest.of(page, PAGE_SIZE));
         }
+        if(sort.equals("modified")){
+            sort = "lastChanged";
+        }
+        return taskRepository.findAllByTaskStatusInAndAssigneesContaining(statuses, user,
+                PageRequest.of(page, PAGE_SIZE, Sort.by(desc ? Sort.Direction.DESC : Sort.Direction.ASC, sort)));
     }
-
 }

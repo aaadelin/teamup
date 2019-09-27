@@ -4,8 +4,6 @@
       <div class="before-profile">
       </div>
       <img class="profile-photo" :src="image" alt="Profile"/>
-<!--      <div class="profile-photo">-->
-<!--      </div>-->
       <div class="row" style="padding-bottom: 10px">
         <strong class="col"> {{user.firstName}} {{user.lastName}} </strong>
       </div>
@@ -87,6 +85,7 @@ export default {
     /*border: 1px solid black;*/
     box-shadow: 3px 2px 6px grey;
     border-radius: 5px;
+    /*margin-top: 20px;*/
     margin-bottom: 20px;
   }
 

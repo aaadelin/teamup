@@ -13,6 +13,7 @@ import com.team.TeamUp.persistence.UserEventRepository;
 import com.team.TeamUp.persistence.UserRepository;
 import com.team.TeamUp.utils.DTOsConverter;
 import com.team.TeamUp.utils.TaskUtils;
+import com.team.TeamUp.utils.UserUtils;
 import com.team.TeamUp.validation.UserValidation;
 import lombok.extern.slf4j.Slf4j;
 import org.json.JSONArray;
@@ -40,7 +41,6 @@ import static org.springframework.web.bind.annotation.RequestMethod.GET;
 public class RestGetUserController {
 
     private static final int PAGE_SIZE = 10;
-    private static final int MAX_PAGE_SIZE = 10000;
 
     private UserRepository userRepository;
     private TaskRepository taskRepository;
@@ -49,55 +49,46 @@ public class RestGetUserController {
 
     private DTOsConverter dtOsConverter;
     private TaskUtils taskUtils;
+    private UserUtils userUtils;
 
     @Autowired
-    public RestGetUserController(UserRepository userRepository, TaskRepository taskRepository, UserEventRepository eventRepository, DTOsConverter dtOsConverter, TaskUtils taskUtils, UserValidation userValidation){
+    public RestGetUserController(UserRepository userRepository,
+                                 TaskRepository taskRepository,
+                                 UserEventRepository eventRepository,
+                                 DTOsConverter dtOsConverter,
+                                 TaskUtils taskUtils,
+                                 UserValidation userValidation,
+                                 UserUtils userUtils){
         this.userRepository = userRepository;
         this.taskRepository = taskRepository;
         this.eventRepository = eventRepository;
         this.userValidation = userValidation;
         this.dtOsConverter = dtOsConverter;
         this.taskUtils = taskUtils;
+        this.userUtils = userUtils;
     }
 
     @RequestMapping(value = "/users", method = GET)
     public ResponseEntity<?> getAllUsers(@RequestParam(name = "ids", required = false) List<Integer> ids,
                                          @RequestParam(name = "page", required = false, defaultValue = "-1") Integer page,
                                          @RequestParam(name = "sort", required = false) String sort,
+                                         @RequestParam(name = "filter", required = false) String filter,
                                          @RequestHeader Map<String, String> headers) {
         if(ids != null) {
-            log.info(String.format("Entering get users by ids method with userIds: %s /n and headers: %s", ids, headers.toString()));
-            List<UserDTO> users = new ArrayList<>();
-            for (int id : ids) {
-                Optional<User> userOptional = userRepository.findById(id);
-                if (userOptional.isPresent()) {
-                    log.info(String.format("Adding user: %s", userOptional.get()));
-                    users.add(dtOsConverter.getDTOFromUser(userOptional.get()));
-                } else {
-                    log.info(String.format("No user found with id %s", id));
-                    return new ResponseEntity<>("NOT FOUND", HttpStatus.NOT_FOUND);
-                }
-            }
-            log.info(String.format("Returning users: %s", users));
-            return new ResponseEntity<>(users, HttpStatus.OK);
+            log.info("Entering get users by ids method with userIds: {}, page {}, filter {} and sort {}", ids, page, filter, sort);
+            ResponseEntity response = userUtils.getUsersByIds(ids);
+            log.info(String.format("Returning users: %s", response.getBody()));
+            return response;
         }else {
-            log.info(String.format("Entering get all users method with headers: %s", headers.toString()));
+            log.info("Entering get all users method with headers: {}", headers.toString());
             List<UserDTO> users;
-            if(page == -1){
-                if(userValidation.isValid(headers.get("token"), UserStatus.ADMIN)){
-                    //if is admin, return all users
-                    users = userRepository.findAll().stream().map(dtOsConverter::getDTOFromUser).collect(Collectors.toList());
-                }else{
-                    users = userRepository.findAll().stream().filter(user -> user.getStatus() != UserStatus.ADMIN).map(dtOsConverter::getDTOFromUser).collect(Collectors.toList());
-                }
-            }else {
-                if(userValidation.isValid(headers.get("token"), UserStatus.ADMIN)){
-                    //if is admin, return all users
-                    users = userRepository.findAll(PageRequest.of(page, PAGE_SIZE)).stream().map(dtOsConverter::getDTOFromUser).collect(Collectors.toList());
-                }else{
-                    users = userRepository.findAll(PageRequest.of(page, PAGE_SIZE)).stream().filter(user -> user.getStatus() != UserStatus.ADMIN).map(dtOsConverter::getDTOFromUser).collect(Collectors.toList());
-                }
+            if(filter == null || filter.equals("")){
+                Boolean isAdmin = userValidation.isValid(headers.get("token"), UserStatus.ADMIN);
+                users = userUtils.sortUsers(page, sort, isAdmin, PAGE_SIZE);
+            } else {
+                users = userUtils.filterUsers(filter);
             }
+
             log.info(String.format("Returning list: %s", users.toString()));
             return new ResponseEntity<>(users, HttpStatus.OK);
         }
@@ -286,7 +277,7 @@ public class RestGetUserController {
     public ResponseEntity<?> getHigherRankUsers(){
         log.info("Entergin method to get high rank users");
         List<User> users = userRepository.findAll();
-        List<UserDTO> dtos = users.stream().filter(user -> user.getStatus().ordinal() > 3 && user.getStatus() != UserStatus.ADMIN)
+        List<UserDTO> dtos = users.stream().filter(user -> user.getStatus().ordinal() >= 3 && user.getStatus() != UserStatus.ADMIN)
                 .map(dtOsConverter::getDTOFromUser).collect(Collectors.toList());
         log.info(String.format("Returning list of users %s", dtos));
         return new ResponseEntity<>(dtos, HttpStatus.OK);

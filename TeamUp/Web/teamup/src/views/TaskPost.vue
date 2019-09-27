@@ -234,7 +234,8 @@ export default {
     toggleEditMode (ev) {
       if (ev.key.toLowerCase() === 'e' && !this.editMode &&
         document.activeElement.tagName !== 'INPUT' &&
-        document.activeElement.tagName !== 'TEXTAREA') {
+        document.activeElement.tagName !== 'TEXTAREA' &&
+          (this.canEditAll || this.canEditStatus)) {
         this.cancelEditMode()
       }
       if (ev.key.toLowerCase() === 'escape' && this.editMode &&

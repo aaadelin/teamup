@@ -45,58 +45,13 @@ public class RestGetTaskController {
     private static final int PAGE_SIZE = 10;
 
     @RequestMapping(value = "/tasks", method = GET)
-    public ResponseEntity<?> getAllTasks(@RequestHeader Map<String, String> headers,
-                                         @RequestParam(value = "page", required = false) Integer startPage,
-                                         @RequestParam(value = "status", required = false) TaskStatus status,
+    public ResponseEntity<?> getAllTasks(@RequestParam(value = "page", required = false) Integer startPage,
                                          @RequestParam(value = "statuses", required = false) List<TaskStatus> statuses,
                                          @RequestParam(value = "search", required = false) String search,
                                          @RequestParam(value = "sort", required = false) String sort,
-                                         @RequestParam(value = "desc", required = false, defaultValue = "false") Boolean desc,
-                                         @RequestParam(value = "last", required = false) Long numberOfTasksSortedDesc) {
-        log.info(String.format("Entering get all tasks method with headers: %s, startPage: %s, status: %s and number of last tasks %s", headers.toString(), startPage, status, numberOfTasksSortedDesc));
+                                         @RequestParam(value = "desc", required = false, defaultValue = "false") Boolean desc) {
+        log.info("Entering get all tasks method with startPage: {}, statuses {}, search {}, sort {}, descending {}", startPage, statuses, search, sort, desc);
         List<TaskDTO> tasks;
-        //TODO
-        //returning all tasks
-        if(startPage == null && status == null && numberOfTasksSortedDesc == null) {
-            log.info("Returning all tasks");
-            tasks = taskUtils.getAllTasksConvertedToDTOs();
-        }
-
-        //returning all tasks from a page
-        if (startPage != null && status == null && numberOfTasksSortedDesc == null){
-            log.info(String.format("Returning all tasks from page %s", startPage));
-            tasks = taskRepository.findAll(PageRequest.of(startPage, PAGE_SIZE))
-                    .stream()
-                    .map(dtOsConverter::getDTOFromTask)
-                    .sorted((o1, o2) -> o2.getId() - o1.getId())
-                    .collect(Collectors.toList());
-        }
-
-        //returning all tasks with status STATUS
-        if(startPage == null && status != null && numberOfTasksSortedDesc == null) {
-            log.info(String.format("Returning all tasks with status %s", status));
-            tasks = taskRepository.findAllByTaskStatus(status)
-                    .stream()
-                    .map(dtOsConverter::getDTOFromTask)
-                    .sorted((o1, o2) -> o2.getId() - o1.getId())
-                    .collect(Collectors.toList());
-        }
-
-        // returning last LAST tasks
-        if(startPage == null && status == null && numberOfTasksSortedDesc != null){
-            log.info(String.format("Returning last %s tasks", numberOfTasksSortedDesc));
-            tasks = taskUtils.getLastNTasks(numberOfTasksSortedDesc);
-            return new ResponseEntity<>(tasks, HttpStatus.OK);
-        }
-
-        //returning tasks with status STATUS from page STARTPAGE
-        if(status != null && startPage != null ){
-            log.info(String.format("Returning page %s with tasks with status %s", startPage, status));
-            tasks = taskRepository.findAllByTaskStatus(status, PageRequest.of(startPage, PAGE_SIZE))
-                    .stream()
-                    .map(dtOsConverter::getDTOFromTask)
-                    .collect(Collectors.toList());
-        }
 
         tasks = taskUtils.findTasksByParameters(startPage, statuses, search, sort, desc);
 
@@ -105,46 +60,46 @@ public class RestGetTaskController {
     }
 
     @RequestMapping(value = "/task-status", method = GET)
-    public ResponseEntity<?> getAllTaskStatus(@RequestHeader Map<String, String> headers) {
-        log.info(String.format("Entering get all task status types method with headers: %s", headers.toString()));
+    public ResponseEntity<?> getAllTaskStatus() {
+        log.info("Entering get all task status types method");
         List<TaskStatus> taskStatuses = Arrays.asList(TaskStatus.values());
         log.info(String.format("Returning current possible task statuses: %s", taskStatuses.toString()));
         return new ResponseEntity<>(taskStatuses, HttpStatus.OK);
     }
 
     @RequestMapping(value = "/task-types", method = GET)
-    public ResponseEntity<?> getAllTaskTypes(@RequestHeader Map<String, String> headers) {
-        log.info(String.format("Entering get all possible task types method with headers: %s", headers.toString()));
+    public ResponseEntity<?> getAllTaskTypes() {
+        log.info("Entering get all possible task types method");
         List<TaskType> taskTypes = Arrays.asList(TaskType.values());
         log.info(String.format("Returning current possible task types: %s", taskTypes.toString()));
         return new ResponseEntity<>(taskTypes, HttpStatus.OK);
     }
 
     @RequestMapping(value = "/tasks/{id}", method = GET)
-    public ResponseEntity<?> getTaskById(@PathVariable int id, @RequestHeader Map<String, String> headers) {
-        log.info(String.format("Entering get task by id method with taskId: %d /n and headers: %s", id, headers.toString()));
+    public ResponseEntity<?> getTaskById(@PathVariable int id) {
+        log.info("Entering get task by id method with taskId: {}", id);
         Optional<Task> taskOptional = taskRepository.findById(id);
         if (taskOptional.isPresent()) {
             TaskDTO task = dtOsConverter.getDTOFromTask(taskOptional.get());
-            log.info(String.format("Returning task: %s", task.toString()));
+            log.info("Returning task: {}", task.toString());
             return new ResponseEntity<>(task, HttpStatus.OK);
         } else {
-            log.info(String.format("No task found with id %s", id));
+            log.info("No task found with id {}", id);
             return new ResponseEntity<>("NOT FOUND", HttpStatus.NOT_FOUND);
         }
     }
 
     @RequestMapping(value = "tasks/{id}/project", method = GET)
-    public ResponseEntity<?> getTasksProject(@PathVariable int id, @RequestHeader Map<String, String> headers) {
-        log.info(String.format("Entering get task's project with task id %s and headers %s", id, headers));
+    public ResponseEntity<?> getTasksProject(@PathVariable int id) {
+        log.info("Entering get task's project with task id {}", id);
         Optional<Task> taskOptional = taskRepository.findById(id);
         if (taskOptional.isPresent()) {
             Project project = taskOptional.get().getProject();
             ProjectDTO projectDTO = dtOsConverter.getDTOFromProject(project);
-            log.info(String.format("Exited with project %s", projectDTO));
+            log.info("Exited with project {}", projectDTO);
             return new ResponseEntity<>(projectDTO, HttpStatus.OK);
         } else {
-            log.info(String.format("No task found with id %s", id));
+            log.info("No task found with id {}", id);
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
     }
@@ -156,8 +111,8 @@ public class RestGetTaskController {
                                               @RequestParam(value = "sort", required = false, defaultValue = "") String sort,
                                               @RequestParam(value = "desc", required = false, defaultValue = "false") Boolean desc,
                                               @RequestParam(value = "statuses", required = false, defaultValue = "") List<TaskStatus> statuses){
-        log.info(String.format("Entered method to get assigned tasks with parameters: \nheaders: %s \nstart page: %s\nstatuses: %s, search %s, sort %s, desc %s",
-                headers, startPage, statuses, search, sort, desc));
+        log.info("Entered method to get assigned tasks with parameters: \nstart page: {}\nstatuses: {}, search {}, sort {}, desc {}, headers: {}",
+                startPage, statuses, search, sort, desc, headers);
         User user = userRepository.findByHashKey(headers.get("token")).orElseThrow();
         List<TaskDTO> taskDTOS = taskUtils.findAssignedTasksByParameters(user, startPage, statuses, search, sort, desc);
         log.info(String.format("Exiting with list of tasks: %s", taskDTOS));

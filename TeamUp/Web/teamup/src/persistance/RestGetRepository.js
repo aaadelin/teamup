@@ -248,3 +248,13 @@ export async function getUsersTeam (userId) {
   let url = `${baseURL}/users/${userId}/team`
   return fetchDataFromUrl(url)
 }
+
+export async function getUsersSortBy (sort = '', page = -1) {
+  let url = `${baseURL}/users?sort=${sort}&page=${page}`
+  return fetchDataFromUrl(url)
+}
+
+export async function getFilteredUsers (filter) {
+  let url = `${baseURL}/users?filter=${filter}`
+  return fetchDataFromUrl(url)
+}
