@@ -1,9 +1,6 @@
 package com.team.TeamUp.utils;
 
-import com.team.TeamUp.domain.Project;
-import com.team.TeamUp.domain.Task;
-import com.team.TeamUp.domain.User;
-import com.team.TeamUp.domain.UserEvent;
+import com.team.TeamUp.domain.*;
 import com.team.TeamUp.domain.enums.UserEventType;
 import com.team.TeamUp.domain.enums.UserStatus;
 import com.team.TeamUp.dtos.UserDTO;
@@ -76,6 +73,12 @@ public class UserUtils {
         return null;
     }
 
+    /**
+     * Creates an user event and saves it to the database
+     * @param creator User that will be the event 'owner'
+     * @param description Event's description
+     * @param eventType Type of the event
+     */
     public void createEvent(User creator, String description, UserEventType eventType){
         log.info(String.format("Entered method to create event with user %s, description %s and type %s", creator, description, eventType));
         UserEvent userEvent = new UserEvent();
@@ -95,11 +98,23 @@ public class UserUtils {
         log.info("Event successfully created");
     }
 
+    /**
+     * Method to handle user deletion.
+     * The user will be removed from the assignees list from all the tasks
+     * Reporter will be changed to his superior
+     * Project ownership will be set to his superior
+     *
+     * If he doesn't has a superior, an admin will be selected
+     * If an admin is not available (Improbable case, since admin users cannot be deleted and the deletion bust be initiated by an admin)
+     * one will be created
+     * @param user User that will be deleted
+     */
     public void deleteUserInitiated(User user) {
         List<Task> assignedTasks = taskRepository.findAllByAssigneesContaining(user);
         List<Task> reportedTasks = taskRepository.findAllByReporter(user);
         List<Project> projects = projectRepository.findAllByOwner(user);
-        User leader = user.getTeam().getLeader();
+        Team team = user.getTeam();
+        User leader = team == null? null : team.getLeader();
 
         for (Task task : assignedTasks) { //remove the user from assignees from all the tasks
             task.getAssignees().remove(user);
@@ -127,7 +142,12 @@ public class UserUtils {
         }
     }
 
+    /**
+     * Creates an admin user
+     * @return The user just created and saved
+     */
     private User createAdmin(){
+        log.info("Creating admin");
         UserDTO userDTO = new UserDTO();
         userDTO.setFirstName("System");
         userDTO.setLastName("Administrator");
@@ -138,9 +158,27 @@ public class UserUtils {
 
         User user = dtOsConverter.getUserFromDTO(userDTO, UserStatus.ADMIN);
         user = userRepository.save(user);
+        log.info("Created admin with username {}", user.getUsername());
         return user;
     }
 
+    /**
+     * Method to create an admin if none are existing at the time
+     * Used at running the server when a new database is set and there are no users.
+     */
+    public void createAdminIfNoneExistent(){
+        log.info("Entering create admin if none existent");
+        if(userRepository.findAllByStatus(UserStatus.ADMIN).isEmpty()){
+            createAdmin();
+        }
+    }
+
+    /**
+     * Get users that contain specified ids
+     * @param ids list of ids to get users
+     * @return ResponseEntry with the users and OK status if all of the ids had a correspondent,
+     * NOT FOUND status if at least one didn't had a correspondent
+     */
     public ResponseEntity<?> getUsersByIds(List<Integer> ids){
         List<UserDTO> users = new ArrayList<>();
         for (int id : ids) {
@@ -156,12 +194,24 @@ public class UserUtils {
         return new ResponseEntity<>(users, HttpStatus.OK);
     }
 
+    /**
+     * Method to filter users by first name and last name containing the specified filter
+     * @param filter String, word to be contained in the first name or the last name
+     * @return list of userdto filtered by criteria
+     */
     public List<UserDTO> filterUsers(String filter){
-        List<UserDTO> users = userRepository.findAllByFirstNameContainingOrLastNameContaining(filter, filter)
+        return userRepository.findAllByFirstNameContainingOrLastNameContaining(filter, filter)
                 .stream().map(dtOsConverter::getDTOFromUser).collect(Collectors.toList());
-        return users;
     }
 
+    /**
+     * Method to return sorted users
+     * @param page Integer, page number to get users from
+     * @param sort String, property of the User to sort by
+     * @param isAdmin Boolean, to know if to return all the users, including admin ones
+     * @param pageSize Integer, number of items per page
+     * @return List of userDTOs sorted by the sort criteria
+     */
     public List<UserDTO> sortUsers(Integer page, String sort, Boolean isAdmin, Integer pageSize){
         if (sort == null || sort.equals("")){
             sort = "id";

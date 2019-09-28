@@ -13,10 +13,28 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 
+/**
+ * Utility class to compress images
+ */
 @Slf4j
 public class ImageCompressor {
 
+    /**
+     * Method to compress the image with a default value at compress quality of 0.2f
+     * @param tempPath temporary path at which the file can be found
+     * @param path final path to which to save the compressed image
+     */
     public static void compressAndSave(String tempPath, String path){
+        compressAndSave(tempPath, path, 0.2f);
+    }
+
+    /**
+     * Method to compress the image
+     * @param tempPath temporary path at which the file can be found
+     * @param path final path to which to save the compressed image
+     * @param compressQuality float, the compression quality of the proto, lower -> more compressed
+     */
+    public static void compressAndSave(String tempPath, String path, float compressQuality){
         log.info(String.format("Entering compressing image with temp path: %s and fimal path %s", tempPath, path ));
         try {
             File file = new File(tempPath);
@@ -31,7 +49,7 @@ public class ImageCompressor {
             ImageWriteParam param = writer.getDefaultWriteParam();
             if(param.canWriteCompressed()){
                 param.setCompressionMode(ImageWriteParam.MODE_EXPLICIT);
-                param.setCompressionQuality(0.2f);
+                param.setCompressionQuality(compressQuality);
             }
 
             writer.write(null, new IIOImage(image, null, null), param);

@@ -16,12 +16,19 @@ import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+/**
+ * Utility class for sending mails
+ */
 @Component
 @Slf4j
 public class MailUtils {
 
     private ExecutorService executorService = Executors.newCachedThreadPool();
 
+    /**
+     * Method to send a reset password mail
+     * @param resetRequest containing the user to whom to send the request
+     */
     public void sendResetURL(ResetRequest resetRequest) {
         log.info("Entering method to send mail with parameter resetRequest {}", resetRequest);
 
@@ -52,6 +59,11 @@ public class MailUtils {
         });
     }
 
+    /**
+     * Method to read the message file
+     * @param resetRequest request with the user to complete name and requestID
+     * @return String containing the final message to be sent
+     */
     private String getMessage (ResetRequest resetRequest) {
         try {
             File file = new ClassPathResource("static/mail/mail-template.html").getFile();
@@ -65,6 +77,10 @@ public class MailUtils {
         return "";
     }
 
+    /**
+     * Method to get the logo
+     * @return byte array containing the logo
+     */
     private byte[] getLogo(){
         try {
             File file = new ClassPathResource("static/img/logo.png").getFile();

@@ -1,5 +1,10 @@
 package com.team.TeamUp.utils;
 
+/**
+ * Pair utility class
+ * @param <S> type of the first member of the pair
+ * @param <T> type of the second member of the pair
+ */
 public class Pair<S, T> {
 
     private S entity1;

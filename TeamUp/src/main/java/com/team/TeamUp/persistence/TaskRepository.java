@@ -83,8 +83,8 @@ public interface TaskRepository extends JpaRepository<Task, Integer> {
     List<Task> findTasksWithStatusAssignedToOrReportedBy(int userId, int taskStatusIndex ,Pageable pageable);
 
     @Query(value = "select t.* from task t\n" +
-            "inner join task_assignees ta on t.id = ta.task_id\n" +
-            "inner join user u on ta.assignees_id = u.id\n" +
+            "left join task_assignees ta on t.id = ta.task_id\n" +
+            "left join user u on ta.assignees_id = u.id\n" +
             "where t.task_status in ?2 and (u.id=?1 or t.reporter_id = ?1)\n" +
             "group by t.id", nativeQuery = true)
     List<Task> findTasksWithStatusesAssignedToOrReportedBy(int userId, List<Integer> taskStatusIndexes ,Pageable pageable);

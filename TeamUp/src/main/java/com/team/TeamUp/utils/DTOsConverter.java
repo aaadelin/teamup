@@ -166,7 +166,9 @@ public class DTOsConverter {
         Optional<User> reporter = userRepository.findByHashKey(reporterKey);
         task.setReporter(reporter.orElseThrow());
 
-        if(taskDTO.getDeadline().isBefore(task.getProject().getDeadline()) && taskDTO.getDeadline().isAfter(LocalDateTime.now().minusMinutes(1))){ //because of the possible delay of the network, it is acceptable to be 1 minute earlier than NOW
+        if(taskDTO.getDeadline().isBefore(task.getProject().getDeadline()) && taskDTO.getDeadline()
+                .isAfter(LocalDateTime.now().minusMinutes(1))){
+            //because of the possible delay of the network, it is acceptable to be 1 minute earlier than NOW
             task.setDeadline(taskDTO.getDeadline());
         }else{
             throw new IllegalArgumentException("Task deadline would be after project's deadline or before NOW");
@@ -191,6 +193,15 @@ public class DTOsConverter {
         return task;
     }
 
+    /**
+     * Get the task updated from a taskDTO depending on the user status
+     * If the user is the reporter or ADMIN he can change every option available,
+     * If the user is assignee, he can only change the status,
+     * Otherwise, no change is allowed
+     * @param taskDTO taskDTO entity to be con
+     * @param user User that made the change
+     * @return task updated accordingly
+     */
     public Task getTaskFromDTOForUpdate(TaskDTO taskDTO, User user) {
         log.info(String.format("Method to update Task from TaskDto called with parameter: %s", taskDTO));
 
@@ -205,10 +216,12 @@ public class DTOsConverter {
             task.setTaskStatus(taskDTO.getTaskStatus());
             task.setLastChanged(LocalDateTime.now());
             return task;
+
         } else if (taskDTO.getDescription() != null && !taskDTO.getDescription().trim().equals("") &&
                 taskDTO.getDeadline() != null && taskDTO.getTaskType() != null &&
-                taskDTO.getDifficulty() != 0 && taskDTO.getPriority() != 0 && taskDTO.getTaskStatus() != null
-                && taskValidation.isTaskStatusChangeValid(taskOptional.get(), taskDTO) && taskDTO.getReporterID() == user.getId()) {
+                taskDTO.getDifficulty() != 0 && taskDTO.getPriority() != 0 && taskDTO.getTaskStatus() != null &&
+                taskValidation.isTaskStatusChangeValid(taskOptional.get(), taskDTO) &&
+                (taskDTO.getReporterID() == user.getId() || user.getStatus().equals(UserStatus.ADMIN))) {
 
             task.setDescription(taskDTO.getDescription());
             task.setDeadline(taskDTO.getDeadline());
@@ -226,7 +239,9 @@ public class DTOsConverter {
                 task.setDoneAt(null);
             }
             task.setLastChanged(LocalDateTime.now());
-            task.setAssignees(taskDTO.getAssignees().stream().map(assigneeId -> userRepository.findById(assigneeId).orElseThrow()).collect(Collectors.toList()));
+            task.setAssignees(taskDTO.getAssignees().stream()
+                    .map(assigneeId -> userRepository.findById(assigneeId).orElseThrow())
+                    .collect(Collectors.toList()));
             return task;
         } else {
             throw new IllegalArgumentException();
@@ -346,7 +361,7 @@ public class DTOsConverter {
      * @return Team model instance containing the information from teamDTO
      */
     public Team getTeamFromDTO(TeamDTO teamDTO, UserStatus status) {
-        log.info(String.format("Method to create instance Team from TeamDTO called with %s and user status %s", teamDTO, status));
+        log.info("Method to create instance Team from TeamDTO called with {} and user status {}", teamDTO, status);
         Team team = getTeamFromDTO(teamDTO);
 
         if (status == UserStatus.ADMIN) {
@@ -381,6 +396,11 @@ public class DTOsConverter {
         return teamDTO;
     }
 
+    /**
+     * Converts LocationDTO to Location
+     * @param location location to be converted
+     * @return LocationDTO object
+     */
     public LocationDTO getDTOFromLocation(Location location){
         log.info(String.format("Method to convert from location to DTO entered with parameter: %s", location));
         LocationDTO locationDTO = new LocationDTO();
@@ -395,8 +415,13 @@ public class DTOsConverter {
         return locationDTO;
     }
 
+    /**
+     * Get Location from LocationDTO
+     * @param locationDTO DTO object to be converted to location
+     * @return Location object
+     */
     public Location getLocationFromDTO(LocationDTO locationDTO){
-        log.info(String.format("Method to convert from locationDTO to Location entered with parameter: %s", locationDTO));
+        log.info("Method to convert from locationDTO to Location entered with parameter: {}", locationDTO);
 
         Optional<Location> locationOptional = locationRepository.findById(locationDTO.getId());
         Location location = new Location();
@@ -411,6 +436,11 @@ public class DTOsConverter {
         return location;
     }
 
+    /**
+     * Converts CommentDTO to Comment
+     * @param commentDTO CommentDTO entity to be converted
+     * @return Comment object
+     */
     public Comment getCommentFromDTO(CommentDTO commentDTO) {
         log.info(String.format("Method to convert from CommentDTO to Comment called with parameter: %s", commentDTO));
         Comment comment = commentRepository.findById(commentDTO.getId()).orElseGet(Comment::new);
@@ -430,6 +460,11 @@ public class DTOsConverter {
         return comment;
     }
 
+    /**
+     * Converts Comment to CommentDTO
+     * @param comment Comment to be converted
+     * @return CommentDTO object
+     */
     public CommentDTO getDTOFromComment(Comment comment) {
         log.info(String.format("Method to convert from Comment to CommentDTO called with parameter: %s", comment));
         CommentDTO commentDTO = new CommentDTO();
@@ -446,6 +481,11 @@ public class DTOsConverter {
         return commentDTO;
     }
 
+    /**
+     * Converts a PostDTO to a Post object
+     * @param postDTO PostDTO object to be converted
+     * @return Post object
+     */
     public Post getPostFromDTO(PostDTO postDTO) {
         log.info(String.format("Method to convert from PostDTO to Post called with parameter: %s", postDTO));
         Post post = postRepository.findById(postDTO.getId()).orElseGet(Post::new);
@@ -457,6 +497,11 @@ public class DTOsConverter {
         return post;
     }
 
+    /**
+     * Converts a Post object to a postDTO
+     * @param post Post object to be converted
+     * @return PostDTO object
+     */
     public PostDTO getDTOFromPost(Post post) {
         log.info(String.format("Method to convert from Post to PostDTO called with parameter: %s", post));
 
@@ -473,6 +518,11 @@ public class DTOsConverter {
         return postDTO;
     }
 
+    /**
+     * Converts a ResetRequest to a DTO
+     * @param resetRequest ResetRequest object to be converted
+     * @return ResetRequestDTO object
+     */
     public ResetRequestDTO getDTOFromResetRequest(ResetRequest resetRequest){
         ResetRequestDTO resetRequestDTO = new ResetRequestDTO();
         resetRequestDTO.setId(resetRequest.getId());
@@ -482,6 +532,11 @@ public class DTOsConverter {
         return resetRequestDTO;
     }
 
+    /**
+     * Converts a ResetRequestDTO to a ResetRequest
+     * @param resetRequestDTO ResetRequestDTO object to be converted
+     * @return ResetRequest object
+     */
     public ResetRequest getResetRequestFromDTO(ResetRequestDTO resetRequestDTO){
         ResetRequest resetRequest = resetRequestRepository.findById(resetRequestDTO.getId()).orElse(new ResetRequest());
         if(resetRequestDTO.getUserId() != 0){
