@@ -44,7 +44,7 @@
                     <option v-for="proj in visibleProjects" :key="proj.id" :value="proj" >{{ proj.name }} (v {{proj.version}})</option>
                   </select>
                 </div>
-                <p v-show="project.deadline !== ''" style="font-size: 10px; margin-bottom: 0">Deadline: {{project.deadline}}</p>
+                <p v-show="project !== undefined || project.deadline !== ''" style="font-size: 10px; margin-bottom: 0">Deadline: {{project.deadline}}</p>
 
                 <br/>
 
@@ -317,7 +317,7 @@ export default {
       this.description = ''
       this.createdAt = null
       this.lastChanged = null
-      this.deadline = null
+      this.deadline = new Date()
       this.difficulty = 3
       this.priority = 3
       this.taskType = this.taskTypes.length > 1 ? this.taskTypes[0] : ''
@@ -326,7 +326,7 @@ export default {
       this.assignees = []
       this.localStorage = localStorage
       this.currentlySelected = null
-      this.project = this.projects.length > 1 ? this.projects[0] : ''
+      this.project = this.visibleProjects.length > 1 ? this.visibleProjects[0] : {}
     },
     async loadMoreUsers () {
       this.assigneesList.push(...await getUsersByPage(++this.usersPage))
@@ -345,11 +345,7 @@ export default {
       this.assigneesList = await getUsersByPage(this.usersPage)
 
       this.projects = await getProjects()
-      this.project = this.projects.length > 1 ? this.projects[0] : ''
-
-      if (this.projects.length > 0) {
-        this.project = this.projects[0]
-      }
+      this.project = this.visibleProjects.length > 0 ? this.visibleProjects[0] : ''
 
       this.dataReady = true
     },

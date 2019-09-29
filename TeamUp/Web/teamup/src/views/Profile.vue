@@ -165,7 +165,6 @@ export default {
   async mounted () {
     this.loadAllData()
     document.addEventListener('keyup', ev => {
-      console.log(document.activeElement.tagName)
       if (ev.key.toLocaleLowerCase() === 'e' &&
           !this.editMode && this.canEdit &&
           !(document.activeElement.tagName === 'INPUT' ||

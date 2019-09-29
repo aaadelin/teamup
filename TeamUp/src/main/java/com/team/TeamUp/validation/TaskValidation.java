@@ -7,7 +7,12 @@ import com.team.TeamUp.dtos.TaskDTO;
 import static com.team.TeamUp.domain.enums.TaskStatus.*;
 
 public class TaskValidation {
-
+    /**
+     *
+     * @param original Task entity consisting of the previous task from the database
+     * @param taskDTO TaskDTO consisting in the alteration of the original
+     * @return true if the change in status between the original and the altered one is valid, false otherwise
+     */
     public boolean isTaskStatusChangeValid(Task original, TaskDTO taskDTO){
         TaskStatus originalStatus = original.getTaskStatus();
         switch (originalStatus){
