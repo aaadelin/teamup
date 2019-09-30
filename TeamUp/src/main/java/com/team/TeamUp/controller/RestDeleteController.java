@@ -55,6 +55,13 @@ public class RestDeleteController {
         return new ResponseEntity<>("Not found", HttpStatus.NOT_FOUND);
     }
 
+    /**
+     * DELETE method to delete user's photo
+     * @param id user's id
+     * @param headers headers of the requester
+     * @return OK if the photo has been successfully deleted, NOT FOUND if it has not been found
+     * @throws IOException if the photo does not exist
+     */
     @RequestMapping(value = "/user/{id}/photo", method = RequestMethod.DELETE)
     public ResponseEntity<?> deletePhoto(@PathVariable int id,
                                          @RequestHeader Map<String, String> headers) throws IOException {

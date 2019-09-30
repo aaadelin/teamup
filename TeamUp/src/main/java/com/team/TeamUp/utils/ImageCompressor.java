@@ -32,10 +32,10 @@ public class ImageCompressor {
      * Method to compress the image
      * @param tempPath temporary path at which the file can be found
      * @param path final path to which to save the compressed image
-     * @param compressQuality float, the compression quality of the proto, lower -> more compressed
+     * @param compressQuality float, the compression quality of the proto, lower for more compression
      */
     public static void compressAndSave(String tempPath, String path, float compressQuality){
-        log.info(String.format("Entering compressing image with temp path: %s and fimal path %s", tempPath, path ));
+        log.debug(String.format("Entering compressing image with temp path: %s and fimal path %s", tempPath, path ));
         try {
             File file = new File(tempPath);
             BufferedImage image = ImageIO.read(file);
@@ -57,9 +57,9 @@ public class ImageCompressor {
             imageOutputStream.close();
             writer.dispose();
             boolean deleted = file.delete();
-            log.info("Image successfully compressed");
+            log.debug("Image successfully compressed");
         } catch (IOException e) {
-            log.info(String.format("Error occured %s ", e.getMessage()));
+            log.debug(String.format("Error occured %s ", e.getMessage()));
             e.printStackTrace();
         }
     }

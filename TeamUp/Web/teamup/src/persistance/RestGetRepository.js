@@ -258,3 +258,8 @@ export async function getFilteredUsers (filter) {
   let url = `${baseURL}/users?filter=${filter}`
   return fetchDataFromUrl(url)
 }
+
+export async function getLeadingTeams (userId) {
+  let url = `${baseURL}/users/${userId}/leading`
+  return fetchDataFromUrl(url)
+}

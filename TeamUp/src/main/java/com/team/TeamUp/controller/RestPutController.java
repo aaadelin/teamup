@@ -60,6 +60,12 @@ public class RestPutController{
         log.info("Creating RestPutController");
     }
 
+    /**
+     * Put method for updating the user.
+     * @param user User object to pe updated in the database
+     * @param headers headers map of the client that initiated the update
+     * @return OK if the user was found and updated, NOT FOUND if the user does not exist in the database
+     */
     @RequestMapping(value = "/users", method = RequestMethod.PUT)
     public ResponseEntity<?> updateUser(@RequestBody UserDTO user, @RequestHeader Map<String, String> headers) {
         log.info(String.format("Entering update user method with user: %s and headers: %s", user, headers));
@@ -80,6 +86,12 @@ public class RestPutController{
         }
     }
 
+    /**
+     * Put method for updating the project
+     * @param projectDTO Project object to be updated in the database
+     * @param headers headers map of the client that initiated the request
+     * @return OK if the project was successfully updated or NOT FOUND if the project is not in the DB
+     */
     @RequestMapping(value = "/project", method = RequestMethod.PUT)
     public ResponseEntity<?> updateProject(@RequestBody ProjectDTO projectDTO, @RequestHeader Map<String, String> headers) {
         log.info(String.format("Entering update project with project: %s and headers: %s", projectDTO, headers));
@@ -141,6 +153,13 @@ public class RestPutController{
 
     }
 
+    /**
+     * Put method for updating the team entity
+     * @param team Team instance to be updated in the database
+     * @param headers request headers containing the token
+     * @return OK if the team is in the database, the requester is admin or team lead and the team has been successfully updated in the DB,
+     * NOT FOUND if the team is not found in the database, and FORBIDDEN if the requester is not admin or team leader
+     */
     @RequestMapping(value = "/teams", method = RequestMethod.PUT)
     public ResponseEntity<?> updateTeam(@RequestBody TeamDTO team, @RequestHeader Map<String, String> headers) {
         log.info(String.format("Entering update team with team: %s and headers: %s", team, headers));
@@ -166,6 +185,14 @@ public class RestPutController{
         return new ResponseEntity<>("FORBIDDEN", HttpStatus.FORBIDDEN);
     }
 
+    /**
+     * Put method for updating user's password
+     * @param id id of the user of which the password has to change
+     * @param parameters map of parameters containing the old password and the new password
+     * @param headers headers of the requester containing the token
+     * @return NOT ACCEPTABLE if the actual password and the old password don't match, or the new password is too short
+     * FORBIDDEN if the user is not eligible, and OK if the password has been successfully changed
+     */
     @RequestMapping(value = "/user/{id}/password", method = RequestMethod.PUT)
     public ResponseEntity<?> updateUserPassword(@PathVariable int id,
                                                 @RequestParam Map<String, String> parameters,
@@ -204,6 +231,13 @@ public class RestPutController{
     }
 
 
+    /**
+     * Put method for updating a request, gets tha password sent from the user
+     * If the password is valid and the request is still valid (within the max number of minutes),
+     * the new password will become user's password
+     * @param resetRequestDTO ResetRequestDTO object containing the new password from the user
+     * @return OK if the request is successfully processed
+     */
     @RequestMapping(value = "/requests", method = PUT)
     public ResponseEntity<?> updateRequest(@RequestBody ResetRequestDTO resetRequestDTO){
         log.info(String.format("Entered method to save new request with requestBody %s", resetRequestDTO));
@@ -219,9 +253,11 @@ public class RestPutController{
 
             resetRequest.setCreatedAt(resetRequest.getCreatedAt().minusMinutes(60));
             resetRequestRepository.save(resetRequest);
+            log.info("Exiting method to create a new request with status OK");
+            return new ResponseEntity<>(HttpStatus.OK);
         }
 
-        log.info("Exiting method to create a new request with status OK");
-        return new ResponseEntity<>(HttpStatus.OK);
+        log.info("Exiting with status NOT ACCEPTABLE");
+        return new ResponseEntity<>(HttpStatus.NOT_ACCEPTABLE);
     }
 }

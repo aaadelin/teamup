@@ -8,7 +8,7 @@ import lombok.Setter;
 import lombok.ToString;
 
 import javax.persistence.*;
-import java.time.LocalDate;
+import java.sql.Date;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
@@ -43,7 +43,7 @@ public class User {
 
     private String hashKey;
 
-    private LocalDate joinedAt;
+    private Date joinedAt;
 
     private UserStatus status;
     @Column(columnDefinition = "integer default 60")

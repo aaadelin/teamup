@@ -139,6 +139,7 @@ export default {
     },
     openSearchPage (event) {
       event.preventDefault()
+      this.hideSearch()
       this.$router.push({
         path: 'search',
         query: {

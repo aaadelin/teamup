@@ -24,20 +24,22 @@
           </label>
         </div>
         <div>
-          <div class="row" style="transition: height 2s" v-if="showTasks">
-            <div class="col">
-              <h5>Assigned to me</h5>
-              <div>
-                <task-search-box v-for="task in assignedToTasks" :key="task.id" :task="task" :word="searchTerm"> </task-search-box>
+          <transition name="fadeHeight">
+            <div class="row" v-show="showTasks">
+              <div class="col">
+<!--                <h5>Assigned to me</h5>-->
+                <div>
+                  <task-search-box v-for="task in assignedToTasks" :key="task.id" :task="task" :word="searchTerm"> </task-search-box>
+                </div>
+              </div>
+              <div class="col">
+<!--                <h5 >Assigned by me</h5>-->
+                <div>
+                  <task-search-box v-for="task in reportedTasks" :key="task.id" :task="task" :word="searchTerm"> {{ task.summary }}</task-search-box>
+                </div>
               </div>
             </div>
-            <div class="col">
-              <h5 >Assigned by me</h5>
-              <div>
-                <task-search-box v-for="task in reportedTasks" :key="task.id" :task="task" :word="searchTerm"> {{ task.summary }}</task-search-box>
-              </div>
-            </div>
-          </div>
+          </transition>
           <div class="row justify-content-between" style="margin: 5px auto 25px auto">
             <input class="col-1 btn btn-secondary" style="min-width: 90px" type="button" @click="previousTasks" :disabled="!previousTasksAvailable" value="Previous">
             <input class="col-1 btn btn-secondary" style="min-width: 90px" type="button" @click="nextTasks" :disabled="!nextTasksAvailable" value="Next">
@@ -54,15 +56,19 @@
       </div>
       <div>
         <div>
-          <h3 style="cursor: pointer; margin-left: 2%; min-width: 100px">Projects</h3>
+          <h3 style="cursor: pointer; margin-left: 2%; min-width: 100px" @click="showProjects = !showProjects">Projects</h3>
         </div>
-        All available projects
-        <div v-for="project in projects" :key="project.id">
-          <project-box :project="project"></project-box>
-        </div>
-        <div v-if="showMoreProjects" @click="loadProjects" style="text-align: center; color: darkblue; cursor: pointer">
-          Show more...
-        </div>
+        <transition name="fadeHeight" mode="in-out">
+          <div v-show="showProjects">
+            All available projects
+            <div v-for="project in projects" :key="project.id">
+              <project-box :project="project"></project-box>
+            </div>
+            <div v-if="showMoreProjects" @click="loadProjects" style="text-align: center; color: darkblue; cursor: pointer">
+              Show more...
+            </div>
+          </div>
+        </transition>
       </div>
     </div>
   </div>
@@ -131,7 +137,7 @@ export default {
       projects: [],
 
       showTasks: true,
-      showProjects: false,
+      showProjects: true,
       showUsers: false,
       showMoreProjects: false,
       sort: this.$route.query.sort === undefined ? '' : this.$route.query.sort,
@@ -233,6 +239,18 @@ export default {
 
   .container{
     min-width: 380px;
+  }
+
+  .fadeHeight-enter-active,
+  .fadeHeight-leave-active {
+    transition: all 0.6s;
+    max-height: 1000vh;
+  }
+  .fadeHeight-enter,
+  .fadeHeight-leave-to
+  {
+    opacity: 0;
+    max-height: 0;
   }
 
 </style>

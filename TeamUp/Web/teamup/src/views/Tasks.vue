@@ -470,11 +470,9 @@ export default {
   }
 
   .scroll-up{
-    position: sticky;
-    bottom: 9px;
-    right: 10px;
-    margin: auto 10px 10px auto;
-    text-align: right;
+    position: fixed;
+    bottom: 10px;
+    right: 20px;
     font-size: 30px;
   }
 

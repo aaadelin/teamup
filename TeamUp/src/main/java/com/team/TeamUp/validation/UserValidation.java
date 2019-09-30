@@ -138,7 +138,7 @@ public class UserValidation {
             return true;
         }
         user.setLastActive(LocalDateTime.now());
-        user = userRepository.save(user);
+        user = userRepository.saveAndFlush(user);
         return false;
     }
 

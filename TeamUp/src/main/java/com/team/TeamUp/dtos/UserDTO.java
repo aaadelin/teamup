@@ -7,7 +7,7 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 
-import java.time.LocalDate;
+import java.sql.Date;
 import java.time.LocalDateTime;
 
 @Getter
@@ -37,7 +37,7 @@ public class UserDTO {
 
     private UserStatus status;
 
-    private LocalDate joinedAt;
+    private Date joinedAt;
 
     private String mail;
 

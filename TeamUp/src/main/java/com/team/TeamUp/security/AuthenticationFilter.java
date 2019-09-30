@@ -36,14 +36,14 @@ public class AuthenticationFilter implements Filter {
         if (isAuthorized(req.getRequestURI(), req.getMethod(), tokenHeader)) {
 //            if((userValidation.isUserLoggedIn(tokenHeader) || req.getRequestURI().equals("/api/login") || req.getRequestURI().contains(""))){ // - for swagger
             if((userValidation.isUserLoggedIn(tokenHeader) || req.getRequestURI().equals("/api/login"))){
-                log.info(String.format("User with token %s is eligible to access %s", tokenHeader, req.getRequestURI()));
+                log.debug(String.format("User with token %s is eligible to access %s", tokenHeader, req.getRequestURI()));
                 chain.doFilter(request, response);
             }else{
-                log.info("User is or just has been logged out");
+                log.debug("User is or just has been logged out");
                 res.sendError(405);
             }
         } else {
-            log.info("User not eligible");
+            log.debug("User not eligible");
             res.sendError(403);
         }
     }

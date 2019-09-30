@@ -38,7 +38,8 @@ public class TaskUtils {
      * @param type String, only 'assignedby' and 'assignedto'
      * @param page pare of the repository
      * @param statuses list of task status
-     * @return list of tasks with the user in assignees or reporting or both, with the specified term (if existing) from the page with one of the specified statuses
+     * @return list of tasks with the user in assignees or reporting or both, with the specified term (if existing)
+     * from the page with one of the specified statuses
      */
     public List<TaskDTO> getFilteredTasksByType(User user, String term, String type, int page, List<TaskStatus> statuses){
         List<Task> tasks = new ArrayList<>();
@@ -132,7 +133,8 @@ public class TaskUtils {
      */
     public List<TaskDTO> filterTasks(String filterWord, List<TaskDTO> tasks){
         if(filterWord != null && !filterWord.strip().equals("")) {
-            return tasks.stream().filter(task -> task.getSummary().toLowerCase().contains(filterWord) || task.getDescription().toLowerCase().contains(filterWord)).collect(Collectors.toList());
+            return tasks.stream().filter(task -> task.getSummary().toLowerCase().contains(filterWord) || task.getDescription()
+                    .toLowerCase().contains(filterWord)).collect(Collectors.toList());
         }
         return tasks;
     }
@@ -149,9 +151,10 @@ public class TaskUtils {
      * @param descending boolean to sort descending or ascending
      * @return list of taskDTOs sorted and filtered by parameters
      */
-    public List<TaskDTO> findAssignedTasksByParameters(User user, Integer page, List<TaskStatus> statuses, String search, String sort, Boolean descending){
+    public List<TaskDTO> findAssignedTasksByParameters(User user, Integer page, List<TaskStatus> statuses, String search,
+                                                       String sort, Boolean descending){
         List<Task> tasks;
-        log.info("Filter method preferred: by multiple statuses");
+        log.debug("Filter method preferred: by multiple statuses");
         if(statuses == null){
             statuses = List.of(TaskStatus.values());
         }
@@ -165,7 +168,7 @@ public class TaskUtils {
         }
         List<TaskDTO> taskDTOS = tasks.stream().map(dtOsConverter::getDTOFromTask).collect(Collectors.toList());
         taskDTOS = filterTasks(search, taskDTOS);
-        log.info(String.format("Returning list of tasks: %s", taskDTOS));
+        log.debug(String.format("Returning list of tasks: %s", taskDTOS));
         return taskDTOS;
     }
 
@@ -178,8 +181,10 @@ public class TaskUtils {
      * @param descending boolean to sort tasks descending or ascending
      * @return list of tasks filtered and sorted by parameters
      */
-    public List<TaskDTO> findTasksByParameters(Integer page, List<TaskStatus> statuses, String search, String sort, Boolean descending){
-        log.info(String.format("Entering method to find tasks with statuses %s in page %s containing string %s sorted %s %s", statuses, page, search, sort, descending));
+    public List<TaskDTO> findTasksByParameters(Integer page, List<TaskStatus> statuses, String search,
+                                               String sort, Boolean descending){
+        log.debug("Entering method to find tasks with statuses {} in page {} containing string {} sorted {} {}",
+                statuses, page, search, sort, descending);
         List<Task> tasks;
 
         if(search == null){
@@ -194,11 +199,12 @@ public class TaskUtils {
         if (statuses == null || statuses.isEmpty()){
             statuses = Arrays.asList(TaskStatus.values());
         }
-        tasks = findAllTasksWithTaskStatusInAndSummaryOrDescriptionContainingSordedBy(statuses.stream().map(Enum::ordinal).collect(Collectors.toList()), search, sort, descending, page);
+        tasks = findAllTasksWithTaskStatusInAndSummaryOrDescriptionContainingSordedBy(statuses.stream().map(Enum::ordinal)
+                .collect(Collectors.toList()), search, sort, descending, page);
 
         List<TaskDTO> taskDTOS = tasks.stream().map(dtOsConverter::getDTOFromTask).collect(Collectors.toList());
 
-        log.info(String.format("Exiting with tasks: %s", taskDTOS));
+        log.debug(String.format("Exiting with tasks: %s", taskDTOS));
         return taskDTOS;
     }
 
@@ -211,14 +217,22 @@ public class TaskUtils {
      * @param page repository's page
      * @return List of tasks from specified page, sorted and filtered
      */
-    private List<Task> findAllTasksWithTaskStatusInAndSummaryOrDescriptionContainingSordedBy(List<Integer> statuses, String search, String sort, Boolean descending, Integer page) {
+    private List<Task> findAllTasksWithTaskStatusInAndSummaryOrDescriptionContainingSordedBy(List<Integer> statuses, String search,
+                                                                                             String sort, Boolean descending, Integer page) {
         if(sort.equals("")){
             return taskRepository.findAllByTaskStatusInAndDescriptionContainingOrSummaryContaining(statuses, search, search, PageRequest.of(page, PAGE_SIZE));
         }
         if(sort.equals("modified")){
             sort = "lastChanged";
         }
-        return taskRepository.findAllByTaskStatusInAndDescriptionContainingOrSummaryContaining(statuses, search, search, PageRequest.of(page, PAGE_SIZE, Sort.by(descending ? Sort.Direction.DESC : Sort.Direction.ASC, sort)));
+        try{
+            return taskRepository.findAllByTaskStatusInAndDescriptionContainingOrSummaryContaining(statuses, search, search,
+                    PageRequest.of(page, PAGE_SIZE, Sort.by(descending ? Sort.Direction.DESC : Sort.Direction.ASC, sort)));
+        } catch (Exception e){
+            sort = sort.replaceAll("[A-Z]", "_$0").toLowerCase();
+            return taskRepository.findAllByTaskStatusInAndDescriptionContainingOrSummaryContaining(statuses, search, search,
+                    PageRequest.of(page, PAGE_SIZE, Sort.by(descending ? Sort.Direction.DESC : Sort.Direction.ASC, sort)));
+        }
     }
 
     /**
@@ -237,7 +251,13 @@ public class TaskUtils {
         if(sort.equals("modified")){
             sort = "lastChanged";
         }
-        return taskRepository.findAllByTaskStatusInAndAssigneesContaining(statuses, user,
-                PageRequest.of(page, PAGE_SIZE, Sort.by(desc ? Sort.Direction.DESC : Sort.Direction.ASC, sort)));
+        try{
+            return taskRepository.findAllByTaskStatusInAndAssigneesContaining(statuses, user,
+                    PageRequest.of(page, PAGE_SIZE, Sort.by(desc ? Sort.Direction.DESC : Sort.Direction.ASC, sort)));
+        } catch (Exception e){
+            sort = sort.replaceAll("[A-Z]", "_$0").toLowerCase();
+            return taskRepository.findAllByTaskStatusInAndAssigneesContaining(statuses, user,
+                    PageRequest.of(page, PAGE_SIZE, Sort.by(desc ? Sort.Direction.DESC : Sort.Direction.ASC, sort)));
+        }
     }
 }

@@ -11,7 +11,7 @@
 
           <div class="row"> <strong class="col-3">Description: </strong>
             <span v-if="editMode && canEditAll" > <textarea @keyup="hasChanged" v-model="currentDescription" cols="50" rows="4"></textarea> </span>
-            <span  v-else v-html="tasksDescription('-')" class="col" id="description-span"></span>
+            <span @dblclick="editMode = canEditAll" v-else v-html="tasksDescription('-')" class="col" id="description-span"></span>
             <div @dblclick="editMode = canEditAll" v-show="showLongDescription" class="col long-description" id="description-over" v-html="tasksDescription('+')"></div>
           </div>
 

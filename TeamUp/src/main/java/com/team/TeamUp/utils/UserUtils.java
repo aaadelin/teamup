@@ -80,7 +80,7 @@ public class UserUtils {
      * @param eventType Type of the event
      */
     public void createEvent(User creator, String description, UserEventType eventType){
-        log.info(String.format("Entered method to create event with user %s, description %s and type %s", creator, description, eventType));
+        log.debug(String.format("Entered method to create event with user %s, description %s and type %s", creator, description, eventType));
         UserEvent userEvent = new UserEvent();
         userEvent.setCreator(creator);
         userEvent.setDescription(description);
@@ -95,7 +95,7 @@ public class UserUtils {
         history.add(userEvent);
         creator.setHistory(history);
         userRepository.save(creator);
-        log.info("Event successfully created");
+        log.debug("Event successfully created");
     }
 
     /**
@@ -147,7 +147,7 @@ public class UserUtils {
      * @return The user just created and saved
      */
     private User createAdmin(){
-        log.info("Creating admin");
+        log.debug("Creating admin");
         UserDTO userDTO = new UserDTO();
         userDTO.setFirstName("System");
         userDTO.setLastName("Administrator");
@@ -158,7 +158,7 @@ public class UserUtils {
 
         User user = dtOsConverter.getUserFromDTO(userDTO, UserStatus.ADMIN);
         user = userRepository.save(user);
-        log.info("Created admin with username {}", user.getUsername());
+        log.debug("Created admin with username {}", user.getUsername());
         return user;
     }
 
@@ -167,7 +167,7 @@ public class UserUtils {
      * Used at running the server when a new database is set and there are no users.
      */
     public void createAdminIfNoneExistent(){
-        log.info("Entering create admin if none existent");
+        log.debug("Entering create admin if none existent");
         if(userRepository.findAllByStatus(UserStatus.ADMIN).isEmpty()){
             createAdmin();
         }
@@ -184,10 +184,10 @@ public class UserUtils {
         for (int id : ids) {
             Optional<User> userOptional = userRepository.findById(id);
             if (userOptional.isPresent()) {
-                log.info(String.format("Adding user: %s", userOptional.get()));
+                log.debug(String.format("Adding user: %s", userOptional.get()));
                 users.add(dtOsConverter.getDTOFromUser(userOptional.get()));
             } else {
-                log.info(String.format("No user found with id %s", id));
+                log.debug(String.format("No user found with id %s", id));
                 return new ResponseEntity<>("NOT FOUND", HttpStatus.NOT_FOUND);
             }
         }
@@ -213,9 +213,6 @@ public class UserUtils {
      * @return List of userDTOs sorted by the sort criteria
      */
     public List<UserDTO> sortUsers(Integer page, String sort, Boolean isAdmin, Integer pageSize){
-        if (sort == null || sort.equals("")){
-            sort = "id";
-        }
         List<UserDTO> users;
         if(page == -1){
             if(isAdmin){

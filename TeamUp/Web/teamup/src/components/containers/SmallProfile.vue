@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div style="margin-left: 0">
     <div @click="openUserPage" title="Go to user" class="profile">
       <div class="before-profile">
       </div>

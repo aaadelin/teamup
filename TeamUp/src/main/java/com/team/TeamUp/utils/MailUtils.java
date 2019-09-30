@@ -30,11 +30,11 @@ public class MailUtils {
      * @param resetRequest containing the user to whom to send the request
      */
     public void sendResetURL(ResetRequest resetRequest) {
-        log.info("Entering method to send mail with parameter resetRequest {}", resetRequest);
+        log.debug("Entering method to send mail with parameter resetRequest {}", resetRequest);
 
         executorService.execute(()->{
             try {
-            log.info("Sending mail from thread {}", Thread.currentThread().getName());
+            log.debug("Sending mail from thread {}", Thread.currentThread().getName());
             String userName = resetRequest.getUser().getFirstName() + " " + resetRequest.getUser().getLastName();
             Email email = null;
                 email = EmailBuilder.startingBlank()
@@ -51,9 +51,9 @@ public class MailUtils {
                     .withSMTPServer("smtp.gmail.com", 587, "teamup.open", "Q3JXc]w&")
                     .buildMailer()
                     .sendMail(email);
-            log.info("Mail successfully sent from {}", Thread.currentThread().getName());
+            log.debug("Mail successfully sent from {}", Thread.currentThread().getName());
             } catch (IOException e) {
-                log.info("Mail failed sending: {}", e.getMessage());
+                log.debug("Mail failed sending: {}", e.getMessage());
                 e.printStackTrace();
             }
         });

@@ -9,6 +9,7 @@ import com.team.TeamUp.dtos.TaskDTO;
 import com.team.TeamUp.dtos.TeamDTO;
 import com.team.TeamUp.dtos.UserDTO;
 import com.team.TeamUp.persistence.TaskRepository;
+import com.team.TeamUp.persistence.TeamRepository;
 import com.team.TeamUp.persistence.UserEventRepository;
 import com.team.TeamUp.persistence.UserRepository;
 import com.team.TeamUp.utils.DTOsConverter;
@@ -46,6 +47,7 @@ public class RestGetUserController {
     private TaskRepository taskRepository;
     private UserEventRepository eventRepository;
     private UserValidation userValidation;
+    private TeamRepository teamRepository;
 
     private DTOsConverter dtOsConverter;
     private TaskUtils taskUtils;
@@ -58,7 +60,8 @@ public class RestGetUserController {
                                  DTOsConverter dtOsConverter,
                                  TaskUtils taskUtils,
                                  UserValidation userValidation,
-                                 UserUtils userUtils){
+                                 UserUtils userUtils,
+                                 TeamRepository teamRepository){
         this.userRepository = userRepository;
         this.taskRepository = taskRepository;
         this.eventRepository = eventRepository;
@@ -66,12 +69,22 @@ public class RestGetUserController {
         this.dtOsConverter = dtOsConverter;
         this.taskUtils = taskUtils;
         this.userUtils = userUtils;
+        this.teamRepository = teamRepository;
     }
 
+    /**
+     *
+     * @param ids list of ids of the users, optional parameter if you want to get specific users
+     * @param page page of the repository
+     * @param sort user's field to be sorted by
+     * @param filter sequence of characters to be found in their first name or last name
+     * @param headers headers of the requester
+     * @return list of users depending on the parameters
+     */
     @RequestMapping(value = "/users", method = GET)
     public ResponseEntity<?> getAllUsers(@RequestParam(name = "ids", required = false) List<Integer> ids,
                                          @RequestParam(name = "page", required = false, defaultValue = "-1") Integer page,
-                                         @RequestParam(name = "sort", required = false) String sort,
+                                         @RequestParam(name = "sort", required = false, defaultValue = "id") String sort,
                                          @RequestParam(name = "filter", required = false) String filter,
                                          @RequestHeader Map<String, String> headers) {
         if(ids != null) {
@@ -94,6 +107,11 @@ public class RestGetUserController {
         }
     }
 
+    /**
+     *
+     * @param headers headers containing the token of the user
+     * @return list of available user statuses
+     */
     @RequestMapping(value = "/user-status", method = GET)
     public ResponseEntity<?> getAllUserStatus(@RequestHeader Map<String, String> headers) {
         log.info(String.format("Entering get all possible user statuses method with headers: %s", headers.toString()));
@@ -102,6 +120,12 @@ public class RestGetUserController {
         return new ResponseEntity<>(userStatuses, HttpStatus.OK);
     }
 
+    /**
+     * Method used to get reported tasks of the same user without making another request containing the id
+     * @param key token of the user
+     * @param headers headers of the requester
+     * @return list of tasks the user is assigned to
+     */
     @RequestMapping(value = "/users/{key}/assigned-tasks", method = GET)
     public ResponseEntity<?> getAssignedTasksForUser(@PathVariable String key, @RequestHeader Map<String, String> headers) {
         log.info(String.format("Entering get user's assigned tasks with key %s and headers %s", key, headers));
@@ -117,6 +141,12 @@ public class RestGetUserController {
         return new ResponseEntity<>(filteredTasks, HttpStatus.OK);
     }
 
+    /**
+     * Method used to get reported tasks of the same user without making another request containing the id
+     * @param key token of the user
+     * @param headers headers of the requester
+     * @return list of reported tasks of the user
+     */
     @RequestMapping(value = "/users/{key}/reported-tasks", method = GET)
     public ResponseEntity<?> getReportedTasksByUser(@PathVariable String key, @RequestHeader Map<String, String> headers) {
         log.info(String.format("Entering get reported tasks by user with key %s and headers %s", key, headers));
@@ -131,6 +161,12 @@ public class RestGetUserController {
         return new ResponseEntity<>(filteredTasks, HttpStatus.OK);
     }
 
+    /**
+     *
+     * @param id user's id
+     * @param headers headers list of the requester
+     * @return details about the user with that id
+     */
     @RequestMapping(value = "/users/{id}", method = GET)
     public ResponseEntity<?> getUserById(@PathVariable int id, @RequestHeader Map<String, String> headers) {
         log.info(String.format("Entering get user by id method with userId: %d /n and headers: %s", id, headers.toString()));
@@ -144,7 +180,11 @@ public class RestGetUserController {
         }
     }
 
-
+    /**
+     *
+     * @param headers headers containing the token of the requester
+     * @return ok if the user is eligible to logout or forbidden if the key is not valid
+     */
     @RequestMapping(value = "/logout", method = GET)
     public ResponseEntity<?> logout(@RequestHeader Map<String, String> headers) {
         log.info(String.format("Entering logout method with headers: %s", headers.toString()));
@@ -165,6 +205,13 @@ public class RestGetUserController {
         return new ResponseEntity<>("FORBIDDEN", HttpStatus.FORBIDDEN);
     }
 
+    /**
+     *
+     * @param id user's id
+     * @param headers requester's headers
+     * @return user's photo if he has one or the default photo
+     * @throws IOException if there is a file error
+     */
     @RequestMapping(value = "/users/{id}/photo", method = GET, produces = "image/jpg")
     public ResponseEntity<?> getFile(@PathVariable("id") Integer id, @RequestHeader Map<String, String> headers) throws IOException {
         log.info(String.format("Entering get photo for user method with id: %s and headers: %s", id, headers));
@@ -185,6 +232,17 @@ public class RestGetUserController {
         }
     }
 
+    /**
+     *
+     * @param id user's id
+     * @param type String with 'assignedto' or 'assignedby' or empty string
+     * @param term search term
+     * @param statuses list of task statuses
+     * @param page number of page from the repository
+     * @param headers headers of the requester
+     * @return list of tasks in which the user with id ID is the reporter, assignee or any that contain term in summary or description,
+     * from that page in the repository.
+     */
     @RequestMapping(value = "users/{id}/tasks", method = GET)
     public ResponseEntity<?> getTasksFor(@PathVariable int id,
                                          @RequestParam(value = "type", required = false) String type,
@@ -223,6 +281,12 @@ public class RestGetUserController {
         }
     }
 
+    /**
+     *
+     * @param id user's id
+     * @param page repository's page number
+     * @return list of UserEvents of the user with ID from page PAGE in repository
+     */
     @RequestMapping(value = "/users/{id}/history", method = GET)
     public ResponseEntity<?> getUsersHistory(@PathVariable int id,
                                              @RequestParam(name = "page", required = false) Integer page){
@@ -273,6 +337,10 @@ public class RestGetUserController {
         return new ResponseEntity<>(counts, HttpStatus.OK);
     }
 
+    /**
+     *
+     * @return list of users that can be team leaders
+     */
     @RequestMapping(value = "/users/high-rank", method = GET)
     public ResponseEntity<?> getHigherRankUsers(){
         log.info("Entergin method to get high rank users");
@@ -283,6 +351,11 @@ public class RestGetUserController {
         return new ResponseEntity<>(dtos, HttpStatus.OK);
     }
 
+    /**
+     *
+     * @param id user's id
+     * @return team that the user is in or not found if he doesn't belong to any
+     */
     @RequestMapping(value = "/users/{id}/team", method = GET)
     public ResponseEntity<?> getUsersTeam(@PathVariable int id){
         log.info("Entering get team that contains the user method with user id {}", id);
@@ -294,5 +367,14 @@ public class RestGetUserController {
         }else {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
+    }
+
+    @RequestMapping(value = "/users/{id}/leading", method = GET)
+    public ResponseEntity<?> getUsersTeams(@PathVariable int id){
+        User user = userRepository.findById(id).orElseThrow();
+        List<TeamDTO> teams = teamRepository.findAllByLeader(user).stream()
+                .map(dtOsConverter::getDTOFromTeam).collect(Collectors.toList());
+
+        return new ResponseEntity<>(teams, HttpStatus.OK);
     }
 }
