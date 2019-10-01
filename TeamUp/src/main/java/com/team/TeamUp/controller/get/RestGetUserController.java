@@ -5,13 +5,11 @@ import com.team.TeamUp.domain.User;
 import com.team.TeamUp.domain.UserEvent;
 import com.team.TeamUp.domain.enums.TaskStatus;
 import com.team.TeamUp.domain.enums.UserStatus;
+import com.team.TeamUp.dtos.ProjectDTO;
 import com.team.TeamUp.dtos.TaskDTO;
 import com.team.TeamUp.dtos.TeamDTO;
 import com.team.TeamUp.dtos.UserDTO;
-import com.team.TeamUp.persistence.TaskRepository;
-import com.team.TeamUp.persistence.TeamRepository;
-import com.team.TeamUp.persistence.UserEventRepository;
-import com.team.TeamUp.persistence.UserRepository;
+import com.team.TeamUp.persistence.*;
 import com.team.TeamUp.utils.DTOsConverter;
 import com.team.TeamUp.utils.TaskUtils;
 import com.team.TeamUp.utils.UserUtils;
@@ -48,6 +46,7 @@ public class RestGetUserController {
     private UserEventRepository eventRepository;
     private UserValidation userValidation;
     private TeamRepository teamRepository;
+    private ProjectRepository projectRepository;
 
     private DTOsConverter dtOsConverter;
     private TaskUtils taskUtils;
@@ -61,7 +60,8 @@ public class RestGetUserController {
                                  TaskUtils taskUtils,
                                  UserValidation userValidation,
                                  UserUtils userUtils,
-                                 TeamRepository teamRepository){
+                                 TeamRepository teamRepository,
+                                 ProjectRepository projectRepository){
         this.userRepository = userRepository;
         this.taskRepository = taskRepository;
         this.eventRepository = eventRepository;
@@ -70,6 +70,7 @@ public class RestGetUserController {
         this.taskUtils = taskUtils;
         this.userUtils = userUtils;
         this.teamRepository = teamRepository;
+        this.projectRepository = projectRepository;
     }
 
     /**
@@ -313,11 +314,11 @@ public class RestGetUserController {
         List<Task> statistics;
         if(lastDays == null){
             log.info("Getting statistics from all time");
-            statistics = taskRepository.findAllByTaskStatusInAndAssigneesContaining(Arrays.asList(TaskStatus.values()), user);
+            statistics = taskRepository.findAllByAssigneesContaining(user);
         }else {
             // todo
             log.info(String.format("Getting statistics from last %s days", lastDays));
-            statistics = taskRepository.findAllByTaskStatusInAndAssigneesContaining(Arrays.asList(TaskStatus.values()), user);
+            statistics = taskRepository.findAllByAssigneesContaining(user);
         }
 
         Map<TaskStatus, Integer> statusCount = new HashMap<>();
@@ -371,10 +372,23 @@ public class RestGetUserController {
 
     @RequestMapping(value = "/users/{id}/leading", method = GET)
     public ResponseEntity<?> getUsersTeams(@PathVariable int id){
+        log.info("Entered method to get teams that user with id {} leads", id);
         User user = userRepository.findById(id).orElseThrow();
         List<TeamDTO> teams = teamRepository.findAllByLeader(user).stream()
                 .map(dtOsConverter::getDTOFromTeam).collect(Collectors.toList());
 
+        log.info("Exiting with teams {}", teams);
         return new ResponseEntity<>(teams, HttpStatus.OK);
+    }
+
+    @RequestMapping(value = "/users/{id}/projects", method = GET)
+    public ResponseEntity<?> getOwnedProjects (@PathVariable int id){
+        log.info("Enteing method to get user's owned project with user id {}", id);
+        User owner = userRepository.findById(id).orElseThrow();
+        List<ProjectDTO> projects = projectRepository.findAllByOwner(owner)
+                .stream().map(dtOsConverter::getDTOFromProject).collect(Collectors.toList());
+
+        log.info("Exiting with projects {}", projects);
+        return new ResponseEntity<>(projects, HttpStatus.OK);
     }
 }

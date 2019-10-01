@@ -20,11 +20,25 @@
         <div @click="deletePhoto" style="cursor: pointer; text-align: right" title="Delete photo">X</div>
       </div>
 
-      <div v-show="!editMode" class="col-3" style="text-align: center">
+      <div v-show="!editMode" class="col-3" style="text-align: center; cursor: pointer">
         <img width="200" height="200" class="rounded-circle" :src="image" alt="Profile" style="margin: 5px"/>
       </div>
-      <div class="col-6" style="text-align: center">
-      <apexchart type=pie width=450 :options="chartOptions" :series="series" @dataPointSelection="showTasksPopup"/>
+      <div class="col-6" style="text-align: left; min-width: 400px">
+
+        <div>
+          <apexchart type=pie width=450 :options="chartOptions" :series="series" @dataPointSelection="showTasksPopup"/>
+        </div>
+      <select class="form-control" @change="changeStatistics(statisticOption)" v-model="statisticOption" style="max-width: 300px">
+        <option :value="{type: 'user'}">
+          {{user.firstName}}'s statistics
+        </option>
+        <optgroup label="Teams" v-show="leadingTeams.length !== 0">
+          <option v-for="team in leadingTeams" :value="team" :key="team.name + team.id">{{team.name}}</option>
+        </optgroup>
+        <optgroup label="Projects" v-show="ownedProjects.length !== 0">
+          <option v-for="project in ownedProjects" :value="project" :key="project.name + project.id" @click="getProjectStatistics(project.id)">{{project.name}}</option>
+        </optgroup>
+      </select>
       </div>
     </div>
     <div class="col" style="text-align: left">
@@ -118,8 +132,15 @@
 </template>
 
 <script>
-
-import { getMyID, getTeam, getUserById, getUsersPhoto, getUserStatistics } from '../persistance/RestGetRepository'
+import {
+  getDetailedStatisticsByProjectId,
+  getLeadingTeams,
+  getMyID, getOwnedProjects,
+  getTeam, getTeamsStatistics,
+  getUserById,
+  getUsersPhoto,
+  getUserStatistics
+} from '../persistance/RestGetRepository'
 import UserProfileTimeLine from '../components/UserProfileTimeLine'
 import { diffYears } from '../utils/DateUtils'
 import TaskCategory from '../components/TaskCategory'
@@ -214,7 +235,10 @@ export default {
       myId: -1,
       uploadPercentage: 0,
       progressStyle: '',
-      team: null
+      team: null,
+      leadingTeams: [],
+      ownedProjects: [],
+      statisticOption: { type: 'user' }
     }
   },
   methods: {
@@ -235,15 +259,31 @@ export default {
       if (this.user === null) {
         this.$router.push('404')
       }
+      document.title = 'TeamUp | ' + this.user.firstName + ' ' + this.user.lastName
       if (this.user.department === null) {
         this.user.department = ''
       }
       this.canEdit = (this.myId === parseInt(this.userId))
       this.team = this.user.teamID !== -1 ? (await getTeam(this.user.teamID)) : {}
-      document.title = 'TeamUp | ' + this.user.firstName + ' ' + this.user.lastName
+
+      this.leadingTeams = await getLeadingTeams(this.userId)
+      this.ownedProjects = await getOwnedProjects(this.userId)
+
+      for (let i = 0; i < this.leadingTeams.length; i++) {
+        this.leadingTeams[i].type = 'team'
+      }
+      for (let i = 0; i < this.ownedProjects.length; i++) {
+        this.ownedProjects[i].type = 'project'
+      }
     },
     async getUserStatistics () {
       this.series = await getUserStatistics(this.userId)
+    },
+    async getProjectStatistics (projectID) {
+      this.series = await getDetailedStatisticsByProjectId(projectID)
+    },
+    async getTeamsStatistics (teamID) {
+      this.series = await getTeamsStatistics(teamID)
     },
     showTasksPopup (e, c, conf) {
       this.taskCategory = this.chartOptions.labels[conf.dataPointIndex]
@@ -283,6 +323,19 @@ export default {
     uploadInput (ev) {
       let files = ev.target.files
       this.uploadPhoto(files)
+    },
+    async changeStatistics (option) {
+      switch (option.type) {
+        case 'user':
+          this.getUserStatistics()
+          break
+        case 'team':
+          this.getTeamsStatistics(option.id)
+          break
+        case 'project':
+          this.getProjectStatistics(option.id)
+          break
+      }
     },
     changePassword () {
       if (this.newPassword === this.newPasswordAgain) {
@@ -348,6 +401,21 @@ export default {
     yearsSinceJoined () {
       let joined = new Date(this.user.joinedAt)
       return diffYears(joined, new Date())
+    },
+    optionsOfStatistics () {
+      let options = [['My statistics', this.getUserStatistics, this.userId]]
+
+      // if he is a team leader
+      for (let i = 0; i < this.leadingTeams.length; i++) {
+        options.push([this.leadingTeams[i].name, 'team', this.leadingTeams[i].id])
+      }
+
+      // if he owns projects
+      for (let i = 0; i < this.ownedProjects.length; i++) {
+        options.push([this.ownedProjects[i].name, this.getProjectStatistics, this.ownedProjects[i].id])
+      }
+
+      return options
     }
   }
 }

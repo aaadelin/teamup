@@ -6,6 +6,7 @@ import com.team.TeamUp.domain.enums.UserStatus;
 import com.team.TeamUp.dtos.*;
 import com.team.TeamUp.persistence.*;
 import com.team.TeamUp.utils.DTOsConverter;
+import com.team.TeamUp.utils.TaskUtils;
 import com.team.TeamUp.validation.UserValidation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,12 +38,13 @@ public class RestGetController {
     private ResetRequestRepository resetRequestRepository;
     private DTOsConverter dtOsConverter;
     private UserValidation userValidation;
+    private TaskUtils taskUtils;
 
     @Autowired
     public RestGetController(TeamRepository teamRepository, UserRepository userRepository, TaskRepository taskRepository,
                              ProjectRepository projectRepository, CommentRepository commentRepository, PostRepository postRepository,
                              DTOsConverter dtOsConverter, LocationRepository locationRepository, UserValidation userValidation,
-                             ResetRequestRepository resetRequestRepository) {
+                             ResetRequestRepository resetRequestRepository, TaskUtils taskUtils) {
         this.teamRepository = teamRepository;
         this.userRepository = userRepository;
         this.taskRepository = taskRepository ;
@@ -53,6 +55,7 @@ public class RestGetController {
         this.resetRequestRepository = resetRequestRepository;
         this.dtOsConverter = dtOsConverter;
         this.userValidation = userValidation;
+        this.taskUtils = taskUtils;
         log.info("Creating RestGetController");
     }
 
@@ -185,6 +188,15 @@ public class RestGetController {
         }
     }
 
+    @RequestMapping(value = "/projects/{id}/statistics/detailed", method = GET)
+    public ResponseEntity<?> getProjectDetailedStatisticsById(@PathVariable int id, @RequestHeader Map<String, String> headers) {
+        log.info("Entering get project's detailed statistics by id method with projectId: {}  and headers: {}", id, headers.toString());
+        Project project = projectRepository.findById(id).orElseThrow();
+
+        List<Integer> counts = taskUtils.createStatisticsFromListOfTasks(project.getTasks());
+        return new ResponseEntity<>(counts, HttpStatus.OK);
+    }
+
     @RequestMapping(value = "/projects/{id}/tasks", method = GET)
     public ResponseEntity<?> getProjectsTasks(@PathVariable int id,
                                               @RequestParam(name = "page", required = false, defaultValue = "0") Integer page,
@@ -256,7 +268,7 @@ public class RestGetController {
 
     @RequestMapping(value = "/requests/{id}", method = GET)
     public ResponseEntity<?> getRequestById(@PathVariable int id){
-        log.info(String.format("Entered method to get request with request id: %s", id));
+        log.info("Entered method to get request with request id: {}", id);
         ResetRequestDTO resetRequestDTO = dtOsConverter.getDTOFromResetRequest(resetRequestRepository.findById(id).orElseThrow());
 
         if(resetRequestDTO.getCreatedAt().equals(LocalDateTime.MIN)){
@@ -265,6 +277,16 @@ public class RestGetController {
 
         log.info(String.format("Exited with request %s", resetRequestDTO));
         return new ResponseEntity<>(resetRequestDTO, HttpStatus.OK);
+    }
+
+    @RequestMapping(value = "/teams/{id}/statistics", method = GET)
+    public ResponseEntity<?> getTeamsStatistics(@PathVariable int id){
+        log.info("Entered method to get teams statistics with team id {} ", id);
+        Team team = teamRepository.findById(id).orElseThrow();
+
+        List<Task> tasks = taskRepository.findDistinctByAssigneesIn(team.getMembers());
+        List<Integer> counts = taskUtils.createStatisticsFromListOfTasks(tasks);
+        return new ResponseEntity<>(counts, HttpStatus.OK);
     }
 }
 

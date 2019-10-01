@@ -23,21 +23,14 @@ public interface TaskRepository extends JpaRepository<Task, Integer> {
     List<Task> findAllByTaskStatus(TaskStatus taskStatus, Pageable pageable);
     List<Task> findAllByTaskStatusAndReporter(TaskStatus taskStatus, User reporter, Pageable pageable);
     List<Task> findAllByTaskStatusAndAssigneesContaining(TaskStatus taskStatus, User assignee, Pageable pageable);
-    List<Task> findAllByTaskStatusAndAssigneesContainingOrderByDeadlineAsc(TaskStatus taskStatus, User assignee, Pageable pageable);
-    List<Task> findAllByTaskStatusAndAssigneesContainingOrderByDeadlineDesc(TaskStatus taskStatus, User assignee, Pageable pageable);
     List<Task> findAllByTaskStatusInAndAssigneesContaining(List<TaskStatus> statuses, User user, Pageable pageable);
-    List<Task> findAllByTaskStatusInAndAssigneesContainingOrderByDeadlineAsc(List<TaskStatus> statuses, User user, Pageable pageable);
-    List<Task> findAllByTaskStatusInAndAssigneesContainingOrderByDeadlineDesc(List<TaskStatus> statuses, User user, Pageable pageable);
-    List<Task> findAllByTaskStatusInAndAssigneesContainingOrderByLastChangedAsc(List<TaskStatus> statuses, User user, Pageable pageable);
-    List<Task> findAllByTaskStatusInAndAssigneesContainingOrderByLastChangedDesc(List<TaskStatus> statuses, User user, Pageable pageable);
-    List<Task> findAllByTaskStatusInAndAssigneesContainingOrderByPriorityAsc(List<TaskStatus> statuses, User user, Pageable pageable);
-    List<Task> findAllByTaskStatusInAndAssigneesContainingOrderByPriorityDesc(List<TaskStatus> statuses, User user, Pageable pageable);
     List<Task> findAllByTaskStatusIn(List<TaskStatus> statuses, Pageable pageable);
     List<Task> findAllByAssigneesContainingAndTaskStatusIn(User assignee, List<TaskStatus> statuses, Pageable pageable);
     List<Task> findAllByProject(Project project);
     List<Task> findAllByProject(Project project, Pageable pageable);
     List<Task> findAllByProjectOrderByIdDesc(Project project, Pageable pageable);
     List<Task> findAllByTaskStatusInAndAssigneesContaining(List<TaskStatus> taskStatuses, User user);
+    List<Task> findDistinctByAssigneesIn(List<User> users);
 
     @Query(value = "select * from task t\n" +
             "where t.task_status in ?1 and (t.summary like concat('%', ?2, '%') or t.description like concat('%', ?2, '%'))", nativeQuery = true)

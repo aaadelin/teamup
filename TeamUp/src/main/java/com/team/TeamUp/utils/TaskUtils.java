@@ -11,9 +11,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Component
@@ -259,5 +257,27 @@ public class TaskUtils {
             return taskRepository.findAllByTaskStatusInAndAssigneesContaining(statuses, user,
                     PageRequest.of(page, PAGE_SIZE, Sort.by(desc ? Sort.Direction.DESC : Sort.Direction.ASC, sort)));
         }
+    }
+
+    /**
+     * Method to return statistics from a list of tasks
+     * @param tasks list of tasks
+     * @return list of integers containing the number of OPEN + REOPENED tasks, IN PROGRESS, UNDER REVIEW and APPROVED
+     */
+    public List<Integer> createStatisticsFromListOfTasks(List<Task> tasks){
+        Map<TaskStatus, Integer> statusCount = new HashMap<>();
+
+        for(Task task : tasks){
+            if(statusCount.containsKey(task.getTaskStatus())){
+                statusCount.put(task.getTaskStatus(), statusCount.get(task.getTaskStatus()) + 1);
+            }else {
+                statusCount.put(task.getTaskStatus(), 1);
+            }
+        }
+
+        return List.of(statusCount.getOrDefault(TaskStatus.OPEN, 0) + statusCount.getOrDefault(TaskStatus.REOPENED, 0),
+                statusCount.getOrDefault(TaskStatus.IN_PROGRESS, 0),
+                statusCount.getOrDefault(TaskStatus.UNDER_REVIEW, 0),
+                statusCount.getOrDefault(TaskStatus.APPROVED, 0));
     }
 }

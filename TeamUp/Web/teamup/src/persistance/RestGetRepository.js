@@ -218,6 +218,11 @@ export async function getStatisticsByProjectId (id) {
   return fetchDataFromUrl(url)
 }
 
+export async function getDetailedStatisticsByProjectId (id) {
+  let url = `${baseURL}/projects/${id}/statistics/detailed`
+  return fetchDataFromUrl(url)
+}
+
 export async function getHighRankUsers () {
   let url = `${baseURL}/users/high-rank`
   return fetchDataFromUrl(url, [])
@@ -262,4 +267,14 @@ export async function getFilteredUsers (filter) {
 export async function getLeadingTeams (userId) {
   let url = `${baseURL}/users/${userId}/leading`
   return fetchDataFromUrl(url)
+}
+
+export async function getOwnedProjects (userID) {
+  let url = `${baseURL}/users/${userID}/projects`
+  return fetchDataFromUrl(url)
+}
+
+export async function getTeamsStatistics (teamID) {
+  let url = `${baseURL}/teams/${teamID}/statistics`
+  return fetchDataFromUrl(url, [])
 }

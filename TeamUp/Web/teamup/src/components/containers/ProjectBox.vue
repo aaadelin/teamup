@@ -150,7 +150,7 @@ export default {
     async enableEdit () {
       let myId = await getMyID()
       let isAdmin = localStorage.getItem('isAdmin')
-      let isAbleToEdit = myId === this.project.ownerID || isAdmin === 'true'
+      let isAbleToEdit = (myId === this.project.ownerID) || (isAdmin === 'true')
       this.enableArchive = isAbleToEdit
       if (isAbleToEdit) {
         let deadline = document.getElementById('deadline' + this.project.id)

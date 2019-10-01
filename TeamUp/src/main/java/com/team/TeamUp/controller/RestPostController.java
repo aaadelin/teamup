@@ -171,6 +171,7 @@ public class RestPostController {
                 answer.put("key", user.get().getHashKey());
                 answer.put("isAdmin", isAdmin);
                 answer.put("name", user.get().getFirstName() + " " + user.get().getLastName());
+                answer.put("id", user.get().getId());
                 log.info(String.format("User has been successfully logged in and key sent :%s", user.get().getHashKey()));
                 return new ResponseEntity<>(answer.toString(), HttpStatus.OK);
             } else {
