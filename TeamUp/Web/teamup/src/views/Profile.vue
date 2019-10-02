@@ -20,8 +20,8 @@
         <div @click="deletePhoto" style="cursor: pointer; text-align: right" title="Delete photo">X</div>
       </div>
 
-      <div v-show="!editMode" class="col-3" style="text-align: center; cursor: pointer">
-        <img width="200" height="200" class="rounded-circle" :src="image" alt="Profile" style="margin: 5px"/>
+      <div v-show="!editMode" class="col-3" style="text-align: center">
+        <img width="200" height="200" class="rounded-circle" :src="image" alt="Profile" style="margin: 5px;cursor: pointer" @click="showPhoto = true"/>
       </div>
       <div class="col-6" style="text-align: left; min-width: 400px">
 
@@ -127,6 +127,11 @@
       :task-category="taskCategory"
       @close="showTasks=false"/>
     </div>
+    <modal-photo
+    :is-visible="showPhoto"
+    :photo="image"
+    @close="showPhoto = false">
+    </modal-photo>
   </div>
 
 </template>
@@ -148,6 +153,7 @@ import { uploadPhoto } from '../persistance/RestPostRepository'
 import { deletePhoto } from '../persistance/RestDeleteRepository'
 import { updatePassword } from '../persistance/RestPutRepository'
 import NProgress from 'nprogress'
+import ModalPhoto from '../components/containers/ModalPhoto'
 
 export default {
   watch: {
@@ -182,7 +188,7 @@ export default {
       }
     }
   },
-  components: { TaskCategory, UserProfileTimeLine },
+  components: { ModalPhoto, TaskCategory, UserProfileTimeLine },
   async mounted () {
     this.loadAllData()
     document.addEventListener('keyup', ev => {
@@ -203,6 +209,7 @@ export default {
   data () {
     return {
       image: '',
+      showPhoto: false,
       series: [1, 1, 1, 1],
       chartOptions: {
         labels: ['TO DO', 'IN PROGRESS', 'UNDER REVIEW', 'DONE'],
