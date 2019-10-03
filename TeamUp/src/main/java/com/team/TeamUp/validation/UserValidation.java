@@ -45,6 +45,16 @@ public class UserValidation {
     }
 
     /**
+     *
+     * @param userID user's id
+     * @return true if user is in the database or false otherwise
+     */
+    public boolean exists(int userID){
+        Optional<User> userOptional = userRepository.findById(userID);
+        return userOptional.isPresent();
+    }
+
+    /**
      * checks if the headers are sent from a valid user
      *
      * @param headers headers from client's request

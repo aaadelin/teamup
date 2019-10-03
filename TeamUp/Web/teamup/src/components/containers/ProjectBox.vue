@@ -179,16 +179,18 @@ export default {
       this.$emit('reload')
     },
     saveProject () {
-      let project = {
-        id: 0,
-        name: this.project.name,
-        description: this.newProject.description,
-        deadline: this.project.deadline,
-        ownerID: this.project.ownerID,
-        version: this.newProject.version
-      }
-      saveProject(project).then(_ => {
-        this.$emit('updates')
+      getMyID().then(id => {
+        let project = {
+          id: 0,
+          name: this.project.name,
+          description: this.newProject.description,
+          deadline: this.project.deadline,
+          ownerID: id,
+          version: this.newProject.version
+        }
+        saveProject(project).then(_ => {
+          this.$emit('updates')
+        })
       })
     }
   }

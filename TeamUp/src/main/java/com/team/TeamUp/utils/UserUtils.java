@@ -13,8 +13,6 @@ import org.apache.tomcat.util.codec.binary.Base64;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 
 import javax.crypto.Cipher;
@@ -179,19 +177,16 @@ public class UserUtils {
      * @return ResponseEntry with the users and OK status if all of the ids had a correspondent,
      * NOT FOUND status if at least one didn't had a correspondent
      */
-    public ResponseEntity<?> getUsersByIds(List<Integer> ids){
+    public List<UserDTO> getUsersByIds(List<Integer> ids){
         List<UserDTO> users = new ArrayList<>();
         for (int id : ids) {
             Optional<User> userOptional = userRepository.findById(id);
             if (userOptional.isPresent()) {
                 log.debug(String.format("Adding user: %s", userOptional.get()));
                 users.add(dtOsConverter.getDTOFromUser(userOptional.get()));
-            } else {
-                log.debug(String.format("No user found with id %s", id));
-                return new ResponseEntity<>("NOT FOUND", HttpStatus.NOT_FOUND);
             }
         }
-        return new ResponseEntity<>(users, HttpStatus.OK);
+        return users;
     }
 
     /**
