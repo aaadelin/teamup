@@ -38,8 +38,8 @@ public class RestGetUserController {
 
 
     private TaskService taskService;
-    private UserValidation userValidation;
     private UserService userService;
+    private UserValidation userValidation;
 
     private DTOsConverter dtOsConverter;
     private TaskUtils taskUtils;
