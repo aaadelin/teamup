@@ -34,10 +34,11 @@ public class UserService {
     private static final int PAGE_SIZE = 10;
 
     private UserRepository userRepository;
-    private ProjectRepository projectRepository;
-    private TeamRepository teamRepository;
+    private ProjectService projectService;
+    private TeamService teamService;
+    private TaskService taskService;
+
     private UserEventRepository eventRepository;
-    private TaskRepository taskRepository;
 
     private UserUtils userUtils;
     private UserValidation userValidation;
@@ -45,18 +46,18 @@ public class UserService {
 
     @Autowired
     public UserService(UserRepository userRepository,
-                       ProjectRepository projectRepository,
-                       TeamRepository teamRepository,
+                       ProjectService projectService,
+                       TeamService teamService,
                        UserEventRepository eventRepository,
-                       TaskRepository taskRepository,
+                       TaskService taskService,
                        UserUtils userUtils,
                        UserValidation userValidation,
                        DTOsConverter dtOsConverter){
         this.userRepository = userRepository;
-        this.projectRepository = projectRepository;
-        this.teamRepository = teamRepository;
+        this.projectService = projectService;
+        this.teamService = teamService;
         this.eventRepository = eventRepository;
-        this.taskRepository = taskRepository;
+        this.taskService = taskService;
 
         this.userUtils = userUtils;
         this.userValidation = userValidation;
@@ -64,19 +65,19 @@ public class UserService {
     }
 
     public List<TaskDTO> getReportedTasks(User user){
-        return taskRepository.findAll().stream()
+        return taskService.getAll().stream()
                 .filter(task -> task.getReporter().equals(user))
                 .map(dtOsConverter::getDTOFromTask).collect(Collectors.toList());
     }
 
     public List<TaskDTO> getAssignedTasks(int userID){
-        User user = getUserByID(userID);
+        User user = getByID(userID);
         return getAssignedTasks(user);
     }
 
     public List<TaskDTO> getAssignedTasks(User user){
 
-        return taskRepository.findAll().stream()
+        return taskService.getAll().stream()
                 .filter(task -> task.getAssignees().contains(user))
                 .map(dtOsConverter::getDTOFromTask).collect(Collectors.toList());
 
@@ -87,7 +88,7 @@ public class UserService {
      * @param key user's hashKey
      * @return user that corresponds to that key
      */
-    public User getUserByHashKey(String key){
+    public User getByHashKey(String key){
         return userRepository.findByHashKey(key).orElseThrow();
     }
 
@@ -200,7 +201,7 @@ public class UserService {
      * @return user with that id
      * @throws NoSuchElementException if there is not an user with that id
      */
-    public User getUserByID(int id){
+    public User getByID(int id){
         return userRepository.findById(id).orElseThrow(NoSuchElementException::new);
     }
 
@@ -211,7 +212,7 @@ public class UserService {
      * @throws NoSuchElementException if there is not an user with that id
      */
     public UserDTO getUserDTOByID(int id){
-        User user = getUserByID(id);
+        User user = getByID(id);
         return dtOsConverter.getDTOFromUser(user);
     }
 
@@ -222,7 +223,7 @@ public class UserService {
      */
     public List<TeamDTO> getUsersLeadingTeams(int userID){
         User user = userRepository.findById(userID).orElseThrow();
-        return teamRepository.findAllByLeader(user).stream()
+        return teamService.getByLeader(user).stream()
                 .map(dtOsConverter::getDTOFromTeam).collect(Collectors.toList());
     }
 
@@ -235,7 +236,19 @@ public class UserService {
         log.debug("Entered method to get user's owned projects with userid {}", userID);
         User owner = userRepository.findById(userID).orElseThrow();
 
-        return projectRepository.findAllByOwner(owner)
+        return projectService.getByOwner(owner)
                 .stream().map(dtOsConverter::getDTOFromProject).collect(Collectors.toList());
+    }
+
+    public User save(User user) {
+        return userRepository.save(user);
+    }
+
+    public boolean exists(int id) {
+        return userRepository.findById(id).isPresent();
+    }
+
+    public Optional<User> findByUsernameAndPassword(String username, String password) {
+        return userRepository.findByUsernameAndPassword(username, password);
     }
 }

@@ -29,12 +29,12 @@
         </li>
         <li style="text-align: left; padding-left: 20px">
           <label>
-          <input name="sort" type="radio" checked="checked" value="" @change="sortChanged">
+          <input name="sort" type="radio"  value="" @change="sortChanged">
             None
           </label>
           <br>
           <label>
-            <input name="sort" type="radio" value="deadline" @change="sortChanged">
+            <input name="sort" type="radio" checked="checked" value="deadline" @change="sortChanged">
             By deadline
           </label>
           <br>

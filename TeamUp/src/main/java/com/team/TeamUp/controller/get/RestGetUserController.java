@@ -109,7 +109,7 @@ public class RestGetUserController {
     public ResponseEntity<?> getAssignedTasksForUser(@PathVariable String key, @RequestHeader Map<String, String> headers) {
         log.info(String.format("Entering get user's assigned tasks with key %s and headers %s", key, headers));
 
-        User user = userService.getUserByHashKey(key);
+        User user = userService.getByHashKey(key);
         log.info(String.format("Acquiring tasks assigned to user %s ", user));
 
         List<TaskDTO> filteredTasks = userService.getAssignedTasks(user);
@@ -127,7 +127,7 @@ public class RestGetUserController {
     @RequestMapping(value = "/users/{key}/reported-tasks", method = GET)
     public ResponseEntity<?> getReportedTasksByUser(@PathVariable String key, @RequestHeader Map<String, String> headers) {
         log.info(String.format("Entering get reported tasks by user with key %s and headers %s", key, headers));
-        User user = userService.getUserByHashKey(key);
+        User user = userService.getByHashKey(key);
         log.info(String.format("Acquiring tasks reported by user %s ", user));
 
         List<TaskDTO> filteredTasks = userService.getReportedTasks(user);
@@ -200,7 +200,7 @@ public class RestGetUserController {
                                          @RequestParam(value = "page") Integer page,
                                          @RequestHeader Map<String, String> headers) {
         log.info(String.format("Entering get user's tasks with user id %s, type value %s, term value %s, page %s, statuses %s and headers %s", id, type, term, page, statuses, headers));
-        User user = userService.getUserByID(id);
+        User user = userService.getByID(id);
         if(statuses == null || statuses.size() == 0) {
             //if no statuses are selected, all tatuses are being taken into consideration
             statuses = Arrays.asList(TaskStatus.values());
@@ -265,7 +265,7 @@ public class RestGetUserController {
                                                 @RequestParam(name = "lastDays", required = false) Integer lastDays,
                                                 @RequestParam(name = "reported", required = false) Boolean reported){
         log.info(String.format("Entered get user's statistics with id %s, reported %s and number of last days: %s", id, reported, lastDays));
-        User user = userService.getUserByID(id);
+        User user = userService.getByID(id);
         // todo include reported or remove the parameter
         List<Task> statistics = taskService.getTasksWhereUserIsAssigned(user, lastDays);
         List<Integer> counts = taskUtils.createStatisticsFromListOfTasks(statistics);
@@ -294,7 +294,7 @@ public class RestGetUserController {
     public ResponseEntity<?> getUsersTeam(@PathVariable int id){
         log.info("Entering get team that contains the user method with user id {}", id);
         if (userValidation.exists(id)){
-            TeamDTO teamDTO = dtOsConverter.getDTOFromTeam(userService.getUserByID(id).getTeam());
+            TeamDTO teamDTO = dtOsConverter.getDTOFromTeam(userService.getByID(id).getTeam());
             log.info("Exiting method with teamDTO {}", teamDTO);
             return new ResponseEntity<>(teamDTO, HttpStatus.OK);
         }else {

@@ -3,7 +3,7 @@ package com.team.TeamUp.controller;
 import com.team.TeamUp.domain.User;
 import com.team.TeamUp.domain.enums.UserEventType;
 import com.team.TeamUp.domain.enums.UserStatus;
-import com.team.TeamUp.persistence.UserRepository;
+import com.team.TeamUp.service.UserService;
 import com.team.TeamUp.utils.UserUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,7 +14,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
 import java.util.Map;
-import java.util.Optional;
 
 //DELETE methods - for deleting
 
@@ -24,12 +23,12 @@ import java.util.Optional;
 @Slf4j
 public class RestDeleteController {
     
-    private UserRepository userRepository;
+    private UserService userService;
     private UserUtils userUtils;
 
     @Autowired
-    public RestDeleteController(UserRepository userRepository, UserUtils userUtils) {
-        this.userRepository = userRepository;
+    public RestDeleteController(UserService userService, UserUtils userUtils) {
+        this.userService = userService;
         this.userUtils = userUtils;
         log.info("Creating RestDeleteController");
     }
@@ -41,12 +40,12 @@ public class RestDeleteController {
     @RequestMapping(value = "/users/{id}", method = RequestMethod.DELETE)
     public ResponseEntity<?> deleteUser(@PathVariable int id, @RequestHeader Map<String, String> headers) {
         log.info(String.format("Entering delete user method with user id: %s \n and headers: %s", id, headers.toString()));
-        Optional<User> userOptional = userRepository.findById(id);
-        if (userOptional.isPresent() && userOptional.get().getStatus() != UserStatus.ADMIN){ //users with status admin cannot be deleted
-            userUtils.createEvent(userRepository.findByHashKey(headers.get("token")).orElseThrow(),
-                    String.format("Deleted user \"%s %s\"", userOptional.get().getFirstName(), userOptional.get().getLastName()),
+        User user = userService.getByID(id);
+        if (user.getStatus() != UserStatus.ADMIN){ //users with status admin cannot be deleted
+            userUtils.createEvent(userService.getByHashKey(headers.get("token")),
+                    String.format("Deleted user \"%s %s\"", user.getFirstName(), user.getLastName()),
                     UserEventType.DELETE);
-            userUtils.deleteUserInitiated(userOptional.get());
+            userUtils.deleteUserInitiated(user);
 //            userRepository.deleteById(id); // todo de-comment this line
             log.info(String.format("User with id %s has been successfully deleted", id));
             return new ResponseEntity<>("OK", HttpStatus.OK);
@@ -66,13 +65,13 @@ public class RestDeleteController {
     public ResponseEntity<?> deletePhoto(@PathVariable int id,
                                          @RequestHeader Map<String, String> headers) throws IOException {
         log.info(String.format("Entered delete photo with headers: %s", headers));
-        Optional<User> userOptional = userRepository.findByHashKey(headers.get("token"));
-        if(userOptional.isPresent() && (userOptional.get().getStatus() == UserStatus.ADMIN || userOptional.get().getId() == id)){
-            ClassPathResource resource = new ClassPathResource("static/img/" + userOptional.get().getPhoto());
+        User user = userService.getByHashKey(headers.get("token"));
+        if(user.getStatus() == UserStatus.ADMIN || user.getId() == id){
+            ClassPathResource resource = new ClassPathResource("static/img/" + user.getPhoto());
             if(resource.exists()){
                 boolean deleted = resource.getFile().delete();
-                userOptional.get().setPhoto(null);
-                userRepository.save(userOptional.get());
+                user.setPhoto(null);
+                userService.save(user);
                 if(deleted){
                     log.info("Photo deleted successfully");
                     return new ResponseEntity<>(HttpStatus.OK);

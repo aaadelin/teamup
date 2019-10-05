@@ -4,7 +4,7 @@ import com.team.TeamUp.domain.*;
 import com.team.TeamUp.domain.enums.UserEventType;
 import com.team.TeamUp.domain.enums.UserStatus;
 import com.team.TeamUp.dtos.*;
-import com.team.TeamUp.persistence.*;
+import com.team.TeamUp.service.*;
 import com.team.TeamUp.utils.*;
 import lombok.extern.slf4j.Slf4j;
 import org.json.JSONObject;
@@ -34,28 +34,29 @@ import static org.springframework.web.bind.annotation.RequestMethod.POST;
 public class RestPostController {
 
     private UserUtils userUtils;
-    private TeamRepository teamRepository;
-    private UserRepository userRepository;
-    private TaskRepository taskRepository;
-    private ProjectRepository projectRepository;
-    private CommentRepository commentRepository;
-    private PostRepository postRepository;
+
+    private TeamService teamService;
+    private UserService userService;
+    private TaskService taskService;
+    private ProjectService projectService;
+    private CommentService commentService;
+    private PostService postService;
+    private ResetRequestService resetRequestService;
     private DTOsConverter dtOsConverter;
-    private ResetRequestRepository resetRequestRepository;
     private MailUtils mailUtils;
 
     @Autowired
-    public RestPostController(TeamRepository teamRepository, UserRepository userRepository, TaskRepository taskRepository,
-                              ProjectRepository projectRepository, CommentRepository commentRepository, PostRepository postRepository,
-                              DTOsConverter dtOsConverter, UserUtils userUtils, ResetRequestRepository resetRequestRepository,
+    public RestPostController(TeamService teamService, UserService userService, TaskService taskService,
+                              ProjectService projectService, CommentService commentService, PostService postService,
+                              DTOsConverter dtOsConverter, UserUtils userUtils, ResetRequestService resetRequestService,
                               MailUtils mailUtils) {
-        this.teamRepository = teamRepository;
-        this.userRepository = userRepository;
-        this.taskRepository = taskRepository;
-        this.projectRepository = projectRepository;
-        this.commentRepository = commentRepository;
-        this.postRepository = postRepository;
-        this.resetRequestRepository = resetRequestRepository;
+        this.teamService = teamService;
+        this.userService = userService;
+        this.taskService = taskService;
+        this.projectService = projectService;
+        this.commentService = commentService;
+        this.postService = postService;
+        this.resetRequestService = resetRequestService;
         this.dtOsConverter = dtOsConverter;
         this.userUtils = userUtils;
         this.mailUtils = mailUtils;
@@ -65,13 +66,13 @@ public class RestPostController {
 
     @RequestMapping(value = "/user", method = POST)
     public ResponseEntity<?> addUser(@RequestBody UserDTO user, @RequestHeader Map<String, String> headers) {
-        userUtils.createEvent(userRepository.findByHashKey(headers.get("token")).orElseThrow(),
+        userUtils.createEvent(userService.getByHashKey(headers.get("token")),
                             String.format("Created user \"%s %s\"", user.getFirstName(), user.getLastName()),
                             UserEventType.CREATE);
         log.info(String.format("Entering method create user with user: %s and headers: %s", user, headers));
         User userToSave = dtOsConverter.getUserFromDTO(user, UserStatus.ADMIN);
         userToSave.setActive(false);
-        userRepository.save(userToSave);
+        userService.save(userToSave);
 
         log.info("User has been successfully created and saved in database");
         return new ResponseEntity<>("OK", HttpStatus.OK);
@@ -79,25 +80,25 @@ public class RestPostController {
 
     @RequestMapping(value = "/project", method = POST)
     public ResponseEntity<?> addProject(@RequestBody ProjectDTO projectDTO, @RequestHeader Map<String, String> headers) {
-        userUtils.createEvent(userRepository.findByHashKey(headers.get("token")).orElseThrow(),
+        userUtils.createEvent(userService.getByHashKey(headers.get("token")),
                 String.format("Created project \"%s\"", projectDTO.getName()),
                 UserEventType.CREATE);
         log.info(String.format("Entering method create project with project: %s and headers: %s", projectDTO, headers));
-        projectRepository.save(dtOsConverter.getProjectFromDTO(projectDTO));
+        projectService.save(dtOsConverter.getProjectFromDTO(projectDTO));
         log.info("Project has been successfully created and saven in database");
         return new ResponseEntity<>("OK", HttpStatus.OK);
     }
 
     @RequestMapping(value = "/task", method = POST)
     public ResponseEntity<?> addTask(@RequestBody TaskDTO taskDTO, @RequestHeader Map<String, String> headers) {
-        userUtils.createEvent(userRepository.findByHashKey(headers.get("token")).orElseThrow(),
+        userUtils.createEvent(userService.getByHashKey(headers.get("token")),
                 String.format("Created task \"%s\"", taskDTO.getSummary()),
                 UserEventType.CREATE);
         log.info(String.format("Entering method create task with task: %s and headers: %s", taskDTO, headers));Task task = dtOsConverter.getTaskFromDTO(taskDTO, headers.get("token"));
-        taskRepository.save(task);
+        taskService.save(task);
         Post post = new Post();
         post.setTask(task);
-        postRepository.save(post);
+        postService.save(post);
         log.info("Task has been successfully created and saved to database");
         return new ResponseEntity<>("OK", HttpStatus.OK);
     }
@@ -105,13 +106,13 @@ public class RestPostController {
 
     @RequestMapping(value = "/team", method = POST)
     public ResponseEntity<?> addTeam(@RequestBody TeamDTO team, @RequestHeader Map<String, String> headers) {
-        userUtils.createEvent(userRepository.findByHashKey(headers.get("token")).orElseThrow(),
+        userUtils.createEvent(userService.getByHashKey(headers.get("token")),
                 String.format("Created team \"%s\" on department \"%s\"", team.getName(), team.getDepartment()),
                 UserEventType.CREATE);
         log.info(String.format("Entering method create team with team: %s and headers: %s", team, headers));
-        User user = userRepository.findByHashKey(headers.get("token")).orElseThrow();
+        User user = userService.getByHashKey(headers.get("token"));
         Team newTeam = dtOsConverter.getTeamFromDTO(team, user.getStatus());
-        teamRepository.save(newTeam);
+        teamService.save(newTeam);
         return new ResponseEntity<>("OK", HttpStatus.OK);
     }
 
@@ -121,21 +122,20 @@ public class RestPostController {
         if(commentDTO.getTitle() == null || commentDTO.getTitle().equals("")){
             return new ResponseEntity<>(HttpStatus.FORBIDDEN);
         }
-        userUtils.createEvent(userRepository.findByHashKey(headers.get("token")).orElseThrow(),
+        userUtils.createEvent(userService.getByHashKey(headers.get("token")),
                 String.format("Added comment \"%s\" at task \"%s\"", commentDTO.getTitle().substring(0, Math.min(commentDTO.getTitle().length(), 30)),
-                        postRepository.findById(commentDTO.getPostId())
-                                .orElseThrow()
+                        postService.getByID(commentDTO.getPostId())
                                 .getTask()
                                 .getSummary()),
                 UserEventType.CREATE);
-        User user = userRepository.findByHashKey(headers.get("token")).orElseGet(User::new);
+        User user = userService.getByHashKey(headers.get("token"));
         commentDTO.setCreator(dtOsConverter.getDTOFromUser(user));
         Comment newComment = dtOsConverter.getCommentFromDTO(commentDTO);
-        commentRepository.save(newComment);
+        commentService.save(newComment);
 
         Post post = newComment.getPost();
         post.addComment(newComment);
-        postRepository.save(post);
+        postService.save(post);
 
         return new ResponseEntity<>("OK", HttpStatus.OK);
     }
@@ -152,7 +152,7 @@ public class RestPostController {
         if (username != null) {
             password = TokenUtils.getMD5Token(password);
 
-            Optional<User> user = userRepository.findByUsernameAndPassword(username, password);
+            Optional<User> user = userService.findByUsernameAndPassword(username, password);
             if (user.isPresent() && !user.get().isLocked()) {
                 boolean isAdmin = false;
 
@@ -164,7 +164,7 @@ public class RestPostController {
                     isAdmin = true;
                 }
 
-                userRepository.save(realUser);
+                userService.save(realUser);
                 log.info("User's status has been saved to database as active");
 
                 JSONObject answer = new JSONObject();
@@ -190,14 +190,14 @@ public class RestPostController {
     ) throws IOException {
 
         log.info("Entering method to upload photo with id {}", id);
-        if (userRepository.findById(id).isEmpty()){
+        if (!userService.exists(id)){
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
 
-        Optional<User> userOptional = userRepository.findByHashKey(headers.get("token"));
-        if(userOptional.isPresent() && (userOptional.get().getId() == id || userOptional.get().getStatus() == UserStatus.ADMIN)){
-            userOptional.get().setPhoto(String.valueOf(userOptional.get().getId()));
-            userRepository.save(userOptional.get());
+        User user = userService.getByHashKey(headers.get("token"));
+        if(user.getId() == id || user.getStatus() == UserStatus.ADMIN){
+            user.setPhoto(String.valueOf(user.getId()));
+            userService.save(user);
         } else {
             return new ResponseEntity<>(HttpStatus.FORBIDDEN);
         }
@@ -224,7 +224,7 @@ public class RestPostController {
         log.info(String.format("Entered method to save new request with requestBody %s", resetRequestDTO));
 
         ResetRequest resetRequest = dtOsConverter.getResetRequestFromDTO(resetRequestDTO);
-        resetRequest = resetRequestRepository.save(resetRequest);
+        resetRequest = resetRequestService.save(resetRequest);
         mailUtils.sendResetURL(resetRequest);
 
         log.info("Exiting method to create a new request with status OK");

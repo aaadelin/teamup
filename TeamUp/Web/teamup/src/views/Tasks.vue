@@ -156,7 +156,7 @@ export default {
       showMore: [true, true, true, true],
       maxPagesLoad: 5,
       filterWord: '',
-      query: 'sort=&desc=false',
+      query: 'sort=deadline&desc=false',
       smallView: false,
       showScroll: false,
       showMenu: true,
