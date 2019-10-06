@@ -85,6 +85,14 @@ public class DTOsConverter {
             userDTO.setTeamID(-1);
         }
 
+        int tasksUnfinished = taskRepository.countTaskByAssigneesContainingAndTaskStatusIn(user, List.of(TaskStatus.OPEN, TaskStatus.REOPENED, TaskStatus.IN_PROGRESS));
+
+        if(tasksUnfinished > 0){
+            userDTO.setHasUnfinishedTasks(true);
+        }else{
+            userDTO.setHasUnfinishedTasks(false);
+        }
+
         log.debug(String.format("UserDTO instance created: %s", userDTO));
         return userDTO;
     }

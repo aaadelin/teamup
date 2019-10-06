@@ -43,6 +43,8 @@ public class UserDTO {
 
     private boolean locked;
 
+    private boolean hasUnfinishedTasks;
+
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     public LocalDateTime getLastActive() {
         return lastActive;

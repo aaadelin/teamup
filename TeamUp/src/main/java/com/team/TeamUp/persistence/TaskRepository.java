@@ -33,7 +33,7 @@ public interface TaskRepository extends JpaRepository<Task, Integer> {
     List<Task> findAllByTaskStatusInAndAssigneesContaining(List<TaskStatus> taskStatuses, User user);
     List<Task> findDistinctByAssigneesIn(List<User> users);
     List<Task> findAllByAssigneesContainingAndLastChangedAfter(User assignee, Date dateAfter);
-
+    int countTaskByAssigneesContainingAndTaskStatusIn(User assignee, List<TaskStatus> statuses);
 
     @Query(value = "select * from task t\n" +
             "where t.task_status in ?1 and (t.summary like concat('%', ?2, '%') or t.description like concat('%', ?2, '%'))", nativeQuery = true)

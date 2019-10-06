@@ -5,6 +5,7 @@ import com.team.TeamUp.domain.User;
 import com.team.TeamUp.dtos.ProjectDTO;
 import com.team.TeamUp.persistence.ProjectRepository;
 import com.team.TeamUp.utils.DTOsConverter;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Component;
 
@@ -19,6 +20,7 @@ public class ProjectService {
     private ProjectRepository projectRepository;
     private DTOsConverter dtOsConverter;
 
+    @Autowired
     public ProjectService(ProjectRepository projectRepository,
                           DTOsConverter dtOsConverter){
         this.projectRepository = projectRepository;

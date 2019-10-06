@@ -5,6 +5,7 @@ import com.team.TeamUp.domain.User;
 import com.team.TeamUp.dtos.TeamDTO;
 import com.team.TeamUp.persistence.TeamRepository;
 import com.team.TeamUp.utils.DTOsConverter;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -17,8 +18,11 @@ public class TeamService {
     private TeamRepository teamRepository;
     private DTOsConverter dtOsConverter;
 
-    public TeamService (TeamRepository teamRepository){
+    @Autowired
+    public TeamService (TeamRepository teamRepository,
+                        DTOsConverter dtOsConverter){
         this.teamRepository = teamRepository;
+        this.dtOsConverter = dtOsConverter;
     }
 
     public List<Team> getAllTeams(){

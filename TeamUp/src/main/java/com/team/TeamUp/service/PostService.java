@@ -5,6 +5,7 @@ import com.team.TeamUp.domain.Task;
 import com.team.TeamUp.dtos.PostDTO;
 import com.team.TeamUp.persistence.PostRepository;
 import com.team.TeamUp.utils.DTOsConverter;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -18,6 +19,7 @@ public class PostService {
     private PostRepository postRepository;
     private DTOsConverter dtOsConverter;
 
+    @Autowired
     public PostService(PostRepository postRepository,
                        DTOsConverter dtOsConverter){
         this.postRepository = postRepository;

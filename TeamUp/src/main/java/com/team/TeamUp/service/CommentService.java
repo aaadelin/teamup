@@ -2,6 +2,7 @@ package com.team.TeamUp.service;
 
 import com.team.TeamUp.domain.Comment;
 import com.team.TeamUp.persistence.CommentRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -11,6 +12,7 @@ public class CommentService {
 
     private CommentRepository commentRepository;
 
+    @Autowired
     public CommentService(CommentRepository commentRepository){
         this.commentRepository = commentRepository;
     }
