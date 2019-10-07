@@ -256,7 +256,7 @@ export async function getUsersTeam (userId) {
 
 export async function getUsersSortBy (sort = '', page = -1) {
   let url = `${baseURL}/users?sort=${sort}&page=${page}`
-  return fetchDataFromUrl(url)
+  return fetchDataFromUrl(url, [])
 }
 
 export async function getFilteredUsers (filter) {

@@ -46,7 +46,7 @@ public class RestDeleteController {
                     String.format("Deleted user \"%s %s\"", user.getFirstName(), user.getLastName()),
                     UserEventType.DELETE);
             userUtils.deleteUserInitiated(user);
-//            userRepository.deleteById(id); // todo de-comment this line
+            userService.deleteById(id); // todo de-comment this line
             log.info(String.format("User with id %s has been successfully deleted", id));
             return new ResponseEntity<>("OK", HttpStatus.OK);
         }

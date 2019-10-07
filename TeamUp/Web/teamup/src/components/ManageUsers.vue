@@ -31,6 +31,7 @@
 
   <create-user class="overflow-auto"
                :is-visible="addUserIsVisible"
+               :users="users"
                ref="createUser"
                @done="closeUser"/>
 </div>
@@ -50,6 +51,9 @@ export default {
     this.getUsers()
     let interval = setInterval(() => {
       this.teams = this.$refs.createUser.teams
+      if (this.teams === null) {
+        this.teams = []
+      }
       this.statuses = this.$refs.createUser.statuses
       if (this.teams.length !== 0 && this.statuses.length !== 0) {
         clearInterval(interval)
@@ -114,11 +118,9 @@ export default {
 
       if (type === 'cancel' && this.editCount === 0) {
         this.headers[this.getIndex(this.headers, 'Mail')] = 'Last Active'
-        // this.headers.splice(this.headers.length - 1, 1); this.headers.splice(4, 0, 'Last Active')
         this.hideColumn = true
       } else if (!appeared && this.editCount !== 0) {
         this.headers[this.getIndex(this.headers, 'Last Active')] = 'Mail'
-        // this.headers.push('Mail'); this.headers.splice(this.getIndex(this.headers, 'Last Active'), 1)
         this.hideColumn = false
       }
     },

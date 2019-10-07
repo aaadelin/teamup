@@ -137,7 +137,8 @@ public class RestPutController{
 
             User user = userService.getByHashKey(headers.get("token"));
             if (taskByID.getAssignees().contains(user) ||
-                            taskByID.getReporter().getId() == user.getId()) {
+                taskByID.getReporter().getId() == user.getId() ||
+                user.getStatus().equals(UserStatus.ADMIN)) {
 
                 Task task = dtOsConverter.getTaskFromDTOForUpdate(taskDTO, user);
                 taskService.save(task);

@@ -127,12 +127,15 @@
 
   </div>
   </transition>
+<!--  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/1.5.3/jspdf.debug.js" integrity="sha384-NaWTHo/8YCBYJ59830LTz/P4aQZK1sS0SneOgAvhsIl3zBu8r9RevNg5lHCHAuQ/" crossorigin="anonymous"></script>-->
 </template>
 
 <script>
 import 'pc-bootstrap4-datetimepicker/build/css/bootstrap-datetimepicker.css'
 import { getTeams, getUserStatuses } from '../../persistance/RestGetRepository'
 import { saveUser } from '../../persistance/RestPostRepository'
+// import jsPDF from '../../utils/jsPDF-1.3.2/jspdf'
+import JsPDF from 'jspdf'
 
 export default {
   async beforeMount () {
@@ -155,7 +158,14 @@ export default {
     // datePicker
   },
   name: 'CreateUser',
-  props: [ 'isVisible' ],
+  props: {
+    isVisible: {
+      required: true
+    },
+    users: {
+      required: true
+    }
+  },
   data () {
     return {
       firstName: '',
@@ -193,6 +203,8 @@ export default {
             type: 'success',
             text: 'Task saved!'
           })
+
+          this.createPDF()
           this.clearData()
           this.$emit('done')
         } else {
@@ -212,6 +224,13 @@ export default {
       this.dataFailed = false
       this.clearData()
       this.$emit('done')
+    },
+    createPDF () {
+      alert('todo')
+      let doc = new JsPDF()
+
+      doc.text('Hello world!', 10, 10)
+      doc.save('a4.pdf')
     },
     createData () {
       if (this.firstName !== '' && this.lastName !== '' && this.username !== '' &&
@@ -277,10 +296,22 @@ export default {
       }
     },
     createUserName () {
+      let usernames = []
+
+      for (let i = 0; i < this.users.length; i++) {
+        usernames.push(this.users[i].username)
+      }
       if (this.firstName && this.lastName) {
         this.username = this.firstName.slice(0, 1).toLocaleLowerCase() + this.lastName.toLocaleLowerCase()
       }
-      this.username = this.username.replace(' ', '_')
+      this.username = this.username.replace(/\s/g, '_')
+      let username = this.username
+      let number = 0
+      while (usernames.includes(username)) {
+        username += number
+        number++
+      }
+      this.username = username
     }
   }
 }

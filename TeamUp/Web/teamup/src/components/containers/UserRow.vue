@@ -64,6 +64,10 @@
       :user="this.user" :is-visible="showDeleteMessage"
       @reload="finishDelete" @cancel="showDeleteMessage = false">
     </confirm-user-delete>
+    <confirm-user-lock
+    :user="user" :is-visible="showLockMessage"
+    @reload="finishLock" @cancel="showLockMessage = false"
+    ></confirm-user-lock>
   </tr>
 </template>
 
@@ -71,10 +75,11 @@
 import { createRequest } from '../../persistance/RestPostRepository'
 import { updateUser } from '../../persistance/RestPutRepository'
 import ConfirmUserDelete from '../ConfirmUserDelete'
+import ConfirmUserLock from '../ConfirmUserLock'
 
 export default {
   name: 'UserRow',
-  components: { ConfirmUserDelete },
+  components: { ConfirmUserLock, ConfirmUserDelete },
   props: {
     user: {
       required: true
@@ -93,7 +98,8 @@ export default {
     return {
       editMode: false,
       showEditIcon: false,
-      showDeleteMessage: false
+      showDeleteMessage: false,
+      showLockMessage: false
     }
   },
   methods: {
@@ -126,9 +132,13 @@ export default {
       this.$emit('reload')
       this.$emit('cancel')
     },
+    finishLock () {
+      this.showLockMessage = false
+      // this.$emit('reload')
+    },
     cancelEdit () {
       this.editMode = false
-      this.$emit('reload')
+      // this.$emit('reload')
       this.$emit('cancel')
     },
     enableEdit () {
@@ -150,13 +160,17 @@ export default {
     unlockUser () {
       this.user.locked = false
       updateUser(this.user)
-      this.$emit('reload')
+      // this.$emit('reload')
     },
     lockUser () {
-      this.user.locked = true
-      this.user.active = false
-      updateUser(this.user)
-      this.$emit('reload')
+      if (this.user.hasUnfinishedTasks) {
+        this.showLockMessage = true
+      } else {
+        this.user.locked = true
+        this.user.active = false
+        updateUser(this.user)
+        // this.$emit('reload')
+      }
     }
   }
 }
