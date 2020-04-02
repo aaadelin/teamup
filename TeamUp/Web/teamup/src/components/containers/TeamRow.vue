@@ -107,6 +107,12 @@ export default {
     },
     saveTeam () {
       updateTeam(this.team).then(_ => {
+        this.$notify({
+          group: 'notificationsGroup',
+          title: 'Success',
+          type: 'success',
+          text: 'Team saved successfully'
+        })
         this.$emit('reload')
       })
       this.editMode = false

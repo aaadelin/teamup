@@ -91,3 +91,8 @@ export async function createRequest (request) {
   let url = `${baseURL}/requests`
   return postDataToUrl(request, url)
 }
+
+export async function saveLocation (request) {
+  let url = `${baseURL}/locations`
+  return postDataToUrl(request, url)
+}

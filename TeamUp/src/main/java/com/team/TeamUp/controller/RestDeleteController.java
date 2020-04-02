@@ -1,8 +1,10 @@
 package com.team.TeamUp.controller;
 
+import com.team.TeamUp.domain.Location;
 import com.team.TeamUp.domain.User;
 import com.team.TeamUp.domain.enums.UserEventType;
 import com.team.TeamUp.domain.enums.UserStatus;
+import com.team.TeamUp.service.LocationService;
 import com.team.TeamUp.service.UserService;
 import com.team.TeamUp.utils.UserUtils;
 import lombok.extern.slf4j.Slf4j;
@@ -14,6 +16,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
 import java.util.Map;
+import java.util.Optional;
 
 //DELETE methods - for deleting
 
@@ -24,12 +27,14 @@ import java.util.Map;
 public class RestDeleteController {
     
     private UserService userService;
+    private LocationService locationService;
     private UserUtils userUtils;
 
     @Autowired
-    public RestDeleteController(UserService userService, UserUtils userUtils) {
+    public RestDeleteController(UserService userService, UserUtils userUtils, LocationService locationService) {
         this.userService = userService;
         this.userUtils = userUtils;
+        this.locationService = locationService;
         log.info("Creating RestDeleteController");
     }
 
@@ -80,4 +85,20 @@ public class RestDeleteController {
         }
         return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
+
+    @RequestMapping(value = "/locations/{id}", method = RequestMethod.DELETE)
+    public ResponseEntity<?> deleteLocation(@PathVariable int id, @RequestHeader Map<String, String> headers){
+        log.info(String.format("Entered delete location with headers: %s", headers));
+        User user = userService.getByHashKey(headers.get("token"));
+        if(user.getStatus() == UserStatus.ADMIN ){
+            Optional<Location> locationOptional = locationService.findById(id);
+            if(locationOptional.isPresent()){
+                locationService.delete(id);
+                return new ResponseEntity<>(HttpStatus.OK);
+            }
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+        }
+        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+    }
+
 }
