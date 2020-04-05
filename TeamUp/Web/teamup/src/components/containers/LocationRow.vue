@@ -31,39 +31,39 @@
 </template>
 
 <script>
-  import {updateLocation, updateTeam} from '../../persistance/RestPutRepository'
+import { updateLocation } from '../../persistance/RestPutRepository'
 
-  export default {
-    name: 'LocationRow',
-    props: {
-      location: {
-        required: true
-      }
-    },
-    mounted () {
-    },
-    data () {
-      return {
-        editMode: false,
-        showEditIcon: false,
-        leaders: []
-      }
-    },
-    methods: {
-      saveLocation () {
-        updateLocation(this.location).then(_ => {
-          this.$notify({
-            group: 'notificationsGroup',
-            title: 'Success',
-            type: 'success',
-            text: 'Location saved successfully'
-          })
-          this.$emit('reload')
+export default {
+  name: 'LocationRow',
+  props: {
+    location: {
+      required: true
+    }
+  },
+  mounted () {
+  },
+  data () {
+    return {
+      editMode: false,
+      showEditIcon: false,
+      leaders: []
+    }
+  },
+  methods: {
+    saveLocation () {
+      updateLocation(this.location).then(_ => {
+        this.$notify({
+          group: 'notificationsGroup',
+          title: 'Success',
+          type: 'success',
+          text: 'Location saved successfully'
         })
-        this.editMode = false
-      }
+        this.$emit('reload')
+      })
+      this.editMode = false
     }
   }
+}
 </script>
 
 <style scoped>

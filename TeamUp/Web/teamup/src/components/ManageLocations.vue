@@ -37,16 +37,14 @@
 </template>
 
 <script>
-import CreateUser from './create-components/CreateUser'
-import {getFilteredUsers, getLocations} from '../persistance/RestGetRepository'
-import UserRow from './containers/UserRow'
+import { getLocations } from '../persistance/RestGetRepository'
 import NProgress from 'nprogress'
 import LocationRow from './containers/LocationRow'
-import CreateLocation from "./create-components/CreateLocation";
+import CreateLocation from './create-components/CreateLocation'
 
 export default {
   name: 'ManageLocations',
-  components: {CreateLocation, UserRow, CreateUser, LocationRow },
+  components: { CreateLocation, LocationRow },
   mounted () {
     this.getLocations()
   },
@@ -81,11 +79,11 @@ export default {
       NProgress.start()
       if (this.locationFilter.length >= 2) {
         let filteredLocations = []
-        for(let i=0; i<this.locations.length; i++){
-          if(this.locations[i].city.includes(this.locationFilter) ||
+        for (let i = 0; i < this.locations.length; i++) {
+          if (this.locations[i].city.includes(this.locationFilter) ||
              this.locations[i].country.includes(this.locationFilter) ||
-             this.locations[i].address.includes(this.locationFilter)){
-              filteredLocations.push(this.locations[i])
+             this.locations[i].address.includes(this.locationFilter)) {
+            filteredLocations.push(this.locations[i])
           }
         }
 

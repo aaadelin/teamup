@@ -66,12 +66,10 @@
 </template>
 
 <script>
-import { getDepartments, getHighRankUsers, getLocations } from '../../persistance/RestGetRepository'
 import { saveLocation } from '../../persistance/RestPostRepository'
 export default {
   name: 'CreateLocation',
   mounted () {
-
     document.addEventListener('keyup', ev => {
       if (ev.key === 'Escape') {
         this.cancel()
@@ -94,7 +92,7 @@ export default {
       country: '',
       city: '',
       address: '',
-      dataFailed: false,
+      dataFailed: false
     }
   },
   methods: {
