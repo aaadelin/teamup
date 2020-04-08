@@ -278,3 +278,8 @@ export async function getTeamsStatistics (teamID) {
   let url = `${baseURL}/teams/${teamID}/statistics`
   return fetchDataFromUrl(url, [])
 }
+
+export async function getUsernames () {
+  let url = `${baseURL}/users/usernames`
+  return fetchDataFromUrl(url)
+}

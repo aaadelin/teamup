@@ -201,7 +201,7 @@ export default {
             group: 'notificationsGroup',
             title: 'Success',
             type: 'success',
-            text: 'Task saved!'
+            text: 'User saved!'
           })
 
           this.createPDF()
@@ -226,11 +226,14 @@ export default {
       this.$emit('done')
     },
     createPDF () {
-      alert('todo')
       let doc = new JsPDF()
 
-      doc.text('Hello world!', 10, 10)
-      doc.save('a4.pdf')
+      doc.text(`First Name: ${this.firstName}`, 20, 30)
+      doc.text(`Last Name: ${this.lastName}`, 20, 45)
+      doc.text(`Username: ${this.username}`, 20, 60)
+      doc.text(`Password: ${this.password}`, 20, 75)
+      doc.text(`Team: ${this.team.name}`, 20, 90)
+      doc.save(`${this.username}.pdf`)
     },
     createData () {
       if (this.firstName !== '' && this.lastName !== '' && this.username !== '' &&

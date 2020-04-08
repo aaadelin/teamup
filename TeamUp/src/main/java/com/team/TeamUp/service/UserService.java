@@ -255,4 +255,8 @@ public class UserService {
     public void deleteById(int id) {
         userRepository.deleteById(id);
     }
+
+    public List<String> getUserNames(){
+        return userRepository.findAll().stream().map(User::getUsername).collect(Collectors.toList());
+    }
 }

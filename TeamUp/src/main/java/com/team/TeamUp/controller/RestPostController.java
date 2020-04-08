@@ -10,6 +10,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ClassPathResource;
+import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -69,16 +70,20 @@ public class RestPostController {
 
     @RequestMapping(value = "/user", method = POST)
     public ResponseEntity<?> addUser(@RequestBody UserDTO user, @RequestHeader Map<String, String> headers) {
-        userUtils.createEvent(userService.getByHashKey(headers.get("token")),
-                String.format("Created user \"%s %s\"", user.getFirstName(), user.getLastName()),
-                UserEventType.CREATE);
-        log.info(String.format("Entering method create user with user: %s and headers: %s", user, headers));
-        User userToSave = dtOsConverter.getUserFromDTO(user, UserStatus.ADMIN);
-        userToSave.setActive(false);
-        userService.save(userToSave);
+        if(!userService.getUserNames().contains(user.getUsername())){
+            userUtils.createEvent(userService.getByHashKey(headers.get("token")),
+                    String.format("Created user \"%s %s\"", user.getFirstName(), user.getLastName()),
+                    UserEventType.CREATE);
+            log.info(String.format("Entering method create user with user: %s and headers: %s", user, headers));
+            User userToSave = dtOsConverter.getUserFromDTO(user, UserStatus.ADMIN);
+            userToSave.setActive(false);
+            userService.save(userToSave);
 
-        log.info("User has been successfully created and saved in database");
-        return new ResponseEntity<>("OK", HttpStatus.OK);
+            log.info("User has been successfully created and saved in database");
+            return new ResponseEntity<>("OK", HttpStatus.OK);
+        }else{
+            return new ResponseEntity<>(HttpStatus.NOT_ACCEPTABLE);
+        }
     }
 
     @RequestMapping(value = "/project", method = POST)
