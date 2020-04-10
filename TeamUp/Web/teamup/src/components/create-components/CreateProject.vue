@@ -185,7 +185,14 @@ export default {
           this.clearData()
           this.cancel()
         }
-        )
+        ).catch(_ => {
+          this.$notify({
+            group: 'notificationsGroup',
+            title: 'Error',
+            type: 'error',
+            text: 'An error occurred'
+          })
+        })
       } else {
         this.$notify({
           group: 'notificationsGroup',

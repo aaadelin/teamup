@@ -273,6 +273,7 @@ public class RestGetUserController {
         return new ResponseEntity<>(counts, HttpStatus.OK);
     }
 
+
     /**
      *
      * @return list of users that can be team leaders

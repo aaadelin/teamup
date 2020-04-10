@@ -43,9 +43,9 @@
           </transition>
 
           <transition name="fadeWidth" mode="in-out">
-          <button @click="showVersion = true" v-show="!showVersion" class="btn btn-outline-secondary col-1" style="margin-left: 15px; max-width: 120px; min-width: 120px">
-            New version
-          </button>
+<!--          <button @click="showVersion = true" v-show="!showVersion" class="btn btn-outline-secondary col-1" style="margin-left: 15px; max-width: 120px; min-width: 120px">-->
+<!--            New version-->
+<!--          </button>-->
           </transition>
         </div>
       </div>

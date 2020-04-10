@@ -65,7 +65,11 @@ export default {
     },
     getProjects () {
       getProjects().then(projects => {
-        this.projects = projects
+        for (let i = 0; i < projects.length; i++) {
+          if (!projects[i].archived) {
+            this.projects.push(projects[i])
+          }
+        }
       })
     }
   }
