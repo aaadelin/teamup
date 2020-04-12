@@ -14,6 +14,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.Map;
 import java.util.Optional;
@@ -72,9 +73,10 @@ public class RestDeleteController {
         log.info(String.format("Entered delete photo with headers: %s", headers));
         User user = userService.getByHashKey(headers.get("token"));
         if(user.getStatus() == UserStatus.ADMIN || user.getId() == id){
-            ClassPathResource resource = new ClassPathResource("static/img/" + user.getPhoto());
+            String path = System.getProperty("user.home") + "/.TeamUpData/" + user.getPhoto();
+            File resource = new File(path);
             if(resource.exists()){
-                boolean deleted = resource.getFile().delete();
+                boolean deleted = resource.delete();
                 user.setPhoto(null);
                 userService.save(user);
                 if(deleted){

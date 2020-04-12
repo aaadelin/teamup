@@ -213,8 +213,9 @@ public class RestPostController {
 
         log.info(String.format("Uploading photo entered with headers: %s and user id: %s", headers, id));
 
-        String pathname_tmp = new ClassPathResource("/static/img").getFile().getAbsolutePath() + "\\" + id + "_1";
-        String pathname = new ClassPathResource("/static/img").getFile().getAbsolutePath() + "\\" + id;
+        String property = System.getProperty("user.home") + "/.TeamUpData/";
+        String pathname_tmp = property + id + "_1";
+        String pathname = property + id;
         log.info(String.format("Uploading to %s", pathname_tmp));
         File file = new File(pathname_tmp);
         try (FileOutputStream fileOutputStream = new FileOutputStream(file)) {

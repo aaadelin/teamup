@@ -1,6 +1,7 @@
 import axios from 'axios'
 
-const baseDomain = 'http://192.168.0.199:8443'
+const baseDomain = 'http://teamup-server.us-west-2.elasticbeanstalk.com'
+// const baseDomain = 'http://localhost:5000'
 export const baseURL = `${baseDomain}/api`
 
 export const MAX_RESULTS = 10

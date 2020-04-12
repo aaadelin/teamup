@@ -123,7 +123,7 @@ public class DTOsConverter {
         if (userDTO.getPhoto() != null) {
             user.setPhoto(userDTO.getPhoto());
         }
-        if((userOptional.isPresent() && userOptional.get().getJoinedAt() == null) || userOptional.isEmpty()){
+        if((userOptional.isPresent() && userOptional.get().getJoinedAt() == null) || !userOptional.isPresent()){
             user.setJoinedAt(Date.valueOf(LocalDate.now()));
         }
         if(userDTO.getMail() == null){

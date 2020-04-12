@@ -9,6 +9,7 @@ import com.team.TeamUp.dtos.TeamDTO;
 import com.team.TeamUp.dtos.UserDTO;
 import com.team.TeamUp.persistence.*;
 import com.team.TeamUp.utils.DTOsConverter;
+import com.team.TeamUp.utils.ImageCompressor;
 import com.team.TeamUp.utils.UserUtils;
 import com.team.TeamUp.validation.UserValidation;
 import lombok.extern.slf4j.Slf4j;
@@ -43,6 +44,7 @@ public class UserService {
     private UserUtils userUtils;
     private UserValidation userValidation;
     private DTOsConverter dtOsConverter;
+    private ImageCompressor imageCompressor = new ImageCompressor();
 
     @Autowired
     public UserService(UserRepository userRepository,
@@ -149,14 +151,15 @@ public class UserService {
     public String getUsersPhoto(int id) throws IOException {
         User user = userRepository.findById(id).orElseThrow();
         String encodedString;
+        String path = System.getProperty("user.home") + "/.TeamUpData/";
 
         if (user.getPhoto() == null) {
-            File file = new ClassPathResource("static/img/avatar.png").getFile();
-            byte[] bytes = Files.readAllBytes(file.toPath());
+            File f = new File(path + "avatar.png");
+            byte[] bytes = Files.readAllBytes(f.toPath());
             encodedString = Base64.getEncoder().encodeToString(bytes);
             log.debug("Exited with default image");
         } else {
-            File file = new ClassPathResource("static/img/" + user.getPhoto()).getFile();
+            File file = new File(path + user.getPhoto());
             byte[] bytes = Files.readAllBytes(file.toPath());
             log.info(String.format("Exited with photo with path %s", user.getPhoto()));
             encodedString = Base64.getEncoder().encodeToString(bytes);

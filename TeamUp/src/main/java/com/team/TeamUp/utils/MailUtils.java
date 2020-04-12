@@ -33,18 +33,17 @@ public class MailUtils {
         log.debug("Entering method to send mail with parameter resetRequest {}", resetRequest);
 
         executorService.execute(()->{
-            try {
             log.debug("Sending mail from thread {}", Thread.currentThread().getName());
             String userName = resetRequest.getUser().getFirstName() + " " + resetRequest.getUser().getLastName();
             Email email = null;
-                email = EmailBuilder.startingBlank()
-                        .from("TeamUp Support", "teamup.open@gmail.com")
-                        .to(userName, resetRequest.getUser().getMail())
-                        .withEmbeddedImage("logo", new FileDataSource(new ClassPathResource("static/logo.png").getFile().getAbsolutePath()))
+            email = EmailBuilder.startingBlank()
+                    .from("TeamUp Support", "teamup.open@gmail.com")
+                    .to(userName, resetRequest.getUser().getMail())
+                    .withEmbeddedImage("logo", new FileDataSource(System.getProperty("user.home") + "/.TeamUpData/logo.png"))
 //                        .with("bootstrap", new FileDataSource(new ClassPathResource("static/mail/bootstrap.min.css").getFile().getAbsolutePath()))
-                        .withSubject("Reset password")
-                        .withHTMLText(getMessage(resetRequest))
-                        .buildEmail();
+                    .withSubject("Reset password")
+                    .withHTMLText(getMessage(resetRequest))
+                    .buildEmail();
 
 
             MailerBuilder
@@ -52,10 +51,6 @@ public class MailUtils {
                     .buildMailer()
                     .sendMail(email);
             log.debug("Mail successfully sent from {}", Thread.currentThread().getName());
-            } catch (IOException e) {
-                log.debug("Mail failed sending: {}", e.getMessage());
-                e.printStackTrace();
-            }
         });
     }
 
@@ -66,7 +61,7 @@ public class MailUtils {
      */
     private String getMessage (ResetRequest resetRequest) {
         try {
-            File file = new ClassPathResource("static/mail/mail-template.html").getFile();
+            File file = new File(System.getProperty("user.home") + "/.TeamUpData/mail-template.html");
             List<String> messageLines = Files.readAllLines(file.toPath());
             String message = String.join("\n", messageLines);
             message = message.replace("<token>", String.valueOf(resetRequest.getId()));
@@ -75,19 +70,5 @@ public class MailUtils {
             e.printStackTrace();
         }
         return "";
-    }
-
-    /**
-     * Method to get the logo
-     * @return byte array containing the logo
-     */
-    private byte[] getLogo(){
-        try {
-            File file = new ClassPathResource("static/img/logo.png").getFile();
-            return Files.readAllBytes(file.toPath());
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return new byte[1];
     }
 }
