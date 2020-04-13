@@ -9,6 +9,7 @@ Vue.use(Router)
 export const router = new Router({
   mode: 'history',
   base: process.env.BASE_URL,
+  port: process.env.PORT || 8080,
   routes: [
     {
       path: '/',

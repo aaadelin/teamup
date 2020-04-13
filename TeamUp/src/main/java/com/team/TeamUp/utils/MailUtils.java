@@ -47,7 +47,8 @@ public class MailUtils {
 
 
             MailerBuilder
-                    .withSMTPServer("smtp.gmail.com", 587, "teamup.open", "Q3JXc]w&")
+                    .withSMTPServer("email-smtp.us-west-2.amazonaws.com", 587, "AKIATGFDDRPH32FF5TXQ", "BCi5lHEVXN55zlmidCT9OqnnTEZC7bdKyWcnkmsG6cJ6")
+//                    .withSMTPServer("smtp.gmail.com", 587, "teamup.open", "Q3JXc]w&")
                     .buildMailer()
                     .sendMail(email);
             log.debug("Mail successfully sent from {}", Thread.currentThread().getName());

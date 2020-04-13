@@ -1,6 +1,7 @@
 import axios from 'axios'
 
-const baseDomain = 'http://teamup-server.us-west-2.elasticbeanstalk.com'
+const baseDomain = 'http://teamup-env.eba-tx7sbyzp.us-east-1.elasticbeanstalk.com'
+// const baseDomain = 'http://teamup-server.us-west-2.elasticbeanstalk.com'
 // const baseDomain = 'http://localhost:5000'
 export const baseURL = `${baseDomain}/api`
 
