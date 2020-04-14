@@ -51,3 +51,8 @@ export async function updateTeam (team) {
   let url = `${baseURL}/teams`
   return putDataToUrl(team, url)
 }
+
+export async function updateLocation (location) {
+  let url = `${baseURL}/locations`
+  return putDataToUrl(location, url)
+}

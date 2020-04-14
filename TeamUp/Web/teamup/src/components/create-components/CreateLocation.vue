@@ -1,15 +1,15 @@
 <template>
-  <transition name="fadeHeight" mode="out-in">
-    <div v-if="isVisible" id="container">
+<transition name="fadeHeight" mode="out-in">
+  <div v-if="isVisible" id="container">
 
     <transition name="modal">
-      <div class="modal-mask">
+      <div class="modal-mask" id="mask">
         <div class="modal-wrapper">
-          <div class="modal-container">
+          <div class="modal-container" id="main-container">
 
             <div class="modal-header">
               <slot name="header">
-                Create a new Project
+                Create a new Location
               </slot>
 
             </div>
@@ -17,8 +17,8 @@
             <div class="modal-body overflow-auto">
               <slot name="body">
                 <div class="row">
-                  <label for="name" class="col-md-4">Project name</label>
-                  <input id="name" type="text" v-model="name" name="name" class="form-control col-md-8"  :class="{ 'is-invalid': dataFailed && !name }"/>
+                  <label for="country" class="col-md-3">Country </label>
+                  <input id="country" type="text" v-model="country" name="country" class="form-control col-md-8"  :class="{ 'is-invalid': dataFailed && !country }"/>
                 </div>
               </slot>
 
@@ -26,8 +26,8 @@
 
               <slot name="body">
                 <div class="row">
-                  <label for="description" class="col-md-4">Description </label>
-                  <textarea id="description" type="text" v-model="description" name="description" class="form-control col-md-8" :class="{ 'is-invalid': dataFailed && !description }"></textarea>
+                  <label for="city" class="col-md-3">City </label>
+                  <textarea id="city" type="text" v-model="city" name="city" class="form-control col-md-8" :class="{ 'is-invalid': dataFailed && !city }"></textarea>
                 </div>
               </slot>
 
@@ -35,29 +35,12 @@
 
               <slot name="body">
                 <div class="row">
-                  <label for="leader" class="col-md-4">Owner</label>
-                  <select id="leader" class="form-control col-md-8" v-model="owner">
-                    <option v-for="user in users" :value="user.id" :key="user.id">{{user.firstName}} {{user.lastName}}</option>
-                  </select>
+                  <label for="address" class="col-md-3">Address </label>
+                  <textarea id="address" type="text" v-model="address" name="address" class="form-control col-md-8" :class="{ 'is-invalid': dataFailed && !address }"></textarea>
                 </div>
               </slot>
 
               <br/>
-              <slot name="body">
-                <div class="row">
-                  <label for="version" class="col-md-4">Project version</label>
-                  <input id="version" type="text" v-model="version" name="verions" class="form-control col-md-8"  :class="{ 'is-invalid': dataFailed && !name }"/>
-                </div>
-              </slot>
-
-              <br/>
-              <br/>
-              <br/>
-
-              <div class="row">
-                <label for="deadline" class="col-md-4">Deadline </label>
-                <date-picker id="deadline" v-model="deadline"  name="deadline" :config="options" class="form-control col-md-8"  :class="{ 'is-invalid': dataFailed && !deadline }"/>
-              </div>
 
             </div>
 
@@ -79,23 +62,14 @@
     </transition>
 
   </div>
-
-  </transition>
-
+</transition>
 </template>
 
 <script>
-import {
-  getMyID,
-  getUsers
-} from '../../persistance/RestGetRepository'
-import { saveProject } from '../../persistance/RestPostRepository'
-
+import { saveLocation } from '../../persistance/RestPostRepository'
 export default {
-  name: 'CreateProject',
+  name: 'CreateLocation',
   mounted () {
-    this.loadData()
-
     document.addEventListener('keyup', ev => {
       if (ev.key === 'Escape') {
         this.cancel()
@@ -115,45 +89,16 @@ export default {
   },
   data () {
     return {
-      name: '',
-      description: '',
-      dataFailed: false,
-      users: [],
-      owner: null,
-      deadline: new Date(),
-      version: '0.0.1',
-
-      options: {
-        format: 'YYYY-MM-DD HH:mm:ss',
-        useCurrent: true,
-        showClear: true,
-        showClose: true,
-        minDate: new Date()
-      }
+      country: '',
+      city: '',
+      address: '',
+      dataFailed: false
     }
   },
   methods: {
     closeAtClick (ev) {
       if (ev.path[0].classList.contains('modal-wrapper')) {
         this.cancel()
-      }
-    },
-    async loadData () {
-      this.getUsers()
-    },
-    async getUsers () {
-      this.users = await getUsers()
-
-      if (this.users.length > 0) {
-        this.user = this.users[0].id
-      }
-
-      let myId = await getMyID()
-      for (let i = 0; i < this.users.length; i++) {
-        if (this.users[i].id === myId) {
-          this.owner = this.users[i].id
-          break
-        }
       }
     },
     cancel () {
@@ -163,36 +108,25 @@ export default {
       this.collectAndSend()
     },
     collectAndSend () {
-      if (this.name.trim() !== '' &&
-        this.description !== null &&
-        this.owner !== null &&
-        this.deadline !== null) {
-        let team = {
-          name: this.name.trim(),
-          description: this.description.trim(),
-          deadline: this.deadline,
-          ownerID: this.owner,
-          location: this.location,
-          version: this.version
+      if (this.country.trim() !== '' &&
+        this.city.trim() !== '' &&
+        this.address.trim() !== '') {
+        let location = {
+          country: this.country.trim(),
+          city: this.city.trim(),
+          address: this.address.trim()
         }
-        saveProject(team).then(el => {
+        saveLocation(location).then(el => {
           this.$notify({
             group: 'notificationsGroup',
             title: 'Success',
             type: 'success',
-            text: 'Project saved successfully'
+            text: 'Location saved successfully'
           })
           this.clearData()
           this.cancel()
         }
-        ).catch(_ => {
-          this.$notify({
-            group: 'notificationsGroup',
-            title: 'Error',
-            type: 'error',
-            text: 'An error occurred'
-          })
-        })
+        )
       } else {
         this.$notify({
           group: 'notificationsGroup',
@@ -203,11 +137,9 @@ export default {
       }
     },
     clearData () {
-      this.name = ''
-      this.description = ''
-      this.leader = null
-      this.location = null
-      this.leader = null
+      this.country = ''
+      this.city = ''
+      this.address = ''
     }
   }
 }
@@ -269,7 +201,6 @@ export default {
     line-height: 1.428571429;
     border-radius: 10px;
   }
-
   .fadeHeight-enter-active,
   .fadeHeight-leave-active {
     transition: all 0.1s;

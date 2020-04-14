@@ -7,6 +7,7 @@
       <div class="col-3" style="margin: 15px 0 15px 15px; min-height: 100px">
         <div class="left-option" @click="updateComponent('ManageUsers')" :class="{ 'currentTab': (component === 'ManageUsers')}"> Users </div>
         <div class="left-option" @click="updateComponent('ManageTeams')" :class="{ 'currentTab': (component === 'ManageTeams')}"> Teams </div>
+        <div class="left-option" @click="updateComponent('ManageLocations')" :class="{ 'currentTab': (component === 'ManageLocations')}"> Locations </div>
       </div>
       <div class="col container" style="max-width: 1000px; margin-top: 15px" >
         <keep-alive>

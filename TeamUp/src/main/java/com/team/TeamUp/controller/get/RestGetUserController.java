@@ -273,6 +273,7 @@ public class RestGetUserController {
         return new ResponseEntity<>(counts, HttpStatus.OK);
     }
 
+
     /**
      *
      * @return list of users that can be team leaders
@@ -326,5 +327,12 @@ public class RestGetUserController {
         List<ProjectDTO> projects = userService.getUsersOwnedProjects(id);
         log.info("Exiting with projects {}", projects);
         return new ResponseEntity<>(projects, HttpStatus.OK);
+    }
+
+    @RequestMapping(value = "/users/usernames", method = GET)
+    public ResponseEntity<?> getUserNames(){
+        log.info("Entering method to get all usernames");
+        List<String> usernames = userService.getUserNames();
+        return new ResponseEntity<>(usernames, HttpStatus.OK);
     }
 }

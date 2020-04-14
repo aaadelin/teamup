@@ -10,6 +10,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ClassPathResource;
+import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -41,6 +42,7 @@ public class RestPostController {
     private ProjectService projectService;
     private CommentService commentService;
     private PostService postService;
+    private LocationService locationService;
     private ResetRequestService resetRequestService;
     private DTOsConverter dtOsConverter;
     private MailUtils mailUtils;
@@ -48,6 +50,7 @@ public class RestPostController {
     @Autowired
     public RestPostController(TeamService teamService, UserService userService, TaskService taskService,
                               ProjectService projectService, CommentService commentService, PostService postService,
+                              LocationService locationService,
                               DTOsConverter dtOsConverter, UserUtils userUtils, ResetRequestService resetRequestService,
                               MailUtils mailUtils) {
         this.teamService = teamService;
@@ -57,6 +60,7 @@ public class RestPostController {
         this.commentService = commentService;
         this.postService = postService;
         this.resetRequestService = resetRequestService;
+        this.locationService = locationService;
         this.dtOsConverter = dtOsConverter;
         this.userUtils = userUtils;
         this.mailUtils = mailUtils;
@@ -66,16 +70,20 @@ public class RestPostController {
 
     @RequestMapping(value = "/user", method = POST)
     public ResponseEntity<?> addUser(@RequestBody UserDTO user, @RequestHeader Map<String, String> headers) {
-        userUtils.createEvent(userService.getByHashKey(headers.get("token")),
-                            String.format("Created user \"%s %s\"", user.getFirstName(), user.getLastName()),
-                            UserEventType.CREATE);
-        log.info(String.format("Entering method create user with user: %s and headers: %s", user, headers));
-        User userToSave = dtOsConverter.getUserFromDTO(user, UserStatus.ADMIN);
-        userToSave.setActive(false);
-        userService.save(userToSave);
+        if(!userService.getUserNames().contains(user.getUsername())){
+            userUtils.createEvent(userService.getByHashKey(headers.get("token")),
+                    String.format("Created user \"%s %s\"", user.getFirstName(), user.getLastName()),
+                    UserEventType.CREATE);
+            log.info(String.format("Entering method create user with user: %s and headers: %s", user, headers));
+            User userToSave = dtOsConverter.getUserFromDTO(user, UserStatus.ADMIN);
+            userToSave.setActive(false);
+            userService.save(userToSave);
 
-        log.info("User has been successfully created and saved in database");
-        return new ResponseEntity<>("OK", HttpStatus.OK);
+            log.info("User has been successfully created and saved in database");
+            return new ResponseEntity<>("OK", HttpStatus.OK);
+        }else{
+            return new ResponseEntity<>(HttpStatus.NOT_ACCEPTABLE);
+        }
     }
 
     @RequestMapping(value = "/project", method = POST)
@@ -94,7 +102,8 @@ public class RestPostController {
         userUtils.createEvent(userService.getByHashKey(headers.get("token")),
                 String.format("Created task \"%s\"", taskDTO.getSummary()),
                 UserEventType.CREATE);
-        log.info(String.format("Entering method create task with task: %s and headers: %s", taskDTO, headers));Task task = dtOsConverter.getTaskFromDTO(taskDTO, headers.get("token"));
+        log.info(String.format("Entering method create task with task: %s and headers: %s", taskDTO, headers));
+        Task task = dtOsConverter.getTaskFromDTO(taskDTO, headers.get("token"));
         taskService.save(task);
         Post post = new Post();
         post.setTask(task);
@@ -119,7 +128,7 @@ public class RestPostController {
     @RequestMapping(value = "/comment", method = POST)
     public ResponseEntity<?> addComment(@RequestBody CommentDTO commentDTO, @RequestHeader Map<String, String> headers) {
         log.info(String.format("Entering method add comment with comment: %s and headers: %s", commentDTO, headers));
-        if(commentDTO.getTitle() == null || commentDTO.getTitle().equals("")){
+        if (commentDTO.getTitle() == null || commentDTO.getTitle().equals("")) {
             return new ResponseEntity<>(HttpStatus.FORBIDDEN);
         }
         userUtils.createEvent(userService.getByHashKey(headers.get("token")),
@@ -190,12 +199,12 @@ public class RestPostController {
     ) throws IOException {
 
         log.info("Entering method to upload photo with id {}", id);
-        if (!userService.exists(id)){
+        if (!userService.exists(id)) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
 
         User user = userService.getByHashKey(headers.get("token"));
-        if(user.getId() == id || user.getStatus() == UserStatus.ADMIN){
+        if (user.getId() == id || user.getStatus() == UserStatus.ADMIN) {
             user.setPhoto(String.valueOf(user.getId()));
             userService.save(user);
         } else {
@@ -204,11 +213,11 @@ public class RestPostController {
 
         log.info(String.format("Uploading photo entered with headers: %s and user id: %s", headers, id));
 
-        String pathname_tmp = new ClassPathResource("/static/img").getFile().getAbsolutePath() + "\\" +  id + "_1";
-        String pathname = new ClassPathResource("/static/img").getFile().getAbsolutePath() + "\\" +  id;
+        String pathname_tmp = new ClassPathResource("/static/img").getFile().getAbsolutePath() + "\\" + id + "_1";
+        String pathname = new ClassPathResource("/static/img").getFile().getAbsolutePath() + "\\" + id;
         log.info(String.format("Uploading to %s", pathname_tmp));
         File file = new File(pathname_tmp);
-        try(FileOutputStream fileOutputStream = new FileOutputStream(file)) {
+        try (FileOutputStream fileOutputStream = new FileOutputStream(file)) {
             fileOutputStream.write(photo.getBytes());
         } catch (IOException e) {
             e.printStackTrace();
@@ -220,7 +229,7 @@ public class RestPostController {
     }
 
     @RequestMapping(value = "/requests", method = POST)
-    public ResponseEntity<?> saveNewRequest(@RequestBody ResetRequestDTO resetRequestDTO){
+    public ResponseEntity<?> saveNewRequest(@RequestBody ResetRequestDTO resetRequestDTO) {
         log.info(String.format("Entered method to save new request with requestBody %s", resetRequestDTO));
 
         ResetRequest resetRequest = dtOsConverter.getResetRequestFromDTO(resetRequestDTO);
@@ -230,5 +239,22 @@ public class RestPostController {
         log.info("Exiting method to create a new request with status OK");
         return new ResponseEntity<>(HttpStatus.OK);
     }
+
+    @RequestMapping(value = "/locations", method = POST)
+    public ResponseEntity<?> saveNewLocation(@RequestBody LocationDTO locationDTO, @RequestHeader Map<String, String> headers) {
+        log.info(String.format("Enter method to save new location with requestBody %s", locationDTO));
+        User user = userService.getByHashKey(headers.get("token"));
+        if (user.getStatus() == UserStatus.ADMIN) {
+            userUtils.createEvent(userService.getByHashKey(headers.get("token")),
+                    String.format("Created location \"%s %s\"", locationDTO.getCountry(), locationDTO.getCity()),
+                    UserEventType.CREATE);
+            locationService.save(dtOsConverter.getLocationFromDTO(locationDTO));
+            log.info("Location has been successfully created and saved in database");
+            return new ResponseEntity<>("OK", HttpStatus.OK);
+        }else{
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+        }
+    }
+
 
 }

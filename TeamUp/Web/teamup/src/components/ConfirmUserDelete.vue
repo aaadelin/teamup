@@ -63,8 +63,8 @@ export default {
     cancel () {
       this.$emit('cancel')
     },
-    finished () {
-      deleteUserById(this.user.id)
+    async finished () {
+      await deleteUserById(this.user.id)
       this.$emit('reload')
     }
   }

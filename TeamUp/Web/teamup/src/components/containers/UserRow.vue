@@ -109,6 +109,12 @@ export default {
     },
     save () {
       updateUser(this.user).then(_ => {
+        this.$notify({
+          group: 'notificationsGroup',
+          title: 'Success',
+          type: 'success',
+          text: 'User saved successfully'
+        })
         this.$emit('reload')
         this.$emit('cancel')
       })

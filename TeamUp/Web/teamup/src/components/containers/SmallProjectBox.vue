@@ -3,7 +3,7 @@
     <div class="col">
     <div class="row">
       <div class="col"><p style="font-weight: 500; cursor:pointer;" @click="showDetails = !showDetails" title="Show details">{{project.name}}</p></div>
-      <div class="col-1" style="min-width: 120px"><p>{{project.deadline.split(' ')[0]}}</p></div>
+      <div class="col-2" style="min-width: 120px"><p>{{project.deadline.split(' ')[0]}}</p></div>
     </div>
     <transition name="fadeHeight" mode="out-in">
     <div class="row" v-if="showDetails">

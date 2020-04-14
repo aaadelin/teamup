@@ -439,7 +439,9 @@ public class DTOsConverter {
         location.setAddress(locationDTO.getAddress());
         location.setCity(locationDTO.getCity());
         location.setCountry(locationDTO.getCountry());
-        location.setTeams(teamRepository.findAllById(locationDTO.getTeams()));
+        if(locationOptional.isPresent() && locationDTO.getTeams() != null){
+            location.setTeams(teamRepository.findAllById(locationDTO.getTeams()));
+        }
         log.debug(String.format("Exiting with entity: %s", location));
 
         return location;
