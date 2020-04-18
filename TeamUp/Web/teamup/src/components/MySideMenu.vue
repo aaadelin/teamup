@@ -43,7 +43,7 @@
             By priority
           </label>
           <br>
-          <label>r
+          <label>
             <input name="sort" type="radio" value="modified" @change="sortChanged">
             By last modified
           </label>

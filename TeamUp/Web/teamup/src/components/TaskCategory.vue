@@ -86,8 +86,7 @@ export default {
       type: String
     },
     id: {
-      required: true,
-      default: 1
+      required: true
     },
     type: {
       required: true,

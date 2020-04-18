@@ -247,7 +247,7 @@ export default {
       leadingTeams: [],
       ownedProjects: [],
       statisticOption: { type: 'user' },
-      statisticsId: this.userId,
+      statisticsId: this.$route.query.userId,
       statisticsType: 'user'
     }
   },
