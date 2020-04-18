@@ -73,7 +73,7 @@ public class RestPostController {
                     String.format("Created user \"%s %s\"", user.getFirstName(), user.getLastName()),
                     UserEventType.CREATE);
             log.info(String.format("Entering method create user with user: %s and headers: %s", user, headers));
-            User userToSave = dtOsConverter.getUserFromDTO(user, UserStatus.ADMIN);
+            User userToSave = dtOsConverter.getUserFromDTO(user);
             userToSave.setActive(false);
             userService.save(userToSave);
 

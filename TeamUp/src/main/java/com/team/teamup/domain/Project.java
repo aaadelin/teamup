@@ -15,7 +15,7 @@ import java.util.Objects;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Project {
+public class Project implements HasNameAndDescription {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

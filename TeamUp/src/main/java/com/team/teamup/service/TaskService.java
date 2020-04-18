@@ -9,7 +9,7 @@ import com.team.teamup.dtos.TaskDTO;
 import com.team.teamup.persistence.TaskRepository;
 import com.team.teamup.persistence.UserRepository;
 import com.team.teamup.utils.DTOsConverter;
-import com.team.teamup.utils.QueryLanguageParser;
+import com.team.teamup.utils.query.QueryLanguageParser;
 import com.team.teamup.utils.TaskUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;

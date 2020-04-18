@@ -283,3 +283,9 @@ export async function getUsernames () {
   let url = `${baseURL}/users/usernames`
   return fetchDataFromUrl(url)
 }
+
+export async function getTasksByQuery (query) {
+  let url = `${baseURL}/tasks/query?search-query=${query}`
+  url = encodeURI(url)
+  return fetchDataFromUrl(url, [])
+}

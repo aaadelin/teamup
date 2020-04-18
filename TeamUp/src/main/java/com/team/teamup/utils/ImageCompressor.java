@@ -56,18 +56,19 @@ public class ImageCompressor {
             out.close();
             imageOutputStream.close();
             writer.dispose();
-            boolean deleted = file.delete();
+            file.delete();
             log.debug("Image successfully compressed");
         } catch (IOException e) {
             log.debug(String.format("Error occured %s ", e.getMessage()));
+            log.info(e.getMessage());
             e.printStackTrace();
         }
     }
 
-    public void downloadImage(String storageLocation, String URI) {
-        try (BufferedInputStream in = new BufferedInputStream(new URL(URI).openStream());
+    public void downloadImage(String storageLocation, String uri) {
+        try (BufferedInputStream in = new BufferedInputStream(new URL(uri).openStream());
              FileOutputStream fileOutputStream = new FileOutputStream(storageLocation)) {
-            byte dataBuffer[] = new byte[1024];
+            byte[] dataBuffer = new byte[1024];
             int bytesRead;
             while ((bytesRead = in.read(dataBuffer, 0, 1024)) != -1) {
                 fileOutputStream.write(dataBuffer, 0, bytesRead);

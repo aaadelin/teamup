@@ -3,17 +3,15 @@ package com.team.teamup.utils;
 import com.team.teamup.domain.Project;
 import com.team.teamup.domain.Task;
 import com.team.teamup.domain.User;
-import com.team.teamup.domain.enums.Department;
 import com.team.teamup.domain.enums.TaskStatus;
-import com.team.teamup.domain.enums.TaskType;
 import com.team.teamup.persistence.TaskRepository;
+import com.team.teamup.utils.query.QueryLanguageParser;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import java.time.LocalDateTime;
@@ -21,7 +19,6 @@ import java.util.List;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
-import static org.junit.Assert.*;
 import static org.mockito.Mockito.when;
 
 @RunWith(SpringJUnit4ClassRunner.class)

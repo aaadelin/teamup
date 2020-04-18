@@ -154,7 +154,7 @@ public class UserUtils {
         userDTO.setPassword(String.valueOf(nano));
         userDTO.setStatus(UserStatus.ADMIN);
 
-        User user = dtOsConverter.getUserFromDTO(userDTO, UserStatus.ADMIN);
+        User user = dtOsConverter.getUserFromDTO(userDTO);
         user = userRepository.save(user);
         log.debug("Created admin with username {}", user.getUsername());
         return user;

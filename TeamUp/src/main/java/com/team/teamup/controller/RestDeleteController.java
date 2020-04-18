@@ -29,6 +29,7 @@ public class RestDeleteController {
     private UserService userService;
     private LocationService locationService;
     private UserUtils userUtils;
+    private static final String TOKEN = "token";
 
     @Autowired
     public RestDeleteController(UserService userService, UserUtils userUtils, LocationService locationService) {
@@ -44,14 +45,14 @@ public class RestDeleteController {
      */
     @RequestMapping(value = "/users/{id}", method = RequestMethod.DELETE)
     public ResponseEntity<?> deleteUser(@PathVariable int id, @RequestHeader Map<String, String> headers) {
-        log.info(String.format("Entering delete user method with user id: %s \n and headers: %s", id, headers.toString()));
+        log.info(String.format("Entering delete user method with user id: %s %n and headers: %s", id, headers.toString()));
         User user = userService.getByID(id);
         if (user.getStatus() != UserStatus.ADMIN){ //users with status admin cannot be deleted
-            userUtils.createEvent(userService.getByHashKey(headers.get("token")),
+            userUtils.createEvent(userService.getByHashKey(headers.get(TOKEN)),
                     String.format("Deleted user \"%s %s\"", user.getFirstName(), user.getLastName()),
                     UserEventType.DELETE);
             userUtils.deleteUserInitiated(user);
-            userService.deleteById(id); // todo de-comment this line
+            userService.deleteById(id);
             log.info(String.format("User with id %s has been successfully deleted", id));
             return new ResponseEntity<>("OK", HttpStatus.OK);
         }
@@ -70,7 +71,7 @@ public class RestDeleteController {
     public ResponseEntity<?> deletePhoto(@PathVariable int id,
                                          @RequestHeader Map<String, String> headers) throws IOException {
         log.info(String.format("Entered delete photo with headers: %s", headers));
-        User user = userService.getByHashKey(headers.get("token"));
+        User user = userService.getByHashKey(headers.get(TOKEN));
         if(user.getStatus() == UserStatus.ADMIN || user.getId() == id){
             String path = System.getProperty("user.home") + "/.TeamUpData/" + user.getPhoto();
             File resource = new File(path);
@@ -90,7 +91,7 @@ public class RestDeleteController {
     @RequestMapping(value = "/locations/{id}", method = RequestMethod.DELETE)
     public ResponseEntity<?> deleteLocation(@PathVariable int id, @RequestHeader Map<String, String> headers){
         log.info(String.format("Entered delete location with headers: %s", headers));
-        User user = userService.getByHashKey(headers.get("token"));
+        User user = userService.getByHashKey(headers.get(TOKEN));
         if(user.getStatus() == UserStatus.ADMIN ){
             Optional<Location> locationOptional = locationService.findById(id);
             if(locationOptional.isPresent()){

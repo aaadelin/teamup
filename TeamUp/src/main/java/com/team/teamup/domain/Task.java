@@ -18,7 +18,7 @@ import java.util.Objects;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Task {
+public class Task implements HasNameAndDescription{
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
@@ -58,6 +58,10 @@ public class Task {
     @JoinColumn(name = "PROJECT_ID")
     @ToString.Exclude
     private Project project;
+
+    public String getName(){
+        return summary;
+    }
 
     @Override
     public boolean equals(Object o) {

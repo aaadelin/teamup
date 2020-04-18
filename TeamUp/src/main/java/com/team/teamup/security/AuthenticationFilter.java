@@ -35,10 +35,10 @@ public class AuthenticationFilter implements Filter {
 
         if (isAuthorized(req.getRequestURI(), req.getMethod(), tokenHeader)) {
 //            if((userValidation.isUserLoggedIn(tokenHeader) || req.getRequestURI().equals("/api/login") || req.getRequestURI().contains(""))){ // - for swagger
-            if((userValidation.isUserLoggedIn(tokenHeader) || req.getRequestURI().equals("/api/login"))){
+            if ((userValidation.isUserLoggedIn(tokenHeader) || req.getRequestURI().equals("/api/login"))) {
                 log.debug(String.format("User with token %s is eligible to access %s", tokenHeader, req.getRequestURI()));
                 chain.doFilter(request, response);
-            }else{
+            } else {
                 log.debug("User is or just has been logged out");
                 res.sendError(405);
             }
@@ -64,34 +64,34 @@ public class AuthenticationFilter implements Filter {
         );
         if (checkMatching(openURIs, uri)) {
             return true;
-        } else {
-            switch (method) {
-                case "GET":
-                    // any url requires only basic authentication
-                    return userValidation.isValid(token);
-                case "POST":
-                    if (adminAuthenticationPOST.stream().anyMatch(protectedUri -> protectedUri.equals(uri))) {
-                        return userValidation.isValid(token, UserStatus.ADMIN);
-                    } else {
-                        return userValidation.isValid(token);
-                    }
-                case "PUT":
-                    if (adminAuthenticationPUT.stream().anyMatch(protectedUri -> protectedUri.equals(uri))) {
-                        return userValidation.isValid(token, UserStatus.ADMIN);
-                    } else {
-                        return userValidation.isValid(token);
-                    }
-                case "DELETE":
-                    if (adminAuthenticationDELETE.stream().anyMatch(uri::matches)) {
-                        return userValidation.isValid(token, UserStatus.ADMIN);
-                    } else {
-                        return userValidation.isValid(token);
-                    }
-            }
         }
-
-        return false;
+        switch (method) {
+            case "GET":
+                // any url requires only basic authentication
+                return userValidation.isValid(token);
+            case "POST":
+                if (adminAuthenticationPOST.stream().anyMatch(protectedUri -> protectedUri.equals(uri))) {
+                    return userValidation.isValid(token, UserStatus.ADMIN);
+                } else {
+                    return userValidation.isValid(token);
+                }
+            case "PUT":
+                if (adminAuthenticationPUT.stream().anyMatch(protectedUri -> protectedUri.equals(uri))) {
+                    return userValidation.isValid(token, UserStatus.ADMIN);
+                } else {
+                    return userValidation.isValid(token);
+                }
+            case "DELETE":
+                if (adminAuthenticationDELETE.stream().anyMatch(uri::matches)) {
+                    return userValidation.isValid(token, UserStatus.ADMIN);
+                } else {
+                    return userValidation.isValid(token);
+                }
+            default:
+                return false;
+        }
     }
+
 
     private boolean checkMatching(List<String> regexUri, String uriToMatch) {
         return regexUri.stream().anyMatch(uriToMatch::matches);

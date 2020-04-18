@@ -73,7 +73,7 @@ public class DTOsConverter {
         userDTO.setStatus(user.getStatus());
         userDTO.setPhoto(user.getPhoto());
         userDTO.setJoinedAt(user.getJoinedAt());
-        if(user.getMail() == null){
+        if (user.getMail() == null) {
             user.setMail("");
         }
         userDTO.setLocked(user.isLocked());
@@ -87,11 +87,7 @@ public class DTOsConverter {
 
         int tasksUnfinished = taskRepository.countTaskByAssigneesContainingAndTaskStatusIn(user, List.of(TaskStatus.OPEN, TaskStatus.REOPENED, TaskStatus.IN_PROGRESS));
 
-        if(tasksUnfinished > 0){
-            userDTO.setHasUnfinishedTasks(true);
-        }else{
-            userDTO.setHasUnfinishedTasks(false);
-        }
+        userDTO.setHasUnfinishedTasks(tasksUnfinished > 0);
 
         log.debug(String.format("UserDTO instance created: %s", userDTO));
         return userDTO;
@@ -101,7 +97,7 @@ public class DTOsConverter {
      * @param userDTO UserDTO instance to be converted to User domain model
      * @return user entity containing userDTO data
      */
-    public User getUserFromDTO(UserDTO userDTO, UserStatus requesterStatus) {
+    public User getUserFromDTO(UserDTO userDTO) {
         log.debug(String.format("Method create User from UserDTO called with parameter %s", userDTO));
 
         Optional<User> userOptional = userRepository.findById(userDTO.getId());
@@ -123,17 +119,17 @@ public class DTOsConverter {
         if (userDTO.getPhoto() != null) {
             user.setPhoto(userDTO.getPhoto());
         }
-        if((userOptional.isPresent() && userOptional.get().getJoinedAt() == null) || !userOptional.isPresent()){
+        if ((userOptional.isPresent() && userOptional.get().getJoinedAt() == null) || !userOptional.isPresent()) {
             user.setJoinedAt(Date.valueOf(LocalDate.now()));
         }
-        if(userDTO.getMail() == null){
+        if (userDTO.getMail() == null) {
             userDTO.setMail("");
         }
         user.setMail(userDTO.getMail());
         user.setMinutesUntilLogout(60);
         user.setStatus(userDTO.getStatus());
         user.setLocked(userDTO.isLocked());
-        if (userDTO.getPassword() != null){
+        if (userDTO.getPassword() != null) {
             user.setPassword(TokenUtils.getMD5Token(userDTO.getPassword()));
         }
 
@@ -175,11 +171,11 @@ public class DTOsConverter {
         Optional<User> reporter = userRepository.findByHashKey(reporterKey);
         task.setReporter(reporter.orElseThrow());
 
-        if(taskDTO.getDeadline().isBefore(task.getProject().getDeadline()) && taskDTO.getDeadline()
-                .isAfter(LocalDateTime.now().minusMinutes(1))){
+        if (taskDTO.getDeadline().isBefore(task.getProject().getDeadline()) && taskDTO.getDeadline()
+                .isAfter(LocalDateTime.now().minusMinutes(1))) {
             //because of the possible delay of the network, it is acceptable to be 1 minute earlier than NOW
             task.setDeadline(taskDTO.getDeadline());
-        }else{
+        } else {
             throw new IllegalArgumentException("Task deadline would be after project's deadline or before NOW");
         }
 
@@ -207,44 +203,47 @@ public class DTOsConverter {
      * If the user is the reporter or ADMIN he can change every option available,
      * If the user is assignee, he can only change the status,
      * Otherwise, no change is allowed
+     *
      * @param taskDTO taskDTO entity to be con
-     * @param user User that made the change
+     * @param user    User that made the change
      * @return task updated accordingly
      */
-    public Task getTaskFromDTOForUpdate(TaskDTO taskDTO, User user) {
+    public Task getTaskFromDTOForUpdate(final TaskDTO taskDTO, final User user) {
         log.debug(String.format("Method to update Task from TaskDto called with parameter: %s", taskDTO));
 
         Optional<Task> taskOptional = taskRepository.findById(taskDTO.getId());
         Task task = taskOptional.orElseThrow();
 
-        if (taskDTO.getDescription() == null && taskDTO.getDeadline() == null && taskDTO.getTaskType() == null &&
+        boolean onlyTheStatusIsUpdated = taskDTO.getDescription() == null && taskDTO.getDeadline() == null && taskDTO.getTaskType() == null &&
                 taskDTO.getDifficulty() == 0 && taskDTO.getPriority() == 0 && taskDTO.getTaskStatus() != null &&
                 (task.getAssignees().contains(user) || task.getReporter().getId() == user.getId()) &&
-                taskValidation.isTaskStatusChangeValid(taskOptional.get(), taskDTO)) {
-            // Only the status is updated
+                taskValidation.isTaskStatusChangeValid(task, taskDTO);
+        if (onlyTheStatusIsUpdated) {
             task.setTaskStatus(taskDTO.getTaskStatus());
             task.setLastChanged(LocalDateTime.now());
             return task;
 
-        } else if (taskDTO.getDescription() != null && !taskDTO.getDescription().trim().equals("") &&
+        }
+        boolean isReporterOrAdmin = taskDTO.getReporterID() == user.getId() || user.getStatus().equals(UserStatus.ADMIN);
+        boolean everyAttributeOfTaskIsUpdated = taskDTO.getDescription() != null && !taskDTO.getDescription().trim().equals("") &&
                 taskDTO.getDeadline() != null && taskDTO.getTaskType() != null &&
                 taskDTO.getDifficulty() != 0 && taskDTO.getPriority() != 0 && taskDTO.getTaskStatus() != null &&
-                taskValidation.isTaskStatusChangeValid(taskOptional.get(), taskDTO) &&
-                (taskDTO.getReporterID() == user.getId() || user.getStatus().equals(UserStatus.ADMIN))) {
+                taskValidation.isTaskStatusChangeValid(task, taskDTO);
+        if (everyAttributeOfTaskIsUpdated && isReporterOrAdmin) {
 
             task.setDescription(taskDTO.getDescription());
             task.setDeadline(taskDTO.getDeadline());
             task.setTaskType(taskDTO.getTaskType());
-            if (taskDTO.getDifficulty() >= 1 && taskDTO.getDifficulty() <= 3){
+            if (taskDTO.getDifficulty() >= 1 && taskDTO.getDifficulty() <= 3) {
                 task.setDifficulty(taskDTO.getDifficulty());
             }
-            if (taskDTO.getPriority() >= 1 && taskDTO.getPriority() <= 3){
+            if (taskDTO.getPriority() >= 1 && taskDTO.getPriority() <= 3) {
                 task.setPriority(taskDTO.getPriority());
             }
             task.setTaskStatus(taskDTO.getTaskStatus());
-            if(task.getTaskStatus().equals(TaskStatus.CLOSED)){
+            if (task.getTaskStatus().equals(TaskStatus.CLOSED)) {
                 task.setDoneAt(LocalDateTime.now());
-            }else{
+            } else {
                 task.setDoneAt(null);
             }
             task.setLastChanged(LocalDateTime.now());
@@ -252,9 +251,10 @@ public class DTOsConverter {
                     .map(assigneeId -> userRepository.findById(assigneeId).orElseThrow())
                     .collect(Collectors.toList()));
             return task;
-        } else {
-            throw new IllegalArgumentException();
         }
+
+        throw new IllegalArgumentException();
+
     }
 
 
@@ -280,7 +280,7 @@ public class DTOsConverter {
         taskDTO.setDepartment(task.getDepartment());
         taskDTO.setTaskType(task.getTaskType());
         taskDTO.setReporterID(task.getReporter().getId());
-        if(task.getAssignees() == null){
+        if (task.getAssignees() == null) {
             task.setAssignees(new ArrayList<>());
         }
         taskDTO.setAssignees(task.getAssignees().stream().map(User::getId).collect(Collectors.toList()));
@@ -299,24 +299,25 @@ public class DTOsConverter {
 
         Project project = projectOptional.orElseGet(Project::new);
 
-        if(projectDTO.getId() != 0){
+        if (projectDTO.getId() != 0) {
             project.setId(projectDTO.getId());
         }
-        if(!(projectDTO.getName() == null || projectDTO.getName().equals(""))) {
+        if (!(projectDTO.getName() == null || projectDTO.getName().equals(""))) {
             project.setName(projectDTO.getName());
         }
-        if(!(projectDTO.getDescription() == null || projectDTO.getDescription().equals(""))) {
+        if (!(projectDTO.getDescription() == null || projectDTO.getDescription().equals(""))) {
             project.setDescription(projectDTO.getDescription());
         }
         project.setDeadline(projectDTO.getDeadline());
-        if(projectDTO.getOwnerID() != 0){
-            project.setOwner(userRepository.findById(projectDTO.getOwnerID()).get());
+        if (projectDTO.getOwnerID() != 0) {
+            User user = userRepository.findById(projectDTO.getOwnerID()).orElseThrow();
+            project.setOwner(user);
         }
         project.setArchived(projectDTO.isArchived());
 
-        if(projectDTO.getVersion() != null){
+        if (projectDTO.getVersion() != null) {
             project.setVersion(projectDTO.getVersion());
-        }else{
+        } else {
             project.setVersion("0.0.1");
         }
 
@@ -407,10 +408,11 @@ public class DTOsConverter {
 
     /**
      * Converts LocationDTO to Location
+     *
      * @param location location to be converted
      * @return LocationDTO object
      */
-    public LocationDTO getDTOFromLocation(Location location){
+    public LocationDTO getDTOFromLocation(Location location) {
         log.debug(String.format("Method to convert from location to DTO entered with parameter: %s", location));
         LocationDTO locationDTO = new LocationDTO();
 
@@ -426,10 +428,11 @@ public class DTOsConverter {
 
     /**
      * Get Location from LocationDTO
+     *
      * @param locationDTO DTO object to be converted to location
      * @return Location object
      */
-    public Location getLocationFromDTO(LocationDTO locationDTO){
+    public Location getLocationFromDTO(LocationDTO locationDTO) {
         log.debug("Method to convert from locationDTO to Location entered with parameter: {}", locationDTO);
 
         Optional<Location> locationOptional = locationRepository.findById(locationDTO.getId());
@@ -439,7 +442,7 @@ public class DTOsConverter {
         location.setAddress(locationDTO.getAddress());
         location.setCity(locationDTO.getCity());
         location.setCountry(locationDTO.getCountry());
-        if(locationOptional.isPresent() && locationDTO.getTeams() != null){
+        if (locationOptional.isPresent() && locationDTO.getTeams() != null) {
             location.setTeams(teamRepository.findAllById(locationDTO.getTeams()));
         }
         log.debug(String.format("Exiting with entity: %s", location));
@@ -449,6 +452,7 @@ public class DTOsConverter {
 
     /**
      * Converts CommentDTO to Comment
+     *
      * @param commentDTO CommentDTO entity to be converted
      * @return Comment object
      */
@@ -463,7 +467,7 @@ public class DTOsConverter {
         Optional<Post> postOptional = postRepository.findById(commentDTO.getPostId());
         postOptional.ifPresent(comment::setPost);
         comment.setReplies(commentDTO.getReplies().stream().map(this::getCommentFromDTO).collect(Collectors.toList()));
-        if(commentDTO.getDatePosted() == null){
+        if (commentDTO.getDatePosted() == null) {
             commentDTO.setDatePosted(LocalDateTime.now());
         }
         comment.setDatePosted(commentDTO.getDatePosted());
@@ -473,6 +477,7 @@ public class DTOsConverter {
 
     /**
      * Converts Comment to CommentDTO
+     *
      * @param comment Comment to be converted
      * @return CommentDTO object
      */
@@ -485,7 +490,7 @@ public class DTOsConverter {
         commentDTO.setCreator(this.getDTOFromUser(comment.getCreator()));
         commentDTO.setReplies(comment.getReplies().stream().map(this::getDTOFromComment).collect(Collectors.toList()));
         commentDTO.setDatePosted(comment.getDatePosted());
-        int parentId = comment.getParent() != null?comment.getParent().getId() : 0;
+        int parentId = comment.getParent() != null ? comment.getParent().getId() : 0;
         commentDTO.setParent(parentId);
         commentDTO.setPostId(comment.getPost().getId());
         log.debug(String.format("Instance of type CommentDTO created: %s", commentDTO));
@@ -494,6 +499,7 @@ public class DTOsConverter {
 
     /**
      * Converts a PostDTO to a Post object
+     *
      * @param postDTO PostDTO object to be converted
      * @return Post object
      */
@@ -510,6 +516,7 @@ public class DTOsConverter {
 
     /**
      * Converts a Post object to a postDTO
+     *
      * @param post Post object to be converted
      * @return PostDTO object
      */
@@ -521,7 +528,7 @@ public class DTOsConverter {
         postDTO.setTaskDTO(getDTOFromTask(post.getTask()));
         postDTO.setComments(post.getComments().stream().map(this::getDTOFromComment).collect(Collectors.toList()));
 
-        if(postDTO.getComments() == null){
+        if (postDTO.getComments() == null) {
             postDTO.setComments(new ArrayList<>());
         }
 
@@ -531,10 +538,11 @@ public class DTOsConverter {
 
     /**
      * Converts a ResetRequest to a DTO
+     *
      * @param resetRequest ResetRequest object to be converted
      * @return ResetRequestDTO object
      */
-    public ResetRequestDTO getDTOFromResetRequest(ResetRequest resetRequest){
+    public ResetRequestDTO getDTOFromResetRequest(ResetRequest resetRequest) {
         ResetRequestDTO resetRequestDTO = new ResetRequestDTO();
         resetRequestDTO.setId(resetRequest.getId());
         resetRequestDTO.setCreatedAt(resetRequest.getCreatedAt());
@@ -545,17 +553,18 @@ public class DTOsConverter {
 
     /**
      * Converts a ResetRequestDTO to a ResetRequest
+     *
      * @param resetRequestDTO ResetRequestDTO object to be converted
      * @return ResetRequest object
      */
-    public ResetRequest getResetRequestFromDTO(ResetRequestDTO resetRequestDTO){
+    public ResetRequest getResetRequestFromDTO(ResetRequestDTO resetRequestDTO) {
         ResetRequest resetRequest = resetRequestRepository.findById(resetRequestDTO.getId()).orElse(new ResetRequest());
-        if(resetRequestDTO.getUserId() != 0){
+        if (resetRequestDTO.getUserId() != 0) {
             resetRequest.setUser(userRepository.findById(resetRequestDTO.getUserId()).orElseThrow());
         }
-        if(resetRequestDTO.getCreatedAt() == null){
+        if (resetRequestDTO.getCreatedAt() == null) {
             resetRequest.setCreatedAt(LocalDateTime.now());
-        }else{
+        } else {
             resetRequest.setCreatedAt(resetRequestDTO.getCreatedAt());
         }
         return resetRequest;

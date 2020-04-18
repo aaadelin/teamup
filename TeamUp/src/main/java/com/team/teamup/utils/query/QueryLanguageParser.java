@@ -1,5 +1,6 @@
-package com.team.teamup.utils;
+package com.team.teamup.utils.query;
 
+import com.team.teamup.domain.HasNameAndDescription;
 import com.team.teamup.domain.Task;
 import com.team.teamup.domain.User;
 import com.team.teamup.domain.enums.Department;
@@ -18,122 +19,36 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @Component
-public class QueryLanguageParser {
+public class QueryLanguageParser extends AbstractLanguageParser {
 
     // "SELECT TASK AS T WHERE (T.NAME=\"\" AND T.DESCRIPTION = \"\")OR (T.DEADLINE=2020-04-14 OR (T.ASSIGNEES=[] AND T.STATUS=INPROGRESS)) AND (T.STATUS=)"
 
-    private final TaskRepository taskRepository;
-    private static final String SUMMARY = "summary";
-    private static final String DESCRIPTION = "description";
-    private static final String CREATED = "created";
-    private static final String LAST_CHANGED = "lastchanged";
-    private static final String DEADLINE = "deadline";
-    private static final String DIFFICULTY = "difficulty";
-    private static final String PRIORITY = "priority";
-    private static final String TYPE = "type";
-    private static final String STATUS = "status";
-    private static final String DEPARTMENT = "department";
-    private static final String ASSIGNEES = "assignees";
-    private static final String REPORTER = "reporter";
-    private static final String WHERE = "where";
-    private static final String NAME = "name";
-    private static final String OWNER = "owner";
-    private static final String VERSION = "version";
-    private static final String ARCHIVED = "archived";
-    private static final String LIKE = " like ";
-    private static final String PROJECT = "project";
-
-    private static final Predicate<Task> defaultPredicate = task -> true;
 
     @Autowired
     public QueryLanguageParser(TaskRepository taskRepository) {
-        this.taskRepository = taskRepository;
+        super(taskRepository);
     }
 
-    public List<Task> getAllByQuery(final String condition) {
-        final String lwrCondition = condition.toLowerCase();
-
-        int limit = 0;
-        String[] words = lwrCondition.split(" ");
-        if (words[words.length - 2].contains("limit") && isInteger(words[words.length - 1])) {
-            limit = Integer.parseInt(words[words.length - 1]);
-        }
-
-        if (!lwrCondition.contains(WHERE) || lwrCondition.split(WHERE).length == 1) {
-            return taskRepository.findAll();
-        }
-        String conditions = lwrCondition.split(WHERE)[1].split("limit")[0];
-
-        String[] delimitQuotes = conditions.replace("\"", "\" ").split("\"");
-        Map<Integer, String> searchTerms = new HashMap<>();
-
-        for (int i = 1; i < delimitQuotes.length; i += 2) {
-            Integer termPosition = i / 2;
-            searchTerms.put(termPosition, delimitQuotes[i]);
-            delimitQuotes[i] = "{" + termPosition + "}";
-        }
-
-        conditions = String.join("", Arrays.asList(delimitQuotes));
-        Map<String, String> aliases = extractAliases(lwrCondition);
-        List<Predicate<Task>> andPredicates = new ArrayList<>();
-        for (String andCondition : conditions.split("and")) {
-            andPredicates.add(reduceOrPredicates(searchTerms, andCondition, aliases));
-        }
-        return getFilteredTasks(limit, andPredicates);
-    }
-
-    private Map<String, String> extractAliases(final String condition) {
-        String[] aliases = condition.split(WHERE)[0].replace("select", "").split(",");
-
-        Map<String, String> aliasesMap = new HashMap<>();
-        aliasesMap.put("task", "task.");
-        aliasesMap.put(PROJECT, "project.");
-
-        switch (aliases.length) {
-            case 1:
-                String[] alias = aliases[0].split(" as ");
-                if (alias.length > 1) {
-                    aliasesMap.put(alias[0].strip(), alias[1].strip() + ".");
-                }
-                return aliasesMap;
-            case 2:
-                String[] alias1 = aliases[0].split(" as ");
-                String[] alias2 = aliases[1].split(" as ");
-                aliasesMap.put(alias1[0].strip(), alias1[1].strip() + ".");
-                aliasesMap.put(alias2[0].strip(), alias2[1].strip() + ".");
-                return aliasesMap;
-            default:
-                return aliasesMap;
-        }
-    }
-
-    private Predicate<Task> reduceOrPredicates(final Map<Integer, String> quotes, final String andCondition, final Map<String, String> aliases) {
+    public Predicate<Task> reduceOrPredicates(final Map<Integer, String> quotes,
+                                              final String andCondition,
+                                              final Map<String, String> aliases) {
         List<Predicate<Task>> orPredicates = new ArrayList<>();
         for (String orCondition : andCondition.split(" or ")) {
             orCondition = orCondition.strip();
             if (orCondition.contains("{")) {
                 Integer key = Integer.parseInt(orCondition.split("\\{")[1].split("}")[0]);
                 String quoted = "\"" + quotes.get(key) + "\"";
-                Predicate<Task> predicate;
-                if (orCondition.startsWith(aliases.get("task"))) {
-                    orCondition = orCondition.replace(aliases.get("task"), "");
-                    predicate = evaluateSimpleTaskCondition(orCondition.replace("{" + key + "}", quoted));
-                }else {
-                    orCondition = orCondition.replace(aliases.get(PROJECT), "");
-                    predicate = evaluateSimpleProjectCondition(orCondition.replace("{" + key + "}", quoted));
-                }
-                orPredicates.add(predicate);
-            } else {
-                Predicate<Task> predicate;
-                if (orCondition.startsWith(aliases.get("task"))) {
-                    orCondition = orCondition.replace(aliases.get("task"), "");
-                    predicate = evaluateSimpleTaskCondition(orCondition);
-                }else{
-                    orCondition = orCondition.replace(aliases.get(PROJECT), "");
-                    predicate = evaluateSimpleProjectCondition(orCondition);
-                }
-                orPredicates.add(predicate);
+                orCondition = orCondition.replace("{" + key + "}", quoted);
             }
+            Predicate<Task> predicate;
+            if (orCondition.startsWith(aliases.get("task"))) {
+                orCondition = orCondition.replace(aliases.get("task"), "");
+                predicate = evaluateSimpleTaskCondition(orCondition);
+            } else {
+                orCondition = orCondition.replace(aliases.get(PROJECT), "");
+                predicate = evaluateSimpleProjectCondition(orCondition);
+            }
+            orPredicates.add(predicate);
         }
         if (!orPredicates.isEmpty()) {
             return orPredicates.stream().reduce(orPredicates.get(0), Predicate::or);
@@ -162,7 +77,7 @@ public class QueryLanguageParser {
         }
         if (condition.split("\"")[0].contains(LIKE)) {
             // summary, description
-            return likeConditionForProject(condition);
+            return likeCondition(condition, Task::getProject);
         }
         return defaultPredicate;
     }
@@ -192,7 +107,7 @@ public class QueryLanguageParser {
             case DEADLINE:
                 return getTaskDateFieldEquality(rightOperand, task -> task.getProject().getDeadline());
             case VERSION:
-                return  task -> task.getProject().getVersion().equals(rightOperand);
+                return task -> task.getProject().getVersion().equals(rightOperand);
             case OWNER:
                 return task -> task.getProject().getOwner().getUsername().equals(rightOperand);
             default:
@@ -209,7 +124,7 @@ public class QueryLanguageParser {
         switch (leftOperand) {
             case VERSION:
                 return task -> Arrays.asList(comparableArray).contains(task.getProject().getVersion());
-                case OWNER:
+            case OWNER:
                 return task -> Arrays.asList(comparableArray).contains(task.getProject().getOwner().getUsername());
 
             default:
@@ -217,40 +132,6 @@ public class QueryLanguageParser {
         }
     }
 
-    private Predicate<Task> likeConditionForProject(String condition) {
-        final String[] conditionStrings = condition.replace(LIKE, " ").split("\""); // summary like "items in a teapot" -> [summary, items in a teapot, ]
-        final String leftOperand = conditionStrings[0].strip();
-        final String stringToBeContained = conditionStrings[1].strip();
-
-        switch (leftOperand) {
-            case NAME:
-                return task -> task.getProject().getName().toLowerCase().contains(stringToBeContained);
-            case DESCRIPTION:
-                return task -> task.getProject().getDescription().toLowerCase().contains(stringToBeContained);
-            default:
-                return defaultPredicate;
-        }
-    }
-
-    private List<Task> getFilteredTasks(int limit, List<Predicate<Task>> andPredicates) {
-        List<Task> allTasks = taskRepository.findAll();
-        limit = limit <= 0 ? allTasks.size() : limit;
-        if (!andPredicates.isEmpty()) {
-            Predicate<Task> predicate = andPredicates.stream().reduce(andPredicates.get(0), Predicate::and);
-            return allTasks.stream().filter(predicate).limit(limit).collect(Collectors.toList());
-        } else {
-            return allTasks.stream().limit(limit).collect(Collectors.toList());
-        }
-    }
-
-    private boolean isInteger(String word) {
-        try {
-            Integer.parseInt(word);
-            return true;
-        } catch (NumberFormatException n) {
-            return false;
-        }
-    }
 
     public Predicate<Task> evaluateSimpleTaskCondition(String inputCondition) {
         //simple conditions like t.status=1, p.owner="user", t.status=
@@ -273,7 +154,7 @@ public class QueryLanguageParser {
         }
         if (condition.split("\"")[0].contains(LIKE)) {
             // summary, description
-            return likeCondition(condition);
+            return likeCondition(condition, task -> task);
         }
         return defaultPredicate;
     }
@@ -413,16 +294,17 @@ public class QueryLanguageParser {
         }
     }
 
-    private Predicate<Task> likeCondition(String condition) {
+    private Predicate<Task> likeCondition(String condition, Function<Task, HasNameAndDescription> getOperator) {
         final String[] conditionStrings = condition.replace(LIKE, " ").split("\""); // summary like "items in a teapot" -> [summary, items in a teapot, ]
         final String leftOperand = conditionStrings[0].strip();
         final String stringToBeContained = conditionStrings[1].strip();
 
         switch (leftOperand) {
             case SUMMARY:
-                return task -> task.getSummary().toLowerCase().contains(stringToBeContained);
+            case NAME:
+                return task -> getOperator.apply(task).getName().toLowerCase().contains(stringToBeContained);
             case DESCRIPTION:
-                return task -> task.getDescription().toLowerCase().contains(stringToBeContained);
+                return task -> getOperator.apply(task).getDescription().toLowerCase().contains(stringToBeContained);
             default:
                 return defaultPredicate;
         }

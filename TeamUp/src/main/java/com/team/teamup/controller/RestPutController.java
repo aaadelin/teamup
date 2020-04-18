@@ -87,7 +87,7 @@ public class RestPutController {
                         String.format("Updated user \"%s %s\"", userServiceByID.getFirstName(), userServiceByID.getLastName()),
                         UserEventType.UPDATE);
 
-                User realUser = dtOsConverter.getUserFromDTO(user, UserStatus.ADMIN);
+                User realUser = dtOsConverter.getUserFromDTO(user);
                 userService.save(realUser);
                 log.info(String.format("User with id %s has been successfully updated in database", user.getId()));
                 return new ResponseEntity<>("OK", HttpStatus.OK);

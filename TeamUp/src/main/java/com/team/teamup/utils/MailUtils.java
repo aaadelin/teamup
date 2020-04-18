@@ -67,6 +67,7 @@ public class MailUtils {
             message = message.replace("<token>", String.valueOf(resetRequest.getId()));
             return message;
         } catch (IOException e) {
+            log.info(e.getMessage());
             e.printStackTrace();
         }
         return "";
