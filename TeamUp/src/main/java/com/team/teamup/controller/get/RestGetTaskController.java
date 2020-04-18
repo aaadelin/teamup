@@ -187,7 +187,7 @@ public class RestGetTaskController {
 
         log.info("Entered method to get assigned and reported tasks with parameters: headers: {} \nstart page: {}\nstatus: {} \n statuses: {}, search {}", headers, startPage, status, statuses, search);
         User user = userService.getByHashKey(headers.get("token"));
-        List<TaskDTO> taskDTOS = taskService.getTasksByStatusesfromPageWithSearchAssignedToUser(status, statuses, search, startPage, user);
+        List<TaskDTO> taskDTOS = taskService.getTasksByStatusesFromPageWithSearchAssignedToUser(status, statuses, search, startPage, user);
         log.info(String.format("Exiting with list of tasks: %s", taskDTOS));
         return new ResponseEntity<>(taskDTOS, HttpStatus.OK);
     }

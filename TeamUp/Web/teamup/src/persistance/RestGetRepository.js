@@ -208,8 +208,18 @@ export async function getTasksByProjectId (id) {
   return fetchDataFromUrl(url)
 }
 
-export async function getTasksByProjectIdAndPage (id, page = 0) {
-  let url = `${baseURL}/projects/${id}/tasks?page=${page}`
+export async function getTasksByProjectIdAndPage (id, page = 0, statuses = '') {
+  let url = `${baseURL}/projects/${id}/tasks?page=${page}&status=${statuses}`
+  return fetchDataFromUrl(url)
+}
+
+export async function getTasksByTeamId (id) {
+  let url = `${baseURL}/teams/${id}/tasks`
+  return fetchDataFromUrl(url)
+}
+
+export async function getTasksByTeamIdAndPage (id, page = 0, statuses = '') {
+  let url = `${baseURL}/teams/${id}/tasks?page=${page}&status=${statuses}`
   return fetchDataFromUrl(url)
 }
 

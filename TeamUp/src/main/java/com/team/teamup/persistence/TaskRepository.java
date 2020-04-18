@@ -5,11 +5,13 @@ import com.team.teamup.domain.Task;
 import com.team.teamup.domain.User;
 import com.team.teamup.domain.enums.TaskStatus;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
 import java.sql.Date;
+import java.util.Collection;
 import java.util.List;
 
 public interface TaskRepository extends JpaRepository<Task, Integer> {
@@ -29,9 +31,10 @@ public interface TaskRepository extends JpaRepository<Task, Integer> {
     List<Task> findAllByAssigneesContainingAndTaskStatusIn(User assignee, List<TaskStatus> statuses, Pageable pageable);
     List<Task> findAllByProject(Project project);
     List<Task> findAllByProject(Project project, Pageable pageable);
+    List<Task> findAllByProjectAndTaskStatusIn(Project project, List<TaskStatus> statuses, Pageable pageable);
     List<Task> findAllByProjectOrderByIdDesc(Project project, Pageable pageable);
     List<Task> findAllByTaskStatusInAndAssigneesContaining(List<TaskStatus> taskStatuses, User user);
-    List<Task> findDistinctByAssigneesIn(List<User> users);
+    List<Task> findDistinctByAssigneesIn(Collection<User> users);
     List<Task> findAllByAssigneesContainingAndLastChangedAfter(User assignee, Date dateAfter);
     int countTaskByAssigneesContainingAndTaskStatusIn(User assignee, List<TaskStatus> statuses);
 
@@ -99,4 +102,7 @@ public interface TaskRepository extends JpaRepository<Task, Integer> {
             "where u.id = ?1 and (t.summary like concat('%', ?2, '%') or t.description like concat('%', ?2, '%')) and t.task_status in ?3 " +
             "group by t.id", nativeQuery = true)
     List<Task> findAllByAssigneesContainingAndSummaryContainingOrDescriptionContainingAndTaskStatusIn(int assignee, String searchTerm, List<Integer> statuses, Pageable pageable);
+
+    List<Task> findDistinctByAssigneesIn(List<User> assignees, Pageable page);
+    List<Task> findDistinctByAssigneesInAndTaskStatusIn(List<User> assignees, List<TaskStatus> status, Pageable page);
 }

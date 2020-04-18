@@ -2,6 +2,7 @@ package com.team.teamup.controller.get;
 
 import com.team.teamup.domain.*;
 import com.team.teamup.domain.enums.Department;
+import com.team.teamup.domain.enums.TaskStatus;
 import com.team.teamup.domain.enums.UserStatus;
 import com.team.teamup.dtos.*;
 import com.team.teamup.service.*;
@@ -194,10 +195,14 @@ public class RestGetController {
     @RequestMapping(value = "/projects/{id}/tasks", method = GET)
     public ResponseEntity<?> getProjectsTasks(@PathVariable int id,
                                               @RequestParam(name = "page", required = false, defaultValue = "0") Integer page,
-                                              @RequestHeader Map<String, String> headers){
-        log.info(String.format("Entering method to get all tasks from a project with project id %s page %s and headers %s", id, page, headers));
+                                              @RequestParam(name = "status", required = false, defaultValue = "") List<String> statuses){
+        log.info(String.format("Entering method to get all tasks from a project with project id %s page %s", id, page));
         Project project = projectService.getByID(id);
-        List<Task> tasks = taskService.getAllByProject(project, page);
+        if(statuses != null && !statuses.isEmpty()){
+            List<TaskDTO> tasks = taskService.getAllByProjectAndStatuses(project, statuses, page);
+            return new ResponseEntity<>(tasks, HttpStatus.OK);
+        }
+        List<TaskDTO> tasks = taskService.getAllByProject(project, page);
         log.info(String.format("Exiting with list of tasks: %s", tasks));
         return new ResponseEntity<>(tasks, HttpStatus.OK);
     }
@@ -275,6 +280,20 @@ public class RestGetController {
         List<Task> tasks = taskService.getTasksByAssignees(team.getMembers());
         List<Integer> counts = taskUtils.createStatisticsFromListOfTasks(tasks);
         return new ResponseEntity<>(counts, HttpStatus.OK);
+    }
+
+    @RequestMapping(value = "/teams/{id}/tasks", method = GET)
+    public ResponseEntity<?> getTeamsTasks(@PathVariable int id,
+                                           @RequestParam(name = "page", required = false, defaultValue = "0") Integer page,
+                                           @RequestParam(name = "status", required = false, defaultValue = "") List<String> statuses){
+        log.info("Entered method to get teams tasks with team id {} ", id);
+        Team team = teamService.getTeamByID(id);
+        if(statuses != null && !statuses.isEmpty()){
+            List<TaskDTO> tasks = taskService.getTasksByAssigneesWithStatus(team.getMembers(), statuses, page);
+            return new ResponseEntity<>(tasks, HttpStatus.OK);
+        }
+        List<TaskDTO> tasks = taskService.getTasksByAssignees(team.getMembers(), page);
+        return new ResponseEntity<>(tasks, HttpStatus.OK);
     }
 }
 

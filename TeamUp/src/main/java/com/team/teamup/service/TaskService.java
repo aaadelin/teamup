@@ -14,6 +14,7 @@ import com.team.teamup.utils.TaskUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 
 import java.sql.Date;
@@ -41,7 +42,7 @@ public class TaskService {
                        UserRepository userRepository,
                        DTOsConverter dtOsConverter,
                        TaskUtils taskUtils,
-                       QueryLanguageParser qlp){
+                       QueryLanguageParser qlp) {
         this.taskRepository = taskRepository;
         this.userRepository = userRepository;
         this.dtOsConverter = dtOsConverter;
@@ -50,26 +51,24 @@ public class TaskService {
     }
 
     /**
-     *
      * @param startPage repository page to get tasks
-     * @param statuses list of statuses tasks should have, if empty, all are taken into consideration
-     * @param search search tem
-     * @param sort task sort propery
-     * @param desc is true, sort will be descenting
+     * @param statuses  list of statuses tasks should have, if empty, all are taken into consideration
+     * @param search    search tem
+     * @param sort      task sort propery
+     * @param desc      is true, sort will be descenting
      * @return list of taskDTOs filtered and sorted by parameters
      */
-    public List<TaskDTO> getTasksByParameters(Integer startPage, List<TaskStatus> statuses, String search, String sort, Boolean desc){
+    public List<TaskDTO> getTasksByParameters(Integer startPage, List<TaskStatus> statuses, String search, String sort, Boolean desc) {
         return taskUtils.findTasksByParameters(startPage, statuses, search, sort, desc);
     }
 
     /**
-     *
-     * @param user user that is assigned to tasks
+     * @param user     user that is assigned to tasks
      * @param lastDays optional integer representing last number of days that a task has been updated
      * @return list of tasks that are assigned to that user and are modified in lastDays
      */
-    public List<Task> getTasksWhereUserIsAssigned(User user, Integer lastDays){
-        if(lastDays == null){
+    public List<Task> getTasksWhereUserIsAssigned(User user, Integer lastDays) {
+        if (lastDays == null) {
             log.info("Getting statistics from all time");
             return taskRepository.findAllByAssigneesContaining(user);
         }
@@ -81,49 +80,45 @@ public class TaskService {
     }
 
     /**
-     *
      * @param ID task's id
      * @return taskDTO from task with that id
      * @throws NoSuchElementException if there is no such element
      */
-    public TaskDTO getTaskDTOById(int ID){
+    public TaskDTO getTaskDTOById(int ID) {
         return dtOsConverter.getDTOFromTask(getByID(ID));
     }
 
 
     /**
-     *
      * @param ID task's id
      * @return task with that id
      * @throws NoSuchElementException if there is no such element
      */
-    public Task getByID(int ID){
+    public Task getByID(int ID) {
         return taskRepository.findById(ID).orElseThrow(NoSuchElementException::new);
     }
 
     /**
-     *
      * @param taskID task's id
      * @return project that contains that task
      * @throws NoSuchElementException if there is no task with that id
      */
-    public ProjectDTO getTasksProjectDTO(int taskID){
+    public ProjectDTO getTasksProjectDTO(int taskID) {
         Task task = getByID(taskID);
         Project project = task.getProject();
         return dtOsConverter.getDTOFromProject(project);
     }
 
     /**
-     *
      * @param startPage page from repository
-     * @param status task status
-     * @param search search term
-     * @param statuses list of task statuses
+     * @param status    task status
+     * @param search    search term
+     * @param statuses  list of task statuses
      * @return list or assigned and reported tasks filtered by parameters
      */
-    public List<TaskDTO> getTasksByStatusesfromPageWithSearchAssignedToUser(TaskStatus status, List<TaskStatus> statuses, String search, int startPage, User user){
+    public List<TaskDTO> getTasksByStatusesFromPageWithSearchAssignedToUser(TaskStatus status, List<TaskStatus> statuses, String search, int startPage, User user) {
         List<TaskDTO> taskDTOS = new ArrayList<>();
-        if(status != null){
+        if (status != null) {
             log.info("Filter type selected: by one single status");
             taskDTOS = taskRepository.findTasksWithStatusAssignedToOrReportedBy(
                     user.getId(),
@@ -131,7 +126,7 @@ public class TaskService {
                     PageRequest.of(startPage, PAGE_SIZE))
                     .stream()
                     .map(dtOsConverter::getDTOFromTask).collect(Collectors.toList());
-        }else if (statuses != null){
+        } else if (statuses != null) {
             log.info("Filter type selected: by multiple statuses");
             taskDTOS = taskRepository.findTasksWithStatusesAssignedToOrReportedBy(
                     user.getId(),
@@ -144,40 +139,46 @@ public class TaskService {
     }
 
     /**
-     *
-     * @param status task status
-     * @param user task's reporter
+     * @param status    task status
+     * @param user      task's reporter
      * @param startPage repository page
      * @return tasks reported by user with status from page
      */
-    public List<TaskDTO> getReportedTasksByStatus(TaskStatus status, User user, int startPage){
-        return taskRepository.findAllByTaskStatusAndReporter(status,
-                user,
-                PageRequest.of(startPage, PAGE_SIZE))
-                .stream().map(dtOsConverter::getDTOFromTask).collect(Collectors.toList());
+    public List<TaskDTO> getReportedTasksByStatus(TaskStatus status, User user, int startPage) {
+        return convertListToDTOS(
+                taskRepository.findAllByTaskStatusAndReporter(status,
+                        user,
+                        PageRequest.of(startPage, PAGE_SIZE)));
     }
 
     /**
-     *
      * @param assignees list of assignees that bust be in tasks
      * @return list of tasks that contain at least one assignee
      */
-    public List<Task> getTasksByAssignees(List<User> assignees){
+    public List<Task> getTasksByAssignees(List<User> assignees) {
         return taskRepository.findDistinctByAssigneesIn(assignees);
     }
 
     /**
-     *
+     * @param assignees list of assignees that bust be in tasks
+     * @param page      repository page
+     * @return list of tasks that contain at least one assignee
+     */
+    public List<TaskDTO> getTasksByAssignees(List<User> assignees, int page) {
+        return convertListToDTOS(taskRepository.findDistinctByAssigneesIn(assignees, PageRequest.of(page, PAGE_SIZE)));
+    }
+
+    /**
      * @param project project to get tasks from
-     * @param page repository page
+     * @param page    repository page
      * @return list of tasks of that project
      */
-    public List<Task> getAllByProject(Project project, int page){
-        if(page < 0){
-            page = (page * -1) -1;
-            return taskRepository.findAllByProjectOrderByIdDesc(project, PageRequest.of(page, PAGE_SIZE));
-        }else{
-            return taskRepository.findAllByProject(project, PageRequest.of(page, PAGE_SIZE));
+    public List<TaskDTO> getAllByProject(Project project, int page) {
+        if (page < 0) {
+            page = (page * -1) - 1;
+            return convertListToDTOS(taskRepository.findAllByProjectOrderByIdDesc(project, PageRequest.of(page, PAGE_SIZE)));
+        } else {
+            return convertListToDTOS(taskRepository.findAllByProject(project, PageRequest.of(page, PAGE_SIZE)));
         }
     }
 
@@ -185,11 +186,39 @@ public class TaskService {
         return taskRepository.findAll();
     }
 
-    public Task save(Task task) {
-        return taskRepository.save(task);
+    public List<TaskDTO> getAllDTO() {
+        return convertListToDTOS(taskRepository.findAll());
+    }
+
+    public TaskDTO save(Task task) {
+        return dtOsConverter.getDTOFromTask(taskRepository.save(task));
     }
 
     public List<TaskDTO> getAllByQuery(String query) {
-        return queryLanguageParser.getAllByQuery(query).stream().map(task -> dtOsConverter.getDTOFromTask(task)).collect(Collectors.toList());
+        return convertListToDTOS(queryLanguageParser.getAllByQuery(query));
+    }
+
+    public List<TaskDTO> getTasksByAssigneesWithStatus(List<User> members, List<String> statuses, Integer page) {
+        return convertListToDTOS(
+                taskRepository.findDistinctByAssigneesInAndTaskStatusIn(members,
+                        statuses.stream().map(status -> TaskStatus.valueOf(status.toUpperCase()))
+                                .collect(Collectors.toList()),
+                        PageRequest.of(page, PAGE_SIZE))
+        );
+    }
+
+    private List<TaskDTO> convertListToDTOS(List<Task> tasks) {
+        return tasks.stream().map(task -> dtOsConverter.getDTOFromTask(task)).collect(Collectors.toList());
+    }
+
+    public List<TaskDTO> getAllByProjectAndStatuses(Project project, List<String> statuses, Integer page) {
+        if (page < 0) {
+            page = (page * -1) - 1;
+            return convertListToDTOS(taskRepository.findAllByProjectOrderByIdDesc(project, PageRequest.of(page, PAGE_SIZE)));
+        } else {
+            return convertListToDTOS(taskRepository.findAllByProjectAndTaskStatusIn(project,
+                    statuses.stream().map(TaskStatus::valueOf).collect(Collectors.toList()),
+                    PageRequest.of(page, PAGE_SIZE)));
+        }
     }
 }

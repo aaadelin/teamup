@@ -34,6 +34,7 @@
 
 <script>
 import {
+  getTasksByProjectIdAndPage, getTasksByTeamIdAndPage,
   getUsersAssignedTasksByUserIdAndTaskStatuses
 } from '../persistance/RestGetRepository'
 import TaskBox from './containers/TaskBox'
@@ -84,9 +85,13 @@ export default {
       default: null,
       type: String
     },
-    userId: {
+    id: {
       required: true,
       default: 1
+    },
+    type: {
+      required: true,
+      default: 'user'
     }
   },
   methods: {
@@ -103,12 +108,30 @@ export default {
     },
     async fetchTasks () {
       let newTasks = []
-      if (this.taskCategory === 'TO DO') {
-        newTasks.push(...await getUsersAssignedTasksByUserIdAndTaskStatuses(this.userId, this.page, 'OPEN,REOPENED'))
-      } else if (this.taskCategory === 'DONE') {
-        newTasks.push(...await getUsersAssignedTasksByUserIdAndTaskStatuses(this.userId, this.page, 'APPROVED'))
-      } else {
-        newTasks.push(...await getUsersAssignedTasksByUserIdAndTaskStatuses(this.userId, this.page, this.taskCategory.replace(' ', '_')))
+      if (this.type === 'user') {
+        if (this.taskCategory === 'TO DO') {
+          newTasks.push(...await getUsersAssignedTasksByUserIdAndTaskStatuses(this.id, this.page, 'OPEN,REOPENED'))
+        } else if (this.taskCategory === 'DONE') {
+          newTasks.push(...await getUsersAssignedTasksByUserIdAndTaskStatuses(this.id, this.page, 'APPROVED'))
+        } else {
+          newTasks.push(...await getUsersAssignedTasksByUserIdAndTaskStatuses(this.id, this.page, this.taskCategory.replace(' ', '_')))
+        }
+      } else if (this.type === 'project') {
+        if (this.taskCategory === 'TO DO') {
+          newTasks.push(...await getTasksByProjectIdAndPage(this.id, this.page, 'OPEN,REOPENED'))
+        } else if (this.taskCategory === 'DONE') {
+          newTasks.push(...await getTasksByProjectIdAndPage(this.id, this.page, 'APPROVED'))
+        } else {
+          newTasks.push(...await getTasksByProjectIdAndPage(this.id, this.page, this.taskCategory.replace(' ', '_')))
+        }
+      } else if (this.type === 'team') {
+        if (this.taskCategory === 'TO DO') {
+          newTasks.push(...await getTasksByTeamIdAndPage(this.id, this.page, 'OPEN,REOPENED'))
+        } else if (this.taskCategory === 'DONE') {
+          newTasks.push(...await getTasksByTeamIdAndPage(this.id, this.page, 'APPROVED'))
+        } else {
+          newTasks.push(...await getTasksByTeamIdAndPage(this.id, this.page, this.taskCategory.replace(' ', '_')))
+        }
       }
       this.page++
       if (newTasks.length < 10) {

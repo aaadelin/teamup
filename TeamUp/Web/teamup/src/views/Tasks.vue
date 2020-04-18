@@ -6,7 +6,8 @@
                 @filter="filterTasks"
                 @sort="sortTasks"
                 @smallView="smallView = !smallView"
-                @hide="showMenu = false"/>
+                @hide="showMenu = false"
+                @reload="getUsersTasks"/>
     <button v-show="!showMenu" class="btn btn-outline-secondary menu-button" @click="showMenu = true">
       &#9776;
     </button>
