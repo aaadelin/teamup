@@ -43,7 +43,7 @@
             By priority
           </label>
           <br>
-          <label>
+          <label>r
             <input name="sort" type="radio" value="modified" @change="sortChanged">
             By last modified
           </label>
@@ -63,8 +63,8 @@
       </ul>
         <ul class="list-unstyled components">
         <li style="text-align: center">
-          <button class="btn btn-outline-light" @click="reload">Refresh
-            <i class="fas fa-sync-alt"></i>
+          <button class="btn btn-outline-light" @click="reload">
+            <i class="fas fa-sync-alt"></i> Refresh
           </button>
         </li>
       </ul>
