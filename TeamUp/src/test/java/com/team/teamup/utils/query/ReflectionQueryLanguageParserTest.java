@@ -1,5 +1,6 @@
 package com.team.teamup.utils.query;
 
+import com.team.teamup.domain.enums.TaskStatus;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -29,101 +30,6 @@ public class ReflectionQueryLanguageParserTest {
         qlp.setClazz(MockTask.class);
 
         LocalDateTime dateTime = LocalDateTime.of(2020, 10, 2, 10, 10);
-//        User user = User.builder()
-//                .username("imaria")
-//                .build();
-//        User user1 = User.builder()
-//                .username("mion")
-//                .build();
-//        User defaultUser = User.builder()
-//                .username("default")
-//                .build();
-//
-//        Project project = Project.builder()
-//                .id(1)
-//                .name("new Project")
-//                .description("project description")
-//                .owner(user1)
-//                .version("0.1")
-//                .archived(true)
-//                .deadline(dateTime.plusDays(10))
-//                .build();
-//        Project project1 = Project.builder()
-//                .id(2)
-//                .name("new new Project")
-//                .description("no description")
-//                .owner(user)
-//                .version("0.3")
-//                .archived(false)
-//                .deadline(dateTime.minusMonths(1))
-//                .build();
-//
-//        Task task1 = Task.builder()
-//                .id(1)
-//                .summary("Create task")
-//                .description("Create task")
-//                .createdAt(dateTime)
-//                .deadline(dateTime.plusDays(10))
-//                .difficulty(1)
-//                .priority(3)
-//                .taskStatus(TaskStatus.OPEN)
-//                .reporter(user)
-//                .assignees(List.of(user1, user))
-//                .project(project)
-//                .build();
-//        Task task2 = Task.builder()
-//                .id(2)
-//                .summary("Update task")
-//                .description("Update task")
-//                .createdAt(dateTime)
-//                .deadline(dateTime.plusDays(9))
-//                .difficulty(2)
-//                .priority(2)
-//                .taskStatus(TaskStatus.IN_PROGRESS)
-//                .reporter(user1)
-//                .assignees(List.of(user1))
-//                .project(project)
-//                .build();
-//        Task task3 = Task.builder()
-//                .id(3)
-//                .summary("Read task")
-//                .description("Read task")
-//                .createdAt(dateTime.plusDays(1))
-//                .deadline(dateTime.plusDays(8))
-//                .difficulty(3)
-//                .priority(1)
-//                .taskStatus(TaskStatus.UNDER_REVIEW)
-//                .reporter(user)
-//                .assignees(List.of(defaultUser))
-//                .project(project1)
-//                .build();
-//        Task task4 = Task.builder()
-//                .id(4)
-//                .summary("Read bug")
-//                .description("Read bug")
-//                .createdAt(dateTime.plusDays(2))
-//                .deadline(dateTime.plusDays(7))
-//                .difficulty(1)
-//                .priority(2)
-//                .taskStatus(TaskStatus.CLOSED)
-//                .reporter(defaultUser)
-//                .assignees(List.of(defaultUser))
-//                .project(project1)
-//                .build();
-//        Task task5 = Task.builder()
-//                .id(5)
-//                .summary("Update bug")
-//                .description("Update bug")
-//                .createdAt(dateTime.plusDays(3))
-//                .deadline(dateTime.plusDays(5))
-//                .difficulty(1)
-//                .priority(1)
-//                .taskStatus(TaskStatus.OPEN)
-//                .reporter(defaultUser)
-//                .assignees(List.of(defaultUser))
-//                .project(project1)
-//                .build();
-//        tasks = List.of(task1, task2, task3, task4, task5);
 
         MockLocation location1 = MockLocation.builder()
                 .address("van")
@@ -157,6 +63,7 @@ public class ReflectionQueryLanguageParserTest {
                 .difficulty(1)
                 .lastChanged(dateTime)
                 .owner(user1)
+                .status(TaskStatus.OPEN)
                 .build();
         MockTask task2 = MockTask.builder()
                 .id(2)
@@ -167,6 +74,7 @@ public class ReflectionQueryLanguageParserTest {
                 .difficulty(2)
                 .lastChanged(dateTime.plusDays(1).plusMinutes(1))
                 .owner(user1)
+                .status(TaskStatus.OPEN)
                 .build();
         MockTask task3 = MockTask.builder()
                 .id(3)
@@ -177,6 +85,7 @@ public class ReflectionQueryLanguageParserTest {
                 .difficulty(3)
                 .lastChanged(dateTime.plusDays(1))
                 .owner(user2)
+                .status(TaskStatus.OPEN)
                 .build();
         MockTask task4 = MockTask.builder()
                 .id(4)
@@ -187,6 +96,7 @@ public class ReflectionQueryLanguageParserTest {
                 .difficulty(4)
                 .lastChanged(dateTime.plusDays(2))
                 .owner(user2)
+                .status(TaskStatus.CLOSED)
                 .build();
         MockTask task5 = MockTask.builder()
                 .id(5)
@@ -197,6 +107,7 @@ public class ReflectionQueryLanguageParserTest {
                 .difficulty(2)
                 .lastChanged(dateTime.plusDays(3))
                 .owner(user2)
+                .status(TaskStatus.IN_PROGRESS)
                 .build();
         tasks = List.of(task1, task2, task3, task4, task5);
     }
@@ -328,5 +239,12 @@ public class ReflectionQueryLanguageParserTest {
         String search = "select where owner.location.country=\"RU\" and summary like \"update\"";
         List<MockTask> tasks = qlp.getAllByQuery(search);
         assertEquals(2, tasks.size());
+    }
+
+    @Test
+    public void testGetByStatus(){
+        String search = "select where status in [open, closed]";
+        List<MockTask> tasks = qlp.getAllByQuery(search);
+        assertEquals(4, tasks.size());
     }
 }

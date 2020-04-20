@@ -32,10 +32,10 @@ public class Task implements HasNameAndDescription{
     @SearchField
     private String description;
 
-    @SearchField
+    @SearchField(name = "created")
     private LocalDateTime createdAt;
 
-    @SearchField
+    @SearchField(name = "done")
     private LocalDateTime doneAt;
 
     @SearchField
@@ -50,13 +50,13 @@ public class Task implements HasNameAndDescription{
     @SearchField
     private Integer priority;
 
-//    @SearchField
+    @SearchField(name = "type")
     private TaskType taskType;
 
-//    @SearchField
+    @SearchField(name = "status")
     private TaskStatus taskStatus;
 
-//    @SearchField
+    @SearchField
     private Department department;
 
     @ManyToOne

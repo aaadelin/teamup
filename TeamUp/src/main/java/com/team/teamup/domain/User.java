@@ -3,6 +3,8 @@ package com.team.teamup.domain;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.team.teamup.domain.enums.UserStatus;
+import com.team.teamup.utils.query.annotations.SearchEntity;
+import com.team.teamup.utils.query.annotations.SearchField;
 import lombok.*;
 
 import javax.persistence.*;
@@ -18,6 +20,7 @@ import java.util.Objects;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@SearchEntity
 public class User {
 
     @Id
@@ -25,6 +28,7 @@ public class User {
     private int id;
 
     @Column(unique = true)
+    @SearchField
     private String username;
 
     @JsonIgnore

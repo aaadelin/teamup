@@ -1,5 +1,6 @@
 package com.team.teamup.utils.query;
 
+import com.team.teamup.domain.enums.TaskStatus;
 import com.team.teamup.utils.query.annotations.SearchEntity;
 import com.team.teamup.utils.query.annotations.SearchField;
 import lombok.Builder;
@@ -37,4 +38,6 @@ public class MockTask {
     private LocalDateTime created;
     @SearchField(attribute = "name")
     private MockUser owner;
+    @SearchField(name = "status")
+    private TaskStatus status;
 }

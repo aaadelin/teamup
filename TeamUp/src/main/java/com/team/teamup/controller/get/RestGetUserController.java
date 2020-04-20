@@ -201,7 +201,7 @@ public class RestGetUserController {
                                          @RequestHeader Map<String, String> headers) {
         log.info(String.format("Entering get user's tasks with user id %s, type value %s, term value %s, page %s, statuses %s and headers %s", id, type, term, page, statuses, headers));
         User user = userService.getByID(id);
-        if(statuses == null || statuses.size() == 0) {
+        if(statuses == null || statuses.isEmpty()) {
             //if no statuses are selected, all tatuses are being taken into consideration
             statuses = Arrays.asList(TaskStatus.values());
         }

@@ -51,8 +51,10 @@ public class ReflectionQueryLanguageParser<T, I> extends AbstractLanguageParser<
     }
 
     private Predicate<T> binaryOperatorParser(String orCondition, Field field, String fieldName, Map<Integer, String> searchTerms) {
-
         String type = field.getType().getSimpleName();
+        if(field.getType().isEnum()){
+            type = "Enum";
+        }
         String remainingCondition = orCondition.replaceFirst(fieldName.toLowerCase(), "").strip();
         switch (type) {
             case "Integer": // < > = != <= >= in
@@ -67,9 +69,56 @@ public class ReflectionQueryLanguageParser<T, I> extends AbstractLanguageParser<
             case "LocalDate":
             case "LocalDateTime": // = >= <= > <
                 return compareDates(field, remainingCondition);
+            case "Enum": // = != in
+                return compareEnums(field, remainingCondition);
             default:
                 return compareObjects(field, remainingCondition, searchTerms);
         }
+
+    }
+
+    private Predicate<T> compareEnums(Field field, String remainingCondition) {
+        List<String> dateOperators = List.of("=", "!=", "in ");
+        for (String operator : dateOperators) {
+            if (remainingCondition.startsWith(operator)) {
+                String rightOperand = remainingCondition.replaceFirst(operator, "").strip();
+                try {
+                    return enumOperator(field, operator, rightOperand);
+                } catch (NoSuchMethodException e) {
+                    log.info(e.getMessage());
+                }
+            }
+        }
+        return t -> true;
+    }
+
+    private Predicate<T> enumOperator(final Field field, final String operator, final String rightOperand) throws NoSuchMethodException {
+        final String methodName = "get" + field.getName().substring(0, 1).toUpperCase() + field.getName().substring(1);
+        final Method method = classes.peek().getDeclaredMethod(methodName);
+        methods.add(method);
+        List<Method> methodsCopy = new ArrayList<>(methods);
+        return t -> {
+            try {
+                Object leftOperand = invokeAllMethods(t, methodsCopy);
+                if(leftOperand == null){
+                    return true;
+                }
+                switch (operator) {
+                    case "=":
+                        return rightOperand.equalsIgnoreCase(leftOperand.toString());
+                    case "!=":
+                        return !rightOperand.equalsIgnoreCase(leftOperand.toString());
+                    case "in ":
+                        String[] options = rightOperand.split("\\[")[1].split("]")[0].split(",");
+                        return Arrays.stream(options).map(String::strip).anyMatch(s -> s.equalsIgnoreCase(leftOperand.toString()));
+                    default:
+                        return true;
+                }
+            } catch (IllegalAccessException | InvocationTargetException e) {
+                log.info(e.getMessage());
+            }
+            return true;
+        };
 
     }
 
