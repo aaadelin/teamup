@@ -1,4 +1,4 @@
-package com.team.teamup.utils;
+package com.team.teamup.utils.query;
 
 import com.team.teamup.domain.Project;
 import com.team.teamup.domain.Task;

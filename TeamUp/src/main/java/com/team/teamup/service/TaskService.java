@@ -9,8 +9,10 @@ import com.team.teamup.dtos.TaskDTO;
 import com.team.teamup.persistence.TaskRepository;
 import com.team.teamup.persistence.UserRepository;
 import com.team.teamup.utils.DTOsConverter;
+import com.team.teamup.utils.query.AbstractLanguageParser;
 import com.team.teamup.utils.query.QueryLanguageParser;
 import com.team.teamup.utils.TaskUtils;
+import com.team.teamup.utils.query.ReflectionQueryLanguageParser;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
@@ -30,24 +32,24 @@ public class TaskService {
 
     private static final int PAGE_SIZE = 10;
 
-    private TaskRepository taskRepository;
-    private UserRepository userRepository;
+    private final TaskRepository taskRepository;
+    private final UserRepository userRepository;
 
-    private DTOsConverter dtOsConverter;
-    private TaskUtils taskUtils;
-    private QueryLanguageParser queryLanguageParser;
+    private final DTOsConverter dtOsConverter;
+    private final TaskUtils taskUtils;
+    private final ReflectionQueryLanguageParser<Task, Integer> queryLanguageParser;
 
     @Autowired
     public TaskService(TaskRepository taskRepository,
                        UserRepository userRepository,
                        DTOsConverter dtOsConverter,
-                       TaskUtils taskUtils,
-                       QueryLanguageParser qlp) {
+                       TaskUtils taskUtils) {
         this.taskRepository = taskRepository;
         this.userRepository = userRepository;
         this.dtOsConverter = dtOsConverter;
         this.taskUtils = taskUtils;
-        this.queryLanguageParser = qlp;
+        this.queryLanguageParser = new ReflectionQueryLanguageParser<>(taskRepository);
+        queryLanguageParser.setClazz(Task.class);
     }
 
     /**
@@ -80,22 +82,22 @@ public class TaskService {
     }
 
     /**
-     * @param ID task's id
+     * @param id task's id
      * @return taskDTO from task with that id
      * @throws NoSuchElementException if there is no such element
      */
-    public TaskDTO getTaskDTOById(int ID) {
-        return dtOsConverter.getDTOFromTask(getByID(ID));
+    public TaskDTO getTaskDTOById(int id) {
+        return dtOsConverter.getDTOFromTask(getByID(id));
     }
 
 
     /**
-     * @param ID task's id
+     * @param id task's id
      * @return task with that id
      * @throws NoSuchElementException if there is no such element
      */
-    public Task getByID(int ID) {
-        return taskRepository.findById(ID).orElseThrow(NoSuchElementException::new);
+    public Task getByID(int id) {
+        return taskRepository.findById(id).orElseThrow(NoSuchElementException::new);
     }
 
     /**
@@ -208,7 +210,7 @@ public class TaskService {
     }
 
     private List<TaskDTO> convertListToDTOS(List<Task> tasks) {
-        return tasks.stream().map(task -> dtOsConverter.getDTOFromTask(task)).collect(Collectors.toList());
+        return tasks.stream().map(dtOsConverter::getDTOFromTask).collect(Collectors.toList());
     }
 
     public List<TaskDTO> getAllByProjectAndStatuses(Project project, List<String> statuses, Integer page) {

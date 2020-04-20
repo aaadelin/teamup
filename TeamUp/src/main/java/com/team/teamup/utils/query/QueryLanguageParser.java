@@ -19,7 +19,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @Component
-public class QueryLanguageParser extends AbstractLanguageParser {
+public class QueryLanguageParser extends AbstractLanguageParser<Task, Integer> {
 
     // "SELECT TASK AS T WHERE (T.NAME=\"\" AND T.DESCRIPTION = \"\")OR (T.DEADLINE=2020-04-14 OR (T.ASSIGNEES=[] AND T.STATUS=INPROGRESS)) AND (T.STATUS=)"
 
@@ -27,6 +27,32 @@ public class QueryLanguageParser extends AbstractLanguageParser {
     @Autowired
     public QueryLanguageParser(TaskRepository taskRepository) {
         super(taskRepository);
+    }
+
+    @Override
+    Map<String, String> extractAliases(final String condition) {
+        String[] aliases = condition.split(WHERE)[0].replace("select", "").split(",");
+
+        Map<String, String> aliasesMap = new HashMap<>();
+        aliasesMap.put("task", "task.");
+        aliasesMap.put(PROJECT, "project.");
+
+        switch (aliases.length) {
+            case 1:
+                String[] alias = aliases[0].split(" as ");
+                if (alias.length > 1) {
+                    aliasesMap.put(alias[0].strip(), alias[1].strip() + ".");
+                }
+                return aliasesMap;
+            case 2:
+                String[] alias1 = aliases[0].split(" as ");
+                String[] alias2 = aliases[1].split(" as ");
+                aliasesMap.put(alias1[0].strip(), alias1[1].strip() + ".");
+                aliasesMap.put(alias2[0].strip(), alias2[1].strip() + ".");
+                return aliasesMap;
+            default:
+                return aliasesMap;
+        }
     }
 
     public Predicate<Task> reduceOrPredicates(final Map<Integer, String> quotes,

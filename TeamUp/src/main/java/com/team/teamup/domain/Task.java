@@ -4,6 +4,8 @@ import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.team.teamup.domain.enums.Department;
 import com.team.teamup.domain.enums.TaskStatus;
 import com.team.teamup.domain.enums.TaskType;
+import com.team.teamup.utils.query.annotations.SearchEntity;
+import com.team.teamup.utils.query.annotations.SearchField;
 import lombok.*;
 
 import javax.persistence.*;
@@ -18,11 +20,13 @@ import java.util.Objects;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@SearchEntity
 public class Task implements HasNameAndDescription{
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
 
+    @SearchField
     private String summary;
 
     private String description;
@@ -37,7 +41,8 @@ public class Task implements HasNameAndDescription{
 
     private int difficulty;
 
-    private int priority;
+    @SearchField
+    private Integer priority;
 
     private TaskType taskType;
 

@@ -1,14 +1,14 @@
 package com.team.teamup.utils.query;
 
 import com.team.teamup.domain.Task;
-import com.team.teamup.persistence.TaskRepository;
+import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.*;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
-public abstract class AbstractLanguageParser {
-    protected final TaskRepository taskRepository;
+public abstract class AbstractLanguageParser<T, I> {
+    protected final JpaRepository<T, I> repository;
     protected static final String SUMMARY = "summary";
     protected static final String DESCRIPTION = "description";
     protected static final String CREATED = "created";
@@ -30,11 +30,11 @@ public abstract class AbstractLanguageParser {
     protected static final String PROJECT = "project";
 
     protected static final Predicate<Task> defaultPredicate = task -> true;
-    public AbstractLanguageParser(TaskRepository taskRepository) {
-        this.taskRepository = taskRepository;
+    public AbstractLanguageParser(JpaRepository<T, I> repository) {
+        this.repository = repository;
     }
 
-    public List<Task> getAllByQuery(final String condition) {
+    public List<T> getAllByQuery(final String condition) {
         final String lwrCondition = condition.toLowerCase();
 
         int limit = 0;
@@ -44,7 +44,7 @@ public abstract class AbstractLanguageParser {
         }
 
         if (!lwrCondition.contains(WHERE) || lwrCondition.split(WHERE).length == 1) {
-            return taskRepository.findAll();
+            return repository.findAll();
         }
         String conditions = lwrCondition.split(WHERE)[1].split("limit")[0];
 
@@ -59,54 +59,40 @@ public abstract class AbstractLanguageParser {
 
         conditions = String.join("", Arrays.asList(delimitQuotes));
         Map<String, String> aliases = extractAliases(lwrCondition);
-        List<Predicate<Task>> andPredicates = new ArrayList<>();
+        List<Predicate<T>> andPredicates = new ArrayList<>();
         for (String andCondition : conditions.split("and")) {
-            andPredicates.add(reduceOrPredicates(searchTerms, andCondition, aliases));
+            andPredicates.add(reduceOrPredicates(searchTerms, andCondition.strip(), aliases));
         }
         return getFilteredTasks(limit, andPredicates);
     }
 
-    protected abstract Predicate<Task> reduceOrPredicates(Map<Integer, String> searchTerms, String andCondition, Map<String, String> aliases);
+    protected abstract Predicate<T> reduceOrPredicates(Map<Integer, String> searchTerms, String andCondition, Map<String, String> aliases);
 
-    private List<Task> getFilteredTasks(int limit, List<Predicate<Task>> andPredicates) {
-        List<Task> allTasks = taskRepository.findAll();
+    private List<T> getFilteredTasks(int limit, List<Predicate<T>> andPredicates) {
+        List<T> allTasks = repository.findAll();
         limit = limit <= 0 ? allTasks.size() : limit;
         if (!andPredicates.isEmpty()) {
-            Predicate<Task> predicate = andPredicates.stream().reduce(andPredicates.get(0), Predicate::and);
+            Predicate<T> predicate = andPredicates.stream().reduce(andPredicates.get(0), Predicate::and);
             return allTasks.stream().filter(predicate).limit(limit).collect(Collectors.toList());
         } else {
             return allTasks.stream().limit(limit).collect(Collectors.toList());
         }
     }
 
-    private Map<String, String> extractAliases(final String condition) {
-        String[] aliases = condition.split(WHERE)[0].replace("select", "").split(",");
-
-        Map<String, String> aliasesMap = new HashMap<>();
-        aliasesMap.put("task", "task.");
-        aliasesMap.put(PROJECT, "project.");
-
-        switch (aliases.length) {
-            case 1:
-                String[] alias = aliases[0].split(" as ");
-                if (alias.length > 1) {
-                    aliasesMap.put(alias[0].strip(), alias[1].strip() + ".");
-                }
-                return aliasesMap;
-            case 2:
-                String[] alias1 = aliases[0].split(" as ");
-                String[] alias2 = aliases[1].split(" as ");
-                aliasesMap.put(alias1[0].strip(), alias1[1].strip() + ".");
-                aliasesMap.put(alias2[0].strip(), alias2[1].strip() + ".");
-                return aliasesMap;
-            default:
-                return aliasesMap;
-        }
-    }
+    abstract Map<String, String> extractAliases(final String condition);
 
     public static boolean isInteger(String word) {
         try {
             Integer.parseInt(word);
+            return true;
+        } catch (NumberFormatException n) {
+            return false;
+        }
+    }
+
+    public static boolean isNumber(String word) {
+        try {
+            Double.parseDouble(word);
             return true;
         } catch (NumberFormatException n) {
             return false;
