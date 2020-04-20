@@ -37,7 +37,7 @@ public class TaskService {
 
     private final DTOsConverter dtOsConverter;
     private final TaskUtils taskUtils;
-    private final ReflectionQueryLanguageParser<Task, Integer> queryLanguageParser;
+    private final AbstractLanguageParser<Task, Integer> queryLanguageParser;
 
     @Autowired
     public TaskService(TaskRepository taskRepository,
@@ -48,8 +48,8 @@ public class TaskService {
         this.userRepository = userRepository;
         this.dtOsConverter = dtOsConverter;
         this.taskUtils = taskUtils;
-        this.queryLanguageParser = new ReflectionQueryLanguageParser<>(taskRepository);
-        queryLanguageParser.setClazz(Task.class);
+        this.queryLanguageParser = new QueryLanguageParser(taskRepository);
+//        queryLanguageParser.setClazz(Task.class);
     }
 
     /**

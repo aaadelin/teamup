@@ -2,9 +2,7 @@ package com.team.teamup.utils.query;
 
 import com.team.teamup.utils.query.annotations.SearchField;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.stereotype.Component;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
@@ -31,16 +29,17 @@ public class ReflectionQueryLanguageParser<T, I> extends AbstractLanguageParser<
 
     public void setClazz(Class<T> clazz) {
         classes.push(clazz);
-        fields = getSearchFields(clazz);
     }
 
     @Override
     protected Predicate<T> reduceOrPredicates(Map<Integer, String> searchTerms, String andCondition, Map<String, String> aliases) {
-        methods.clear();
+        fields = getSearchFields(classes.peek());
         List<Predicate<T>> orPredicates = new ArrayList<>();
         for (String orCondition : andCondition.split(" or ")) {
+
             for (Map.Entry<String, Field> attribute : fields.entrySet()) {
                 if (orCondition.startsWith(attribute.getKey().toLowerCase())) {
+                    methods.clear();
                     orPredicates.add(binaryOperatorParser(orCondition, fields.get(attribute.getKey()), attribute.getKey(), searchTerms));
                 }
             }
@@ -77,34 +76,48 @@ public class ReflectionQueryLanguageParser<T, I> extends AbstractLanguageParser<
     private Predicate<T> compareObjects(Field field, String remainingCondition, Map<Integer, String> searchTerms) {
         Map<String, Field> fieldMap = getSearchFields(field.getType());
         SearchField annotation = field.getAnnotation(SearchField.class);
-        String[] attributes = annotation.attributes();
-        if(attributes.length == 0){
+
+        if (remainingCondition.startsWith(".")) {
+            return pushAttributeToStack(field, remainingCondition.substring(1), searchTerms, fieldMap, findNextAttribute(remainingCondition.substring(1)));
+        }
+
+        String attribute = annotation.attribute();
+        if (attribute.equalsIgnoreCase("")) {
             //should be one
             throw new NoAttributesSetException();
         }
 
-        if(attributes.length == 1 && fieldMap.containsKey(attributes[0])){
+        if (fieldMap.containsKey(attribute)) {
             //compare directly to that key
-
-            final String attribute = attributes[0];
-            return pushAttributeToStack(field, remainingCondition, searchTerms, fieldMap, attribute);
+            return pushAttributeToStack(field, attribute + remainingCondition, searchTerms, fieldMap, attribute);
         }
 
-        if (attributes.length > 1){
-            //compare to all with ||
-            List<Predicate<T>> predicates = new ArrayList<>();
-            for(String attribute : attributes){
-                predicates.add(pushAttributeToStack(field, remainingCondition, searchTerms, fieldMap, attribute));
-            }
-            return predicates.stream().reduce(predicates.get(0), Predicate::or);
-        }
         return t -> true;
+    }
+
+    private String findNextAttribute(String substring) {
+        //separator: spatiu . = < > !
+        List<String> separators = List.of(" ", ".", "<", ">", "=", "!");
+
+        int minIndex = substring.length();
+        String minSeparator = "";
+        for (String separator : separators) {
+            int idx = substring.indexOf(separator);
+            if(idx < minIndex && idx != -1){
+                minIndex = idx;
+                minSeparator = separator;
+            }
+        }
+        if(minSeparator.equals(".")){
+            minSeparator = "\\.";
+        }
+        return substring.split(minSeparator)[0];
     }
 
     private Predicate<T> pushAttributeToStack(Field field, String remainingCondition, Map<Integer, String> searchTerms, Map<String, Field> fieldMap, String attribute) {
         Field field1 = fieldMap.get(attribute);
 
-        String methodName = "get" + field.getName().substring(0,1).toUpperCase() + field.getName().substring(1);
+        String methodName = "get" + field.getName().substring(0, 1).toUpperCase() + field.getName().substring(1);
         Method method;
         try {
             method = classes.peek().getMethod(methodName);
@@ -115,7 +128,7 @@ public class ReflectionQueryLanguageParser<T, I> extends AbstractLanguageParser<
         methods.add(method);
 
         classes.push(field.getType());
-        Predicate<T> predicate = binaryOperatorParser(attribute + remainingCondition, field1, attribute, searchTerms);
+        Predicate<T> predicate = binaryOperatorParser(remainingCondition, field1, attribute, searchTerms);
         classes.pop();
         return predicate;
     }
@@ -139,13 +152,14 @@ public class ReflectionQueryLanguageParser<T, I> extends AbstractLanguageParser<
         final String methodName = "get" + field.getName().substring(0, 1).toUpperCase() + field.getName().substring(1);
         final Method method = classes.peek().getDeclaredMethod(methodName);
         methods.add(method);
+        ArrayList<Method> methodsCopy = new ArrayList<>(this.methods);
         return t -> {
             try {
                 LocalDateTime leftOperand;
                 if (field.getType().getSimpleName().equals("LocalDate")) {
-                    leftOperand = ((LocalDate) invokeAllMethods(t)).atStartOfDay();
+                    leftOperand = ((LocalDate) invokeAllMethods(t, methodsCopy)).atStartOfDay();
                 } else {
-                    leftOperand = (LocalDateTime) invokeAllMethods(t);
+                    leftOperand = (LocalDateTime) invokeAllMethods(t, methodsCopy);
                 }
 
                 switch (operator) {
@@ -224,15 +238,16 @@ public class ReflectionQueryLanguageParser<T, I> extends AbstractLanguageParser<
         final String methodName = "get" + field.getName().substring(0, 1).toUpperCase() + field.getName().substring(1);
         final Method method = classes.peek().getDeclaredMethod(methodName);
         methods.add(method);
+        ArrayList<Method> methodsCopy = new ArrayList<>(this.methods);
         return t -> {
             try {
                 switch (operator) {
                     case "=":
-                        return ((String) invokeAllMethods(t)).strip().equalsIgnoreCase(rightOperand);
+                        return ((String) invokeAllMethods(t, methodsCopy)).strip().equalsIgnoreCase(rightOperand);
                     case "!=":
-                        return !((String) invokeAllMethods(t)).strip().equalsIgnoreCase(rightOperand);
+                        return !((String) invokeAllMethods(t, methodsCopy)).strip().equalsIgnoreCase(rightOperand);
                     case "like ":
-                        return ((String) invokeAllMethods(t)).strip().toLowerCase().contains(rightOperand);
+                        return ((String) invokeAllMethods(t, methodsCopy)).strip().toLowerCase().contains(rightOperand);
                     default:
                         return true;
                 }
@@ -285,9 +300,10 @@ public class ReflectionQueryLanguageParser<T, I> extends AbstractLanguageParser<
         final Method method = classes.peek().getDeclaredMethod(methodName);
         methods.add(method);
         final Double rightOperand = Double.parseDouble(operand);
+        List<Method> methodsCopy =  new ArrayList<>(methods);
         return t -> {
             try {
-                Double leftOperand = ((Number) invokeAllMethods(t)).doubleValue();
+                Double leftOperand = ((Number) invokeAllMethods(t, methodsCopy)).doubleValue();
                 switch (usedOperator) {
                     case "=":
                         return leftOperand.equals(rightOperand);
@@ -318,9 +334,10 @@ public class ReflectionQueryLanguageParser<T, I> extends AbstractLanguageParser<
 
         Method method = classes.peek().getDeclaredMethod(methodName);
         methods.add(method);
+        List<Method> methodsCopy = new ArrayList<>(methods);
         return t -> Arrays.stream(numbers).map(Double::parseDouble).anyMatch(number -> {
                     try {
-                        return ((Number) invokeAllMethods(t)).doubleValue() == number;
+                        return ((Number) invokeAllMethods(t, methodsCopy)).doubleValue() == number;
                     } catch (IllegalAccessException | InvocationTargetException e) {
                         log.info(e.getMessage());
                     }
@@ -353,9 +370,9 @@ public class ReflectionQueryLanguageParser<T, I> extends AbstractLanguageParser<
         return classFields;
     }
 
-    private Object invokeAllMethods(T t) throws InvocationTargetException, IllegalAccessException {
+    private Object invokeAllMethods(T t, List<Method> methods) throws InvocationTargetException, IllegalAccessException {
         Object o = t;
-        for(Method method : methods){
+        for (Method method : methods) {
             o = method.invoke(o);
         }
         return o;

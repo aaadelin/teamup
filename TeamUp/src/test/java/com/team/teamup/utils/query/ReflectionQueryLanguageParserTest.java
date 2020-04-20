@@ -125,17 +125,28 @@ public class ReflectionQueryLanguageParserTest {
 //                .build();
 //        tasks = List.of(task1, task2, task3, task4, task5);
 
+        MockLocation location1 = MockLocation.builder()
+                .address("van")
+                .country("Romania")
+                .build();
+
+        MockLocation location2 = MockLocation.builder()
+                .address("van")
+                .country("RU")
+                .build();
         MockUser user1 = MockUser.builder()
                 .id(1)
                 .name("Ana")
                 .age(10)
                 .bornDate(dateTime)
+                .location(location1)
                 .build();
         MockUser user2 = MockUser.builder()
                 .id(2)
                 .name("Matei")
                 .age(11)
                 .bornDate(dateTime.minusYears(1))
+                .location(location2)
                 .build();
         MockTask task1 = MockTask.builder()
                 .id(1)
@@ -293,7 +304,7 @@ public class ReflectionQueryLanguageParserTest {
 
     @Test
     public void testDeadlineBeforeOrEqualsOrDifficultyLower(){
-        String search = "select where sfarsit <= 2020-10-5 or difficulty < 3";
+        String search = "select where deadline <= 2020-10-5 or difficulty < 3";
         List<MockTask> tasks = qlp.getAllByQuery(search);
         assertEquals(4, tasks.size());
     }
@@ -301,6 +312,20 @@ public class ReflectionQueryLanguageParserTest {
     @Test
     public void testGetByOwner(){
         String search = "select where owner=\"Ana\"";
+        List<MockTask> tasks = qlp.getAllByQuery(search);
+        assertEquals(2, tasks.size());
+    }
+
+    @Test
+    public void testGetByOwnerName(){
+        String search = "select where owner.age=11";
+        List<MockTask> tasks = qlp.getAllByQuery(search);
+        assertEquals(3, tasks.size());
+    }
+
+    @Test
+    public void testGetByOwnerLocationCountry(){
+        String search = "select where owner.location.country=\"RU\" and summary like \"update\"";
         List<MockTask> tasks = qlp.getAllByQuery(search);
         assertEquals(2, tasks.size());
     }

@@ -31,10 +31,10 @@ public class MockTask {
     private String description;
     @SearchField
     private LocalDateTime lastChanged;
-    @SearchField(name = "sfarsit")
+    @SearchField()
     private LocalDate deadline;
     @SearchField
     private LocalDateTime created;
-    @SearchField(attributes = {"name", "location"})
+    @SearchField(attribute = "name")
     private MockUser owner;
 }

@@ -29,4 +29,7 @@ public class MockUser {
     @SearchField
     private LocalDateTime bornDate;
 
+    @SearchField(attribute = "address")
+    private MockLocation location;
+
 }

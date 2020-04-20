@@ -6,5 +6,5 @@ import java.lang.annotation.RetentionPolicy;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface SearchField {
     String name() default "";
-    String[] attributes() default "";
+    String attribute() default "";
 }

@@ -29,39 +29,51 @@ public class Task implements HasNameAndDescription{
     @SearchField
     private String summary;
 
+    @SearchField
     private String description;
 
+    @SearchField
     private LocalDateTime createdAt;
 
+    @SearchField
     private LocalDateTime doneAt;
 
+    @SearchField
     private LocalDateTime lastChanged;
 
+    @SearchField
     private LocalDateTime deadline;
 
+    @SearchField
     private int difficulty;
 
     @SearchField
     private Integer priority;
 
+//    @SearchField
     private TaskType taskType;
 
+//    @SearchField
     private TaskStatus taskStatus;
 
+//    @SearchField
     private Department department;
 
     @ManyToOne
     @JoinColumn(name = "REPORTER_ID")
+    @SearchField(attribute = "username")
     private User reporter;
 
     @ManyToMany
     @JoinColumn(name = "ASSIGNEE_ID")
+    @SearchField
     private List<User> assignees;
 
     @JsonBackReference
     @ManyToOne
     @JoinColumn(name = "PROJECT_ID")
     @ToString.Exclude
+    @SearchField(attribute = "name")
     private Project project;
 
     public String getName(){
