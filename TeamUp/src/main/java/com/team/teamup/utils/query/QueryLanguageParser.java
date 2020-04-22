@@ -29,7 +29,6 @@ public class QueryLanguageParser extends AbstractLanguageParser<Task, Integer> {
         super(taskRepository);
     }
 
-    @Override
     Map<String, String> extractAliases(final String condition) {
         String[] aliases = condition.split(WHERE)[0].replace("select", "").split(",");
 
@@ -56,9 +55,9 @@ public class QueryLanguageParser extends AbstractLanguageParser<Task, Integer> {
     }
 
     public Predicate<Task> reduceOrPredicates(final Map<Integer, String> quotes,
-                                              final String andCondition,
-                                              final Map<String, String> aliases) {
+                                              final String andCondition) {
         List<Predicate<Task>> orPredicates = new ArrayList<>();
+        Map<String, String> aliases = extractAliases(andCondition);
         for (String orCondition : andCondition.split(" or ")) {
             orCondition = orCondition.strip();
             if (orCondition.contains("{")) {

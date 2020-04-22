@@ -12,6 +12,7 @@ import javax.persistence.Entity;
 import javax.persistence.Id;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @SearchEntity
 @Entity
@@ -38,6 +39,10 @@ public class MockTask {
     private LocalDateTime created;
     @SearchField(attribute = "name")
     private MockUser owner;
+    @SearchField(attribute = "name")
+    private List<MockUser> assignees;
     @SearchField(name = "status")
     private TaskStatus status;
+    @SearchField
+    private List<Integer> difficulties;
 }

@@ -7,11 +7,13 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.lang.reflect.ParameterizedType;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.*;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 @Slf4j
 public class ReflectionQueryLanguageParser<T, I> extends AbstractLanguageParser<T, I> {
@@ -19,6 +21,8 @@ public class ReflectionQueryLanguageParser<T, I> extends AbstractLanguageParser<
     private final Stack<Class<?>> classes;
     private Map<String, Field> fields;
     private final Queue<Method> methods;
+    private T t;
+    //todo use lists
 
     public ReflectionQueryLanguageParser(JpaRepository<T, I> repository) {
         super(repository);
@@ -32,7 +36,7 @@ public class ReflectionQueryLanguageParser<T, I> extends AbstractLanguageParser<
     }
 
     @Override
-    protected Predicate<T> reduceOrPredicates(Map<Integer, String> searchTerms, String andCondition, Map<String, String> aliases) {
+    protected Predicate<T> reduceOrPredicates(Map<Integer, String> searchTerms, String andCondition) {
         fields = getSearchFields(classes.peek());
         List<Predicate<T>> orPredicates = new ArrayList<>();
         for (String orCondition : andCondition.split(" or ")) {
@@ -52,7 +56,7 @@ public class ReflectionQueryLanguageParser<T, I> extends AbstractLanguageParser<
 
     private Predicate<T> binaryOperatorParser(String orCondition, Field field, String fieldName, Map<Integer, String> searchTerms) {
         String type = field.getType().getSimpleName();
-        if(field.getType().isEnum()){
+        if (field.getType().isEnum()) {
             type = "Enum";
         }
         String remainingCondition = orCondition.replaceFirst(fieldName.toLowerCase(), "").strip();
@@ -64,18 +68,68 @@ public class ReflectionQueryLanguageParser<T, I> extends AbstractLanguageParser<
             case "double":
             case "float":
                 return compareNumerical(field, remainingCondition);
-            case "String": // = like !=
+            case "String": // = like != in
                 return compareString(field, remainingCondition, searchTerms);
             case "LocalDate":
             case "LocalDateTime": // = >= <= > <
                 return compareDates(field, remainingCondition);
             case "Enum": // = != in
                 return compareEnums(field, remainingCondition);
+            case "List": // = in/contains
+                return compareLists(field, fieldName, remainingCondition, searchTerms);
             default:
                 return compareObjects(field, remainingCondition, searchTerms);
         }
 
     }
+
+    private Predicate<T> compareLists(Field field, String fieldName, String remainingCondition, Map<Integer, String> searchTerms) {
+        List<String> listOperators = List.of("=", "in ");
+        for (String operator : listOperators) {
+            if (remainingCondition.startsWith(operator)) {
+                String rightOperator = remainingCondition.replaceFirst(remainingCondition, operator);
+                try {
+                    return compareLists(field, fieldName, operator, rightOperator, searchTerms);
+                } catch (NoSuchMethodException e) {
+                    log.info(e.getMessage());
+                }
+            }
+        }
+        return t -> true;
+    }
+
+    private Predicate<T> compareLists(Field field, String fieldName, final String operator, String rightOperator, Map<Integer, String> searchTerms) throws NoSuchMethodException {
+        final List<Method> methodsCopy = getMethods(field);
+        methods.remove();
+        return t -> {
+            try {
+                Class<?> listType = Class.forName(((ParameterizedType) field.getGenericType()).getActualTypeArguments()[0].getTypeName());
+                List leftOperand = (List) invokeAllMethods(t, methodsCopy);
+                Map<String, Field> attributes = getSearchFields(listType);
+                String attribute = field.getAnnotation(SearchField.class).attribute();
+                if (leftOperand == null) {
+                    return true;
+                }
+
+                List<Predicate<T>> predicates = new ArrayList<>();
+                for (Object operand : leftOperand) {
+                    predicates.add(pushAttributeToStack(field, rightOperator, searchTerms, attributes, attribute)); //todo use operand
+                }
+                switch (operator) {
+                    case "=":
+                        return predicates.stream().reduce(predicates.get(0), Predicate::and).test(t);
+                    case "in ":
+                        return predicates.stream().reduce(predicates.get(0), Predicate::or).test(t);
+                    default:
+                        return true;
+                }
+            } catch (IllegalAccessException | InvocationTargetException | ClassNotFoundException e) {
+                e.printStackTrace();
+            }
+            return true;
+        };
+    }
+
 
     private Predicate<T> compareEnums(Field field, String remainingCondition) {
         List<String> dateOperators = List.of("=", "!=", "in ");
@@ -93,14 +147,11 @@ public class ReflectionQueryLanguageParser<T, I> extends AbstractLanguageParser<
     }
 
     private Predicate<T> enumOperator(final Field field, final String operator, final String rightOperand) throws NoSuchMethodException {
-        final String methodName = "get" + field.getName().substring(0, 1).toUpperCase() + field.getName().substring(1);
-        final Method method = classes.peek().getDeclaredMethod(methodName);
-        methods.add(method);
-        List<Method> methodsCopy = new ArrayList<>(methods);
+        List<Method> methodsCopy = getMethods(field);
         return t -> {
             try {
                 Object leftOperand = invokeAllMethods(t, methodsCopy);
-                if(leftOperand == null){
+                if (leftOperand == null) {
                     return true;
                 }
                 switch (operator) {
@@ -152,12 +203,12 @@ public class ReflectionQueryLanguageParser<T, I> extends AbstractLanguageParser<
         String minSeparator = "";
         for (String separator : separators) {
             int idx = substring.indexOf(separator);
-            if(idx < minIndex && idx != -1){
+            if (idx < minIndex && idx != -1) {
                 minIndex = idx;
                 minSeparator = separator;
             }
         }
-        if(minSeparator.equals(".")){
+        if (minSeparator.equals(".")) {
             minSeparator = "\\.";
         }
         return substring.split(minSeparator)[0];
@@ -176,7 +227,18 @@ public class ReflectionQueryLanguageParser<T, I> extends AbstractLanguageParser<
         }
         methods.add(method);
 
-        classes.push(field.getType());
+        Class<?> type;
+        if(field.getType().getSimpleName().equalsIgnoreCase("list")){
+            try {
+                type = Class.forName(((ParameterizedType) field.getGenericType()).getActualTypeArguments()[0].getTypeName());
+            } catch (ClassNotFoundException e) {
+                return t-> true;
+            }
+        }else{
+            type = field.getType();
+        }
+
+        classes.push(type);
         Predicate<T> predicate = binaryOperatorParser(remainingCondition, field1, attribute, searchTerms);
         classes.pop();
         return predicate;
@@ -198,10 +260,7 @@ public class ReflectionQueryLanguageParser<T, I> extends AbstractLanguageParser<
     }
 
     private Predicate<T> simpleDateOperator(Field field, String operator, LocalDateTime rightOperand) throws NoSuchMethodException {
-        final String methodName = "get" + field.getName().substring(0, 1).toUpperCase() + field.getName().substring(1);
-        final Method method = classes.peek().getDeclaredMethod(methodName);
-        methods.add(method);
-        ArrayList<Method> methodsCopy = new ArrayList<>(this.methods);
+        ArrayList<Method> methodsCopy = getMethods(field);
         return t -> {
             try {
                 LocalDateTime leftOperand;
@@ -231,6 +290,13 @@ public class ReflectionQueryLanguageParser<T, I> extends AbstractLanguageParser<
                 return true;
             }
         };
+    }
+
+    private ArrayList<Method> getMethods(Field field) throws NoSuchMethodException {
+        final String methodName = "get" + field.getName().substring(0, 1).toUpperCase() + field.getName().substring(1);
+        final Method method = classes.peek().getDeclaredMethod(methodName);
+        methods.add(method);
+        return new ArrayList<>(this.methods);
     }
 
     private boolean checkDateEquality(LocalDateTime leftOperand, LocalDateTime rightOperand) {
@@ -269,7 +335,7 @@ public class ReflectionQueryLanguageParser<T, I> extends AbstractLanguageParser<
     }
 
     private Predicate<T> compareString(Field field, String remainingCondition, Map<Integer, String> searchTerms) {
-        List<String> stringOperators = List.of("=", "!=", "like ");
+        List<String> stringOperators = List.of("=", "!=", "like ", "in ");
         for (String operator : stringOperators) {
             if (remainingCondition.startsWith(operator)) {
                 String rightOperand = getQuotedRightOperand(remainingCondition.replaceFirst(operator, ""), searchTerms);
@@ -284,10 +350,7 @@ public class ReflectionQueryLanguageParser<T, I> extends AbstractLanguageParser<
     }
 
     private Predicate<T> simpleStringOperator(final Field field, final String operator, final String rightOperand) throws NoSuchMethodException {
-        final String methodName = "get" + field.getName().substring(0, 1).toUpperCase() + field.getName().substring(1);
-        final Method method = classes.peek().getDeclaredMethod(methodName);
-        methods.add(method);
-        ArrayList<Method> methodsCopy = new ArrayList<>(this.methods);
+        ArrayList<Method> methodsCopy = getMethods(field);
         return t -> {
             try {
                 switch (operator) {
@@ -297,6 +360,10 @@ public class ReflectionQueryLanguageParser<T, I> extends AbstractLanguageParser<
                         return !((String) invokeAllMethods(t, methodsCopy)).strip().equalsIgnoreCase(rightOperand);
                     case "like ":
                         return ((String) invokeAllMethods(t, methodsCopy)).strip().toLowerCase().contains(rightOperand);
+                    case "in ":
+                        String objectAttribute = ((String) invokeAllMethods(t, methodsCopy)).strip().toLowerCase();
+                        List<String> listToAppearIn = Arrays.stream(rightOperand.replace("[", "").replace("]", "").split(",")).map(String::strip).collect(Collectors.toList());
+                        return listToAppearIn.contains(objectAttribute);
                     default:
                         return true;
                 }
@@ -307,11 +374,14 @@ public class ReflectionQueryLanguageParser<T, I> extends AbstractLanguageParser<
     }
 
     private String getQuotedRightOperand(String operand, Map<Integer, String> searchTerms) {
-        String key = operand.split("\\{")[1].split("}")[0];
-        if (isInteger(key)) {
-            return searchTerms.get(Integer.parseInt(key)).strip();
+        List<String> quotedStrings = new ArrayList<>();
+        for(String item : operand.split(",")) {
+            String key = item.split("\\{")[1].split("}")[0];
+            if (isInteger(key)) {
+                quotedStrings.add(searchTerms.get(Integer.parseInt(key)).strip());
+            }
         }
-        return "";
+        return String.join(",", quotedStrings);
     }
 
     private Predicate<T> compareNumerical(Field field, String remainingCondition) {
@@ -349,7 +419,7 @@ public class ReflectionQueryLanguageParser<T, I> extends AbstractLanguageParser<
         final Method method = classes.peek().getDeclaredMethod(methodName);
         methods.add(method);
         final Double rightOperand = Double.parseDouble(operand);
-        List<Method> methodsCopy =  new ArrayList<>(methods);
+        List<Method> methodsCopy = new ArrayList<>(methods);
         return t -> {
             try {
                 Double leftOperand = ((Number) invokeAllMethods(t, methodsCopy)).doubleValue();
@@ -379,11 +449,8 @@ public class ReflectionQueryLanguageParser<T, I> extends AbstractLanguageParser<
     private Predicate<T> numericalListComparison(final Field field, String rightOperand) throws NoSuchMethodException {
         //list comparison
         String[] numbers = rightOperand.split("\\[")[1].split("]")[0].split(",");
-        String methodName = "get" + field.getName().substring(0, 1).toUpperCase() + field.getName().substring(1);
 
-        Method method = classes.peek().getDeclaredMethod(methodName);
-        methods.add(method);
-        List<Method> methodsCopy = new ArrayList<>(methods);
+        List<Method> methodsCopy = getMethods(field);
         return t -> Arrays.stream(numbers).map(Double::parseDouble).anyMatch(number -> {
                     try {
                         return ((Number) invokeAllMethods(t, methodsCopy)).doubleValue() == number;
@@ -396,15 +463,7 @@ public class ReflectionQueryLanguageParser<T, I> extends AbstractLanguageParser<
 
     }
 
-    @Override
-    Map<String, String> extractAliases(String condition) {
-        HashMap<String, String> aliases = new HashMap<>();
-
-        aliases.put(classes.peek().getSimpleName(), classes.peek().getSimpleName().toLowerCase());
-        return aliases;
-    }
-
-    private Map<String, Field> getSearchFields(Class<?> clazz) {
+    public static Map<String, Field> getSearchFields(Class<?> clazz) {
         Map<String, Field> classFields = new HashMap<>();
         for (Field field : clazz.getDeclaredFields()) {
             SearchField annotation = field.getAnnotation(SearchField.class);

@@ -1,10 +1,13 @@
 package com.team.teamup.utils.query;
 
 import com.team.teamup.domain.Task;
+import com.team.teamup.utils.Pair;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.*;
 import java.util.function.Predicate;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 public abstract class AbstractLanguageParser<T, I> {
@@ -47,26 +50,31 @@ public abstract class AbstractLanguageParser<T, I> {
             return repository.findAll();
         }
         String conditions = lwrCondition.split(WHERE)[1].split("limit")[0];
+        Map<Integer, String> searchTerms = getQuotedSearchTerms(conditions).getValue();
 
-        String[] delimitQuotes = conditions.replace("\"", "\" ").split("\"");
-        Map<Integer, String> searchTerms = new HashMap<>();
-
-        for (int i = 1; i < delimitQuotes.length; i += 2) {
-            Integer termPosition = i / 2;
-            searchTerms.put(termPosition, delimitQuotes[i]);
-            delimitQuotes[i] = "{" + termPosition + "}";
-        }
-
-        conditions = String.join("", Arrays.asList(delimitQuotes));
-        Map<String, String> aliases = extractAliases(lwrCondition);
+        conditions = getQuotedSearchTerms(conditions).getKey();
         List<Predicate<T>> andPredicates = new ArrayList<>();
         for (String andCondition : conditions.split("and")) {
-            andPredicates.add(reduceOrPredicates(searchTerms, andCondition.strip(), aliases));
+            andPredicates.add(reduceOrPredicates(searchTerms, andCondition.strip()));
         }
         return getFilteredTasks(limit, andPredicates);
     }
 
-    protected abstract Predicate<T> reduceOrPredicates(Map<Integer, String> searchTerms, String andCondition, Map<String, String> aliases);
+    protected static Pair<String, Map<Integer, String>> getQuotedSearchTerms(final String condition){
+        Matcher matcher = Pattern.compile("\".*?\"").matcher(condition);
+        StringBuffer stringBuffer = new StringBuffer();
+        Map<Integer, String> aliases = new HashMap<>();
+        int i=1;
+        while (matcher.find()){
+            String key = "{" + i + "}";
+            aliases.put(i++, matcher.group().replace("\"", ""));
+            matcher.appendReplacement(stringBuffer, key);
+        }
+        matcher.appendTail(stringBuffer);
+        return new Pair<>(stringBuffer.toString(), aliases);
+    }
+
+    protected abstract Predicate<T> reduceOrPredicates(Map<Integer, String> searchTerms, String andCondition);
 
     private List<T> getFilteredTasks(int limit, List<Predicate<T>> andPredicates) {
         List<T> allTasks = repository.findAll();
@@ -78,8 +86,6 @@ public abstract class AbstractLanguageParser<T, I> {
             return allTasks.stream().limit(limit).collect(Collectors.toList());
         }
     }
-
-    abstract Map<String, String> extractAliases(final String condition);
 
     public static boolean isInteger(String word) {
         try {

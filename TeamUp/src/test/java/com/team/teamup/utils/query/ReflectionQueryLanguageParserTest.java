@@ -64,6 +64,8 @@ public class ReflectionQueryLanguageParserTest {
                 .lastChanged(dateTime)
                 .owner(user1)
                 .status(TaskStatus.OPEN)
+                .assignees(List.of(user1))
+                .difficulties(List.of(1))
                 .build();
         MockTask task2 = MockTask.builder()
                 .id(2)
@@ -75,6 +77,8 @@ public class ReflectionQueryLanguageParserTest {
                 .lastChanged(dateTime.plusDays(1).plusMinutes(1))
                 .owner(user1)
                 .status(TaskStatus.OPEN)
+                .assignees(List.of(user2))
+                .difficulties(List.of(1, 2))
                 .build();
         MockTask task3 = MockTask.builder()
                 .id(3)
@@ -86,6 +90,8 @@ public class ReflectionQueryLanguageParserTest {
                 .lastChanged(dateTime.plusDays(1))
                 .owner(user2)
                 .status(TaskStatus.OPEN)
+                .assignees(List.of(user1))
+                .difficulties(List.of(4))
                 .build();
         MockTask task4 = MockTask.builder()
                 .id(4)
@@ -97,6 +103,8 @@ public class ReflectionQueryLanguageParserTest {
                 .lastChanged(dateTime.plusDays(2))
                 .owner(user2)
                 .status(TaskStatus.CLOSED)
+                .assignees(List.of(user2))
+                .difficulties(List.of(5))
                 .build();
         MockTask task5 = MockTask.builder()
                 .id(5)
@@ -108,6 +116,8 @@ public class ReflectionQueryLanguageParserTest {
                 .lastChanged(dateTime.plusDays(3))
                 .owner(user2)
                 .status(TaskStatus.IN_PROGRESS)
+                .assignees(List.of(user1, user2))
+                .difficulties(List.of(5))
                 .build();
         tasks = List.of(task1, task2, task3, task4, task5);
     }
@@ -246,5 +256,26 @@ public class ReflectionQueryLanguageParserTest {
         String search = "select where status in [open, closed]";
         List<MockTask> tasks = qlp.getAllByQuery(search);
         assertEquals(4, tasks.size());
+    }
+
+    @Test
+    public void testGetByOwnerIn(){
+        String search = "select where owner in [\"Ana\", \"Geo\"]";
+        List<MockTask> tasks = qlp.getAllByQuery(search);
+        assertEquals(2, tasks.size());
+    }
+
+    @Test
+    public void testGetByAssigneesIn(){
+        String search = "select where assignees in [\"Ana\", \"Geo\"]";
+        List<MockTask> tasks = qlp.getAllByQuery(search);
+        assertEquals(3, tasks.size());
+    }
+
+    @Test
+    public void testGetByDifficultiesIn(){
+        String search = "select where difficulties in [1, 2, 3]";
+        List<MockTask> tasks = qlp.getAllByQuery(search);
+        assertEquals(3, tasks.size());
     }
 }
