@@ -66,6 +66,7 @@ public class ReflectionQueryLanguageParserTest {
                 .status(TaskStatus.OPEN)
                 .assignees(List.of(user1))
                 .difficulties(List.of(1))
+                .tags(List.of("test"))
                 .build();
         MockTask task2 = MockTask.builder()
                 .id(2)
@@ -79,6 +80,7 @@ public class ReflectionQueryLanguageParserTest {
                 .status(TaskStatus.OPEN)
                 .assignees(List.of(user2))
                 .difficulties(List.of(1, 2))
+                .tags(List.of("test2"))
                 .build();
         MockTask task3 = MockTask.builder()
                 .id(3)
@@ -92,6 +94,7 @@ public class ReflectionQueryLanguageParserTest {
                 .status(TaskStatus.OPEN)
                 .assignees(List.of(user1))
                 .difficulties(List.of(4))
+                .tags(List.of("update"))
                 .build();
         MockTask task4 = MockTask.builder()
                 .id(4)
@@ -105,6 +108,7 @@ public class ReflectionQueryLanguageParserTest {
                 .status(TaskStatus.CLOSED)
                 .assignees(List.of(user2))
                 .difficulties(List.of(5))
+                .tags(List.of("test", "read"))
                 .build();
         MockTask task5 = MockTask.builder()
                 .id(5)
@@ -118,6 +122,7 @@ public class ReflectionQueryLanguageParserTest {
                 .status(TaskStatus.IN_PROGRESS)
                 .assignees(List.of(user1, user2))
                 .difficulties(List.of(5))
+                .tags(List.of("read"))
                 .build();
         tasks = List.of(task1, task2, task3, task4, task5);
     }
@@ -275,6 +280,13 @@ public class ReflectionQueryLanguageParserTest {
     @Test
     public void testGetByDifficultiesIn(){
         String search = "select where difficulties in [1, 2, 3]";
+        List<MockTask> tasks = qlp.getAllByQuery(search);
+        assertEquals(2, tasks.size());
+    }
+
+    @Test
+    public void testGetByTagsIn(){
+        String search = "select where tags in [\"test\", \"read\"]";
         List<MockTask> tasks = qlp.getAllByQuery(search);
         assertEquals(3, tasks.size());
     }

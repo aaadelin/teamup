@@ -45,4 +45,6 @@ public class MockTask {
     private TaskStatus status;
     @SearchField
     private List<Integer> difficulties;
+    @SearchField
+    private List<String> tags;
 }
