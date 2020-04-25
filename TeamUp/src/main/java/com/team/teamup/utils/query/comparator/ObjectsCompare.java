@@ -1,18 +1,18 @@
 package com.team.teamup.utils.query.comparator;
 
 import com.team.teamup.utils.query.NoAttributeException;
-import com.team.teamup.utils.query.RecursivePredicate;
-import com.team.teamup.utils.query.comparator.AbstractComparator;
+import com.team.teamup.utils.query.exceptions.NoClassRemainingException;
+import com.team.teamup.utils.query.exceptions.RecursivePredicate;
 import com.team.teamup.utils.query.annotations.SearchField;
 import lombok.extern.slf4j.Slf4j;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
+import java.util.Deque;
 import java.util.List;
 import java.util.Map;
 import java.util.Queue;
-import java.util.Stack;
 import java.util.function.Predicate;
 
 import static com.team.teamup.utils.query.ReflectionQueryLanguageParser.getSearchFields;
@@ -20,7 +20,7 @@ import static com.team.teamup.utils.query.ReflectionQueryLanguageParser.getSearc
 @Slf4j
 public class ObjectsCompare extends AbstractComparator {
 
-    public ObjectsCompare(Stack<Class<?>> classes, Queue<Method> methods) {
+    public ObjectsCompare(Deque<Class<?>> classes, Queue<Method> methods) {
         super(classes, methods);
     }
 
@@ -29,6 +29,13 @@ public class ObjectsCompare extends AbstractComparator {
         this.recursiveMethod = method;
     }
 
+    /**
+     *
+     * @param field
+     * @param remainingCondition
+     * @param searchTerms
+     * @return
+     */
     public Predicate<Object> compare(Field field, String remainingCondition, Map<Integer, String> searchTerms) {
         Map<String, Field> fieldMap = getSearchFields(field.getType());
         SearchField annotation = field.getAnnotation(SearchField.class);
@@ -51,6 +58,11 @@ public class ObjectsCompare extends AbstractComparator {
         return t -> true;
     }
 
+    /**
+     * in case of multiple level attribute, find the next one (task.owner.name -> task; owner.name -> name )
+     * @param substring substring containing the attribute list and condition
+     * @return string with the next attribute
+     */
     private String findNextAttribute(String substring) {
         //separator: spatiu . = < > !
         List<String> separators = List.of(" ", ".", "<", ">", "=", "!");
@@ -70,12 +82,24 @@ public class ObjectsCompare extends AbstractComparator {
         return substring.split(minSeparator)[0];
     }
 
+    /**
+     *
+     * @param field class's field
+     * @param remainingCondition string containing the operator and right operand
+     * @param searchTerms quoted strings from query
+     * @param fieldMap fields available in the class
+     * @param attribute attribute to search for in the field object
+     * @return predicate
+     */
     private Predicate<Object> pushAttributeToStack(Field field, String remainingCondition, Map<Integer, String> searchTerms, Map<String, Field> fieldMap, String attribute) {
         Field field1 = fieldMap.get(attribute);
 
         String methodName = "get" + field.getName().substring(0, 1).toUpperCase() + field.getName().substring(1);
         Method method;
         try {
+            if(classes.peek() == null){
+                throw new NoClassRemainingException();
+            }
             method = classes.peek().getMethod(methodName);
         } catch (NoSuchMethodException e) {
             log.info(e.getMessage());

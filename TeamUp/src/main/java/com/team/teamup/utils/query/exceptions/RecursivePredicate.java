@@ -1,4 +1,4 @@
-package com.team.teamup.utils.query;
+package com.team.teamup.utils.query.exceptions;
 
 import java.util.function.Predicate;
 

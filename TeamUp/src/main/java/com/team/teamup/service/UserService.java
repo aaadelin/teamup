@@ -7,9 +7,9 @@ import com.team.teamup.dtos.ProjectDTO;
 import com.team.teamup.dtos.TaskDTO;
 import com.team.teamup.dtos.TeamDTO;
 import com.team.teamup.dtos.UserDTO;
-import com.team.teamup.persistence.*;
+import com.team.teamup.persistence.UserEventRepository;
+import com.team.teamup.persistence.UserRepository;
 import com.team.teamup.utils.DTOsConverter;
-import com.team.teamup.utils.ImageCompressor;
 import com.team.teamup.utils.UserUtils;
 import com.team.teamup.validation.UserValidation;
 import lombok.extern.slf4j.Slf4j;
@@ -33,17 +33,16 @@ public class UserService {
 
     private static final int PAGE_SIZE = 10;
 
-    private UserRepository userRepository;
-    private ProjectService projectService;
-    private TeamService teamService;
-    private TaskService taskService;
+    private final UserRepository userRepository;
+    private final ProjectService projectService;
+    private final TeamService teamService;
+    private final TaskService taskService;
 
-    private UserEventRepository eventRepository;
+    private final UserEventRepository eventRepository;
 
     private UserUtils userUtils;
-    private UserValidation userValidation;
-    private DTOsConverter dtOsConverter;
-    private ImageCompressor imageCompressor = new ImageCompressor();
+    private final UserValidation userValidation;
+    private final DTOsConverter dtOsConverter;
 
     @Autowired
     public UserService(UserRepository userRepository,
@@ -51,7 +50,6 @@ public class UserService {
                        TeamService teamService,
                        UserEventRepository eventRepository,
                        TaskService taskService,
-                       UserUtils userUtils,
                        UserValidation userValidation,
                        DTOsConverter dtOsConverter){
         this.userRepository = userRepository;
@@ -60,20 +58,19 @@ public class UserService {
         this.eventRepository = eventRepository;
         this.taskService = taskService;
 
-        this.userUtils = userUtils;
         this.userValidation = userValidation;
         this.dtOsConverter = dtOsConverter;
+    }
+
+    @Autowired
+    public void setUserUtils(UserUtils userUtils){
+        this.userUtils = userUtils;
     }
 
     public List<TaskDTO> getReportedTasks(User user){
         return taskService.getAll().stream()
                 .filter(task -> task.getReporter().equals(user))
                 .map(dtOsConverter::getDTOFromTask).collect(Collectors.toList());
-    }
-
-    public List<TaskDTO> getAssignedTasks(int userID){
-        User user = getByID(userID);
-        return getAssignedTasks(user);
     }
 
     public List<TaskDTO> getAssignedTasks(User user){

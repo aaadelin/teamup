@@ -11,7 +11,7 @@ import java.util.Optional;
 @Component
 public class LocationService {
 
-    private LocationRepository locationRepository;
+    private final LocationRepository locationRepository;
 
     @Autowired
     public LocationService(LocationRepository locationRepository){

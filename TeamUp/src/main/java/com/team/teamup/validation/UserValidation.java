@@ -21,8 +21,9 @@ import java.util.Optional;
 @Component
 public class UserValidation {
 
-    private UserRepository userRepository;
+    private final UserRepository userRepository;
     public static final Logger LOGGER = LoggerFactory.getLogger(UserValidation.class);
+    private String TOKEN = "token";
 
     @Autowired
     public UserValidation(UserRepository userRepository) {
@@ -62,8 +63,8 @@ public class UserValidation {
      */
     public boolean isValid(Map<String, String> headers) {
         LOGGER.info(String.format("Checking if headers send from user are valid (%s)", headers));
-        if (headers.containsKey("token")) {
-            return isValid(headers.get("token"));
+        if (headers.containsKey(TOKEN)) {
+            return isValid(headers.get(TOKEN));
         }
         LOGGER.info("Headers did not contain necessary information");
         return false;
@@ -93,8 +94,8 @@ public class UserValidation {
      */
     public boolean isValid(Map<String, String> headers, UserStatus status) {
         LOGGER.info(String.format("Checking if headers (%s) send from user are valid and user has the specified status %s", headers, status));
-        if (headers.containsKey("token")) {
-            String token = headers.get("token");
+        if (headers.containsKey(TOKEN)) {
+            String token = headers.get(TOKEN);
 
             Optional<User> userOptional = userRepository.findByHashKey(token);
             return userOptional.isPresent() && userOptional.get().getStatus().equals(status);
@@ -112,8 +113,8 @@ public class UserValidation {
      */
     public boolean isOwner(Map<String, String> headers, ProjectDTO projectDTO) {
         LOGGER.info(String.format("Checking if user with specified headers (%s) is the owner of the project %s", headers, projectDTO));
-        if(headers.containsKey("token")){
-            String token = headers.get("token");
+        if(headers.containsKey(TOKEN)){
+            String token = headers.get(TOKEN);
             Optional<User> userOptional = userRepository.findByHashKey(token);
             return userOptional.isPresent() && userOptional.get().getId() == projectDTO.getOwnerID();
         }

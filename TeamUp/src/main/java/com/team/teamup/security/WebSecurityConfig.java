@@ -22,6 +22,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     @Value("${application.cors.origins}")
     private String allowedOrigins;
 
+    @Override
     protected void configure(HttpSecurity http) throws Exception {
         AuthenticationEntryPoint entryPoint = (req, res, ex) -> res.sendError(HttpServletResponse.SC_UNAUTHORIZED, ex.getMessage());
 

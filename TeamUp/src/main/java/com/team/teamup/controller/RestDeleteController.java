@@ -26,9 +26,9 @@ import java.util.Optional;
 @Slf4j
 public class RestDeleteController {
     
-    private UserService userService;
-    private LocationService locationService;
-    private UserUtils userUtils;
+    private final UserService userService;
+    private final LocationService locationService;
+    private final UserUtils userUtils;
     private static final String TOKEN = "token";
 
     @Autowired
@@ -43,7 +43,7 @@ public class RestDeleteController {
      * @param id int representing the id of user entity to be deleted
      * @return responseEntity signaling the success or failure
      */
-    @RequestMapping(value = "/users/{id}", method = RequestMethod.DELETE)
+    @DeleteMapping(value = "/users/{id}")
     public ResponseEntity<?> deleteUser(@PathVariable int id, @RequestHeader Map<String, String> headers) {
         log.info(String.format("Entering delete user method with user id: %s %n and headers: %s", id, headers.toString()));
         User user = userService.getByID(id);
@@ -67,7 +67,7 @@ public class RestDeleteController {
      * @return OK if the photo has been successfully deleted, NOT FOUND if it has not been found
      * @throws IOException if the photo does not exist
      */
-    @RequestMapping(value = "/user/{id}/photo", method = RequestMethod.DELETE)
+    @DeleteMapping(value = "/user/{id}/photo")
     public ResponseEntity<?> deletePhoto(@PathVariable int id,
                                          @RequestHeader Map<String, String> headers) throws IOException {
         log.info(String.format("Entered delete photo with headers: %s", headers));
@@ -88,7 +88,7 @@ public class RestDeleteController {
         return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
 
-    @RequestMapping(value = "/locations/{id}", method = RequestMethod.DELETE)
+    @DeleteMapping(value = "/locations/{id}")
     public ResponseEntity<?> deleteLocation(@PathVariable int id, @RequestHeader Map<String, String> headers){
         log.info(String.format("Entered delete location with headers: %s", headers));
         User user = userService.getByHashKey(headers.get(TOKEN));

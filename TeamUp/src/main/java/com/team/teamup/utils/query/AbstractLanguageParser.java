@@ -1,10 +1,12 @@
 package com.team.teamup.utils.query;
 
-import com.team.teamup.domain.Task;
 import com.team.teamup.utils.Pair;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.function.Predicate;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -12,27 +14,8 @@ import java.util.stream.Collectors;
 
 public abstract class AbstractLanguageParser<T, I> {
     protected final JpaRepository<T, I> repository;
-    protected static final String SUMMARY = "summary";
-    protected static final String DESCRIPTION = "description";
-    protected static final String CREATED = "created";
-    protected static final String LAST_CHANGED = "lastchanged";
-    protected static final String DEADLINE = "deadline";
-    protected static final String DIFFICULTY = "difficulty";
-    protected static final String PRIORITY = "priority";
-    protected static final String TYPE = "type";
-    protected static final String STATUS = "status";
-    protected static final String DEPARTMENT = "department";
-    protected static final String ASSIGNEES = "assignees";
-    protected static final String REPORTER = "reporter";
     protected static final String WHERE = "where";
-    protected static final String NAME = "name";
-    protected static final String OWNER = "owner";
-    protected static final String VERSION = "version";
-    protected static final String ARCHIVED = "archived";
-    protected static final String LIKE = " like ";
-    protected static final String PROJECT = "project";
 
-    protected static final Predicate<Task> defaultPredicate = task -> true;
     public AbstractLanguageParser(JpaRepository<T, I> repository) {
         this.repository = repository;
     }
@@ -53,7 +36,7 @@ public abstract class AbstractLanguageParser<T, I> {
         Map<Integer, String> searchTerms = getQuotedSearchTerms(conditions).getValue();
 
         conditions = getQuotedSearchTerms(conditions).getKey();
-        List<Predicate<T>> andPredicates = new ArrayList<>();
+        List<Predicate<Object>> andPredicates = new ArrayList<>();
         for (String andCondition : conditions.split("and")) {
             andPredicates.add(reduceOrPredicates(searchTerms, andCondition.strip()));
         }
@@ -74,13 +57,13 @@ public abstract class AbstractLanguageParser<T, I> {
         return new Pair<>(stringBuffer.toString(), aliases);
     }
 
-    protected abstract Predicate<T> reduceOrPredicates(Map<Integer, String> searchTerms, String andCondition);
+    protected abstract Predicate<Object> reduceOrPredicates(Map<Integer, String> searchTerms, String andCondition);
 
-    private List<T> getFilteredTasks(int limit, List<Predicate<T>> andPredicates) {
+    private List<T> getFilteredTasks(int limit, List<Predicate<Object>> andPredicates) {
         List<T> allTasks = repository.findAll();
         limit = limit <= 0 ? allTasks.size() : limit;
         if (!andPredicates.isEmpty()) {
-            Predicate<T> predicate = andPredicates.stream().reduce(andPredicates.get(0), Predicate::and);
+            Predicate<Object> predicate = andPredicates.stream().reduce(andPredicates.get(0), Predicate::and);
             return allTasks.stream().filter(predicate).limit(limit).collect(Collectors.toList());
         } else {
             return allTasks.stream().limit(limit).collect(Collectors.toList());

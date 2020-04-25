@@ -17,8 +17,8 @@ import java.util.stream.Collectors;
 public class ProjectService {
     private static final int PAGE_SIZE = 10;
 
-    private ProjectRepository projectRepository;
-    private DTOsConverter dtOsConverter;
+    private final ProjectRepository projectRepository;
+    private final DTOsConverter dtOsConverter;
 
     @Autowired
     public ProjectService(ProjectRepository projectRepository,

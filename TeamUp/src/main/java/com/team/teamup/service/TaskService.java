@@ -7,16 +7,12 @@ import com.team.teamup.domain.enums.TaskStatus;
 import com.team.teamup.dtos.ProjectDTO;
 import com.team.teamup.dtos.TaskDTO;
 import com.team.teamup.persistence.TaskRepository;
-import com.team.teamup.persistence.UserRepository;
 import com.team.teamup.utils.DTOsConverter;
-import com.team.teamup.utils.query.AbstractLanguageParser;
-import com.team.teamup.utils.query.QueryLanguageParser;
 import com.team.teamup.utils.TaskUtils;
 import com.team.teamup.utils.query.ReflectionQueryLanguageParser;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 
 import java.sql.Date;
@@ -33,7 +29,6 @@ public class TaskService {
     private static final int PAGE_SIZE = 10;
 
     private final TaskRepository taskRepository;
-    private final UserRepository userRepository;
 
     private final DTOsConverter dtOsConverter;
     private final TaskUtils taskUtils;
@@ -41,14 +36,11 @@ public class TaskService {
 
     @Autowired
     public TaskService(TaskRepository taskRepository,
-                       UserRepository userRepository,
                        DTOsConverter dtOsConverter,
                        TaskUtils taskUtils) {
         this.taskRepository = taskRepository;
-        this.userRepository = userRepository;
         this.dtOsConverter = dtOsConverter;
         this.taskUtils = taskUtils;
-//        this.queryLanguageParser = new QueryLanguageParser(taskRepository);
         this.queryLanguageParser = new ReflectionQueryLanguageParser<>(taskRepository);
         queryLanguageParser.setClazz(Task.class);
     }
@@ -187,10 +179,6 @@ public class TaskService {
 
     public List<Task> getAll() {
         return taskRepository.findAll();
-    }
-
-    public List<TaskDTO> getAllDTO() {
-        return convertListToDTOS(taskRepository.findAll());
     }
 
     public TaskDTO save(Task task) {

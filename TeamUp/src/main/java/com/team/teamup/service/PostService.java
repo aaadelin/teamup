@@ -16,8 +16,8 @@ import java.util.stream.Collectors;
 @Component
 public class PostService {
 
-    private PostRepository postRepository;
-    private DTOsConverter dtOsConverter;
+    private final PostRepository postRepository;
+    private final DTOsConverter dtOsConverter;
 
     @Autowired
     public PostService(PostRepository postRepository,

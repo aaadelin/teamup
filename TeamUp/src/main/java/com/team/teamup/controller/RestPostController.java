@@ -22,8 +22,6 @@ import java.util.Base64;
 import java.util.Map;
 import java.util.Optional;
 
-import static org.springframework.web.bind.annotation.RequestMethod.POST;
-
 //POST methods - for creating
 
 @RestController
@@ -34,12 +32,12 @@ public class RestPostController {
 
     private UserUtils userUtils;
 
-    private TeamService teamService;
-    private UserService userService;
-    private TaskService taskService;
-    private ProjectService projectService;
-    private CommentService commentService;
-    private PostService postService;
+    private final TeamService teamService;
+    private final UserService userService;
+    private final TaskService taskService;
+    private final ProjectService projectService;
+    private final CommentService commentService;
+    private final PostService postService;
     private LocationService locationService;
     private ResetRequestService resetRequestService;
     private DTOsConverter dtOsConverter;
@@ -48,27 +46,46 @@ public class RestPostController {
     @Autowired
     public RestPostController(TeamService teamService, UserService userService, TaskService taskService,
                               ProjectService projectService, CommentService commentService, PostService postService,
-                              LocationService locationService,
-                              DTOsConverter dtOsConverter, UserUtils userUtils, ResetRequestService resetRequestService,
-                              MailUtils mailUtils) {
+                              DTOsConverter dtOsConverter) {
         this.teamService = teamService;
         this.userService = userService;
         this.taskService = taskService;
         this.projectService = projectService;
         this.commentService = commentService;
         this.postService = postService;
-        this.resetRequestService = resetRequestService;
-        this.locationService = locationService;
         this.dtOsConverter = dtOsConverter;
-        this.userUtils = userUtils;
-        this.mailUtils = mailUtils;
 
         log.info("Creating RestPostController");
     }
 
-    @RequestMapping(value = "/user", method = POST)
+    @Autowired
+    public void setMailUtils(MailUtils mailUtils) {
+        this.mailUtils = mailUtils;
+    }
+
+    @Autowired
+    public void setLocationService(LocationService locationService) {
+        this.locationService = locationService;
+    }
+
+    @Autowired
+    public void setResetRequestService(ResetRequestService resetRequestService) {
+        this.resetRequestService = resetRequestService;
+    }
+
+    @Autowired
+    public void setUserUtils(UserUtils userUtils) {
+        this.userUtils = userUtils;
+    }
+
+    @Autowired
+    public void setDtOsConverter(DTOsConverter dtOsConverter) {
+        this.dtOsConverter = dtOsConverter;
+    }
+
+    @PostMapping(value = "/user")
     public ResponseEntity<?> addUser(@RequestBody UserDTO user, @RequestHeader Map<String, String> headers) {
-        if(!userService.getUserNames().contains(user.getUsername())){
+        if (!userService.getUserNames().contains(user.getUsername())) {
             userUtils.createEvent(userService.getByHashKey(headers.get("token")),
                     String.format("Created user \"%s %s\"", user.getFirstName(), user.getLastName()),
                     UserEventType.CREATE);
@@ -79,12 +96,12 @@ public class RestPostController {
 
             log.info("User has been successfully created and saved in database");
             return new ResponseEntity<>("OK", HttpStatus.OK);
-        }else{
+        } else {
             return new ResponseEntity<>(HttpStatus.NOT_ACCEPTABLE);
         }
     }
 
-    @RequestMapping(value = "/project", method = POST)
+    @PostMapping(value = "/project")
     public ResponseEntity<?> addProject(@RequestBody ProjectDTO projectDTO, @RequestHeader Map<String, String> headers) {
         userUtils.createEvent(userService.getByHashKey(headers.get("token")),
                 String.format("Created project \"%s\"", projectDTO.getName()),
@@ -95,7 +112,7 @@ public class RestPostController {
         return new ResponseEntity<>("OK", HttpStatus.OK);
     }
 
-    @RequestMapping(value = "/task", method = POST)
+    @PostMapping(value = "/task")
     public ResponseEntity<?> addTask(@RequestBody TaskDTO taskDTO, @RequestHeader Map<String, String> headers) {
         userUtils.createEvent(userService.getByHashKey(headers.get("token")),
                 String.format("Created task \"%s\"", taskDTO.getSummary()),
@@ -111,7 +128,7 @@ public class RestPostController {
     }
 
 
-    @RequestMapping(value = "/team", method = POST)
+    @PostMapping(value = "/team")
     public ResponseEntity<?> addTeam(@RequestBody TeamDTO team, @RequestHeader Map<String, String> headers) {
         userUtils.createEvent(userService.getByHashKey(headers.get("token")),
                 String.format("Created team \"%s\" on department \"%s\"", team.getName(), team.getDepartment()),
@@ -123,7 +140,7 @@ public class RestPostController {
         return new ResponseEntity<>("OK", HttpStatus.OK);
     }
 
-    @RequestMapping(value = "/comment", method = POST)
+    @PostMapping(value = "/comment")
     public ResponseEntity<?> addComment(@RequestBody CommentDTO commentDTO, @RequestHeader Map<String, String> headers) {
         log.info(String.format("Entering method add comment with comment: %s and headers: %s", commentDTO, headers));
         if (commentDTO.getTitle() == null || commentDTO.getTitle().equals("")) {
@@ -147,7 +164,7 @@ public class RestPostController {
         return new ResponseEntity<>("OK", HttpStatus.OK);
     }
 
-    @RequestMapping(value = "/login", method = POST)
+    @PostMapping(value = "/login")
     public ResponseEntity<?> getKeyForUser(@RequestParam Map<String, String> requestParameters) {
         log.info(String.format("Entering method to login with requested parameters: %s", requestParameters));
         String username = requestParameters.get("username");
@@ -183,14 +200,14 @@ public class RestPostController {
                 return new ResponseEntity<>(answer.toString(), HttpStatus.OK);
             } else {
                 log.info("User with specified credentials has not been found or is locked");
-                return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
+                return new ResponseEntity<>(HttpStatus.NOT_FOUND);
             }
         }
         log.error("User not eligible");
-        return new ResponseEntity<>(null, HttpStatus.FORBIDDEN);
+        return new ResponseEntity<>(HttpStatus.FORBIDDEN);
     }
 
-    @RequestMapping(value = "/user/{id}/photo", method = POST)
+    @PostMapping(value = "/user/{id}/photo")
     public ResponseEntity<?> uploadPhoto(@PathVariable int id,
                                          @RequestHeader Map<String, String> headers,
                                          @RequestParam(name = "photo") MultipartFile photo
@@ -212,22 +229,22 @@ public class RestPostController {
         log.info(String.format("Uploading photo entered with headers: %s and user id: %s", headers, id));
 
         String property = System.getProperty("user.home") + "/.TeamUpData/";
-        String pathname_tmp = property + id + "_1";
+        String pathNameTemp = property + id + "_1";
         String pathname = property + id;
-        log.info(String.format("Uploading to %s", pathname_tmp));
-        File file = new File(pathname_tmp);
+        log.info(String.format("Uploading to %s", pathNameTemp));
+        File file = new File(pathNameTemp);
         try (FileOutputStream fileOutputStream = new FileOutputStream(file)) {
             fileOutputStream.write(photo.getBytes());
         } catch (IOException e) {
-            e.printStackTrace();
+            log.info(e.getMessage());
         }
 
-        ImageCompressor.compressAndSave(pathname_tmp, pathname);
+        ImageCompressor.compressAndSave(pathNameTemp, pathname);
 
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
-    @RequestMapping(value = "/requests", method = POST)
+    @PostMapping(value = "/requests")
     public ResponseEntity<?> saveNewRequest(@RequestBody ResetRequestDTO resetRequestDTO) {
         log.info(String.format("Entered method to save new request with requestBody %s", resetRequestDTO));
 
@@ -239,7 +256,7 @@ public class RestPostController {
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
-    @RequestMapping(value = "/locations", method = POST)
+    @PostMapping(value = "/locations")
     public ResponseEntity<?> saveNewLocation(@RequestBody LocationDTO locationDTO, @RequestHeader Map<String, String> headers) {
         log.info(String.format("Enter method to save new location with requestBody %s", locationDTO));
         User user = userService.getByHashKey(headers.get("token"));
@@ -250,7 +267,7 @@ public class RestPostController {
             locationService.save(dtOsConverter.getLocationFromDTO(locationDTO));
             log.info("Location has been successfully created and saved in database");
             return new ResponseEntity<>("OK", HttpStatus.OK);
-        }else{
+        } else {
             return new ResponseEntity<>(HttpStatus.FORBIDDEN);
         }
     }

@@ -11,6 +11,7 @@ import org.springframework.context.annotation.Bean;
 
 import java.io.File;
 
+//todo: add comments and tests. 70% of app should be tested
 @SpringBootApplication
 @Slf4j
 public class TeamUpApplication {
@@ -28,13 +29,13 @@ public class TeamUpApplication {
 
 	@Bean
 	public CommandLineRunner demo() {
-		return (args) -> {
+		return args -> {
 			userUtils.createAdminIfNoneExistent();
 			createFiles();
 		};
 	}
 
-	public static void createFiles(){
+	private static void createFiles(){
 		//create directory and download Avatar
 		String home = System.getProperty("user.home");
 		File file = new File(home + "/.TeamUpData");
@@ -56,7 +57,7 @@ public class TeamUpApplication {
 			Thread.sleep(1L);
 			imageCompressor.downloadImage(file.getAbsolutePath() + "/bootstrap.min.css", bootstrapURI); //bootstrap
 		} catch (InterruptedException e) {
-			e.printStackTrace();
+			log.info(e.getMessage());
 		}
 	}
 }

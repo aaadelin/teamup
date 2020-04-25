@@ -7,6 +7,7 @@ import com.team.teamup.dtos.*;
 import com.team.teamup.persistence.*;
 import com.team.teamup.validation.TaskValidation;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.sql.Date;
@@ -24,15 +25,15 @@ import java.util.stream.Collectors;
 @Slf4j
 public class DTOsConverter {
 
-    private UserRepository userRepository;
-    private TeamRepository teamRepository;
-    private TaskRepository taskRepository;
-    private ProjectRepository projectRepository;
-    private PostRepository postRepository;
-    private CommentRepository commentRepository;
-    private LocationRepository locationRepository;
+    private final UserRepository userRepository;
+    private final TeamRepository teamRepository;
+    private final TaskRepository taskRepository;
+    private final ProjectRepository projectRepository;
+    private final PostRepository postRepository;
+    private final CommentRepository commentRepository;
+    private final LocationRepository locationRepository;
     private ResetRequestRepository resetRequestRepository;
-    private TaskValidation taskValidation;
+    private final TaskValidation taskValidation;
 
     public DTOsConverter(UserRepository userRepository,
                          TeamRepository teamRepository,
@@ -40,8 +41,7 @@ public class DTOsConverter {
                          ProjectRepository projectRepository,
                          PostRepository postRepository,
                          LocationRepository locationRepository,
-                         CommentRepository commentRepository,
-                         ResetRequestRepository resetRequestRepository) {
+                         CommentRepository commentRepository) {
 
         this.userRepository = userRepository;
         this.teamRepository = teamRepository;
@@ -50,10 +50,14 @@ public class DTOsConverter {
         this.postRepository = postRepository;
         this.locationRepository = locationRepository;
         this.commentRepository = commentRepository;
-        this.resetRequestRepository = resetRequestRepository;
         this.taskValidation = new TaskValidation();
 
         log.debug("Instance of class DtosConverter created");
+    }
+
+    @Autowired
+    public void setResetRequestRepository(ResetRequestRepository resetRequestRepository) {
+        this.resetRequestRepository = resetRequestRepository;
     }
 
     /**
@@ -119,7 +123,7 @@ public class DTOsConverter {
         if (userDTO.getPhoto() != null) {
             user.setPhoto(userDTO.getPhoto());
         }
-        if ((userOptional.isPresent() && userOptional.get().getJoinedAt() == null) || !userOptional.isPresent()) {
+        if (userOptional.isEmpty() || userOptional.get().getJoinedAt() == null) {
             user.setJoinedAt(Date.valueOf(LocalDate.now()));
         }
         if (userDTO.getMail() == null) {
@@ -218,6 +222,7 @@ public class DTOsConverter {
                 taskDTO.getDifficulty() == 0 && taskDTO.getPriority() == 0 && taskDTO.getTaskStatus() != null &&
                 (task.getAssignees().contains(user) || task.getReporter().getId() == user.getId()) &&
                 taskValidation.isTaskStatusChangeValid(task, taskDTO);
+
         if (onlyTheStatusIsUpdated) {
             task.setTaskStatus(taskDTO.getTaskStatus());
             task.setLastChanged(LocalDateTime.now());
@@ -229,32 +234,36 @@ public class DTOsConverter {
                 taskDTO.getDeadline() != null && taskDTO.getTaskType() != null &&
                 taskDTO.getDifficulty() != 0 && taskDTO.getPriority() != 0 && taskDTO.getTaskStatus() != null &&
                 taskValidation.isTaskStatusChangeValid(task, taskDTO);
-        if (everyAttributeOfTaskIsUpdated && isReporterOrAdmin) {
 
-            task.setDescription(taskDTO.getDescription());
-            task.setDeadline(taskDTO.getDeadline());
-            task.setTaskType(taskDTO.getTaskType());
-            if (taskDTO.getDifficulty() >= 1 && taskDTO.getDifficulty() <= 3) {
-                task.setDifficulty(taskDTO.getDifficulty());
-            }
-            if (taskDTO.getPriority() >= 1 && taskDTO.getPriority() <= 3) {
-                task.setPriority(taskDTO.getPriority());
-            }
-            task.setTaskStatus(taskDTO.getTaskStatus());
-            if (task.getTaskStatus().equals(TaskStatus.CLOSED)) {
-                task.setDoneAt(LocalDateTime.now());
-            } else {
-                task.setDoneAt(null);
-            }
-            task.setLastChanged(LocalDateTime.now());
-            task.setAssignees(taskDTO.getAssignees().stream()
-                    .map(assigneeId -> userRepository.findById(assigneeId).orElseThrow())
-                    .collect(Collectors.toList()));
-            return task;
+        if (everyAttributeOfTaskIsUpdated && isReporterOrAdmin) {
+            return getEveryAttributeChangedTask(taskDTO, task);
         }
 
         throw new IllegalArgumentException();
 
+    }
+
+    private Task getEveryAttributeChangedTask(TaskDTO taskDTO, Task task) {
+        task.setDescription(taskDTO.getDescription());
+        task.setDeadline(taskDTO.getDeadline());
+        task.setTaskType(taskDTO.getTaskType());
+        if (taskDTO.getDifficulty() >= 1 && taskDTO.getDifficulty() <= 3) {
+            task.setDifficulty(taskDTO.getDifficulty());
+        }
+        if (taskDTO.getPriority() >= 1 && taskDTO.getPriority() <= 3) {
+            task.setPriority(taskDTO.getPriority());
+        }
+        task.setTaskStatus(taskDTO.getTaskStatus());
+        if (task.getTaskStatus().equals(TaskStatus.CLOSED)) {
+            task.setDoneAt(LocalDateTime.now());
+        } else {
+            task.setDoneAt(null);
+        }
+        task.setLastChanged(LocalDateTime.now());
+        task.setAssignees(taskDTO.getAssignees().stream()
+                .map(assigneeId -> userRepository.findById(assigneeId).orElseThrow())
+                .collect(Collectors.toList()));
+        return task;
     }
 
 

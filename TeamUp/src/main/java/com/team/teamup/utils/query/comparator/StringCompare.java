@@ -1,6 +1,5 @@
 package com.team.teamup.utils.query.comparator;
 
-import com.team.teamup.utils.query.comparator.AbstractComparator;
 import lombok.extern.slf4j.Slf4j;
 
 import java.lang.reflect.Field;
@@ -15,10 +14,17 @@ import static com.team.teamup.utils.query.AbstractLanguageParser.isInteger;
 @Slf4j
 public class StringCompare extends AbstractComparator {
 
-    public StringCompare(Stack<Class<?>> classes, Queue<Method> methods) {
+    public StringCompare(Deque<Class<?>> classes, Queue<Method> methods) {
         super(classes, methods);
     }
 
+    /**
+     *
+     * @param field class field to compare
+     * @param remainingCondition string containing operator + right operand
+     * @param searchTerms map of placeholders and strings
+     * @return predicate
+     */
     public Predicate<Object> compare(Field field, String remainingCondition, Map<Integer, String> searchTerms) {
         List<String> stringOperators = List.of("=", "!=", "like ", "in ");
         for (String operator : stringOperators) {
@@ -34,6 +40,14 @@ public class StringCompare extends AbstractComparator {
         return t -> true;
     }
 
+    /**
+     *
+     * @param field class field to compare, should be string
+     * @param operator compare operator (=, <=, ...)
+     * @param rightOperand string containing a string or a list of strings separated by comma
+     * @return predicate
+     * @throws NoSuchMethodException if field doesn't have a getter associated
+     */
     private Predicate<Object> simpleStringOperator(final Field field, final String operator, final String rightOperand) throws NoSuchMethodException {
         List<Method> methodsCopy = getMethods(field);
         return t -> {
@@ -58,6 +72,12 @@ public class StringCompare extends AbstractComparator {
         };
     }
 
+    /**
+     * convert list of string tags to actual strings
+     * @param operand string of placeholders
+     * @param searchTerms map containing the placeholders as keys and strings as values
+     * @return list of strings separated by comma
+     */
     private String getQuotedRightOperand(String operand, Map<Integer, String> searchTerms) {
         List<String> quotedStrings = new ArrayList<>();
         for (String item : operand.split(",")) {

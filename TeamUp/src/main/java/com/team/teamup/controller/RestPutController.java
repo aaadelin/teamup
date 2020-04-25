@@ -6,7 +6,6 @@ import com.team.teamup.domain.enums.UserStatus;
 import com.team.teamup.dtos.*;
 import com.team.teamup.service.*;
 import com.team.teamup.utils.DTOsConverter;
-import com.team.teamup.utils.MailUtils;
 import com.team.teamup.utils.TokenUtils;
 import com.team.teamup.utils.UserUtils;
 import com.team.teamup.validation.UserValidation;
@@ -21,8 +20,6 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 
-import static org.springframework.web.bind.annotation.RequestMethod.PUT;
-
 //PUT methods - for updating
 
 
@@ -35,34 +32,44 @@ public class RestPutController {
     private UserUtils userUtils;
     private UserValidation userValidation;
 
-    private TeamService teamService;
-    private UserService userService;
-    private TaskService taskService;
-    private ProjectService projectService;
-    private ResetRequestService resetRequestService;
-    private LocationService locationService;
+    private final TeamService teamService;
+    private final UserService userService;
+    private final TaskService taskService;
+    private final ProjectService projectService;
+    private final ResetRequestService resetRequestService;
+    private final LocationService locationService;
 
     private DTOsConverter dtOsConverter;
-    private MailUtils mailUtils;
 
 
     @Autowired
     public RestPutController(TeamService teamService, UserService userService, TaskService taskService,
-                             ProjectService projectService, UserValidation userValidation, DTOsConverter dtOsConverter,
+                             ProjectService projectService,
                              LocationService locationService,
-                             ResetRequestService resetRequestService, UserUtils userUtils, MailUtils mailUtils) {
+                             ResetRequestService resetRequestService) {
 
         this.teamService = teamService;
         this.userService = userService;
         this.taskService = taskService;
         this.projectService = projectService;
         this.locationService = locationService;
-        this.dtOsConverter = dtOsConverter;
         this.resetRequestService = resetRequestService;
-        this.userValidation = userValidation;
-        this.mailUtils = mailUtils;
-        this.userUtils = userUtils;
         log.info("Creating RestPutController");
+    }
+
+    @Autowired
+    public void setUserUtils(UserUtils userUtils) {
+        this.userUtils = userUtils;
+    }
+
+    @Autowired
+    public void setUserValidation(UserValidation userValidation) {
+        this.userValidation = userValidation;
+    }
+
+    @Autowired
+    public void setDtOsConverter(DTOsConverter dtOsConverter) {
+        this.dtOsConverter = dtOsConverter;
     }
 
     /**
@@ -72,7 +79,7 @@ public class RestPutController {
      * @param headers headers map of the client that initiated the update
      * @return OK if the user was found and updated, NOT FOUND if the user does not exist in the database
      */
-    @RequestMapping(value = "/users", method = RequestMethod.PUT)
+    @PutMapping(value = "/users")
     public ResponseEntity<?> updateUser(@RequestBody UserDTO user, @RequestHeader Map<String, String> headers) {
         log.info(String.format("Entering update user method with user: %s and headers: %s", user, headers));
 
@@ -108,7 +115,7 @@ public class RestPutController {
      * @param headers    headers map of the client that initiated the request
      * @return OK if the project was successfully updated or NOT FOUND if the project is not in the DB
      */
-    @RequestMapping(value = "/project", method = RequestMethod.PUT)
+    @PutMapping(value = "/project")
     public ResponseEntity<?> updateProject(@RequestBody ProjectDTO projectDTO, @RequestHeader Map<String, String> headers) {
         log.info(String.format("Entering update project with project: %s and headers: %s", projectDTO, headers));
 
@@ -140,7 +147,7 @@ public class RestPutController {
      * @param headers request headers containing token
      * @return response ok, not_found, Forbidden
      */
-    @RequestMapping(value = "/tasks", method = RequestMethod.PUT)
+    @PutMapping(value = "/tasks")
     public ResponseEntity<?> updateTask(@RequestBody TaskDTO taskDTO, @RequestHeader Map<String, String> headers) {
         log.info(String.format("Entering update task with task: %s and headers: %s", taskDTO, headers));
 
@@ -178,7 +185,7 @@ public class RestPutController {
      * @return OK if the team is in the database, the requester is admin or team lead and the team has been successfully updated in the DB,
      * NOT FOUND if the team is not found in the database, and FORBIDDEN if the requester is not admin or team leader
      */
-    @RequestMapping(value = "/teams", method = RequestMethod.PUT)
+    @PutMapping(value = "/teams")
     public ResponseEntity<?> updateTeam(@RequestBody TeamDTO team, @RequestHeader Map<String, String> headers) {
         log.info(String.format("Entering update team with team: %s and headers: %s", team, headers));
 
@@ -212,7 +219,7 @@ public class RestPutController {
      * @return NOT ACCEPTABLE if the actual password and the old password don't match, or the new password is too short
      * FORBIDDEN if the user is not eligible, and OK if the password has been successfully changed
      */
-    @RequestMapping(value = "/user/{id}/password", method = RequestMethod.PUT)
+    @PutMapping(value = "/user/{id}/password")
     public ResponseEntity<?> updateUserPassword(@PathVariable int id,
                                                 @RequestParam Map<String, String> parameters,
                                                 @RequestHeader Map<String, String> headers) {
@@ -231,7 +238,7 @@ public class RestPutController {
 
         if (requester.getId() == userToChange.getId() || requester.getStatus() == UserStatus.ADMIN) {
 
-            if (userToChange.getPassword().toLowerCase().equals(oldPassword)) {
+            if (userToChange.getPassword().equalsIgnoreCase(oldPassword)) {
                 userToChange.setPassword(newPassword);
                 log.info("Password successfully changed");
                 if (parameters.get("logout").equals("true")) {
@@ -258,7 +265,7 @@ public class RestPutController {
      * @param resetRequestDTO ResetRequestDTO object containing the new password from the user
      * @return OK if the request is successfully processed
      */
-    @RequestMapping(value = "/requests", method = PUT)
+    @PutMapping(value = "/requests")
     public ResponseEntity<?> updateRequest(@RequestBody ResetRequestDTO resetRequestDTO) {
         log.info(String.format("Entered method to save new request with requestBody %s", resetRequestDTO));
 
@@ -281,7 +288,7 @@ public class RestPutController {
         return new ResponseEntity<>(HttpStatus.NOT_ACCEPTABLE);
     }
 
-    @RequestMapping(value = "/locations", method = PUT)
+    @PutMapping(value = "/locations")
     public ResponseEntity<?> updateLocation(@RequestBody LocationDTO locationDTO, @RequestHeader Map<String, String> headers) {
         log.info(String.format("Enter method to update new location with requestBody %s", locationDTO));
         User user = userService.getByHashKey(headers.get("token"));

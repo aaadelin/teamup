@@ -15,8 +15,8 @@ import java.util.stream.Collectors;
 @Component
 public class TeamService {
 
-    private TeamRepository teamRepository;
-    private DTOsConverter dtOsConverter;
+    private final TeamRepository teamRepository;
+    private final DTOsConverter dtOsConverter;
 
     @Autowired
     public TeamService (TeamRepository teamRepository,

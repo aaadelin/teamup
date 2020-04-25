@@ -10,7 +10,7 @@ import java.util.NoSuchElementException;
 @Component
 public class ResetRequestService {
 
-    private ResetRequestRepository resetRequestRepository;
+    private final ResetRequestRepository resetRequestRepository;
 
     @Autowired
     public ResetRequestService(ResetRequestRepository resetRequestRepository){
