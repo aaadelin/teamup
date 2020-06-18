@@ -47,7 +47,7 @@ public class RestDeleteController {
     public ResponseEntity<?> deleteUser(@PathVariable int id, @RequestHeader Map<String, String> headers) {
         log.info(String.format("Entering delete user method with user id: %s %n and headers: %s", id, headers.toString()));
         User user = userService.getByID(id);
-        if (user.getStatus() != UserStatus.ADMIN){ //users with status admin cannot be deleted
+        if (user != null && user.getStatus() != UserStatus.ADMIN){ //users with status admin cannot be deleted
             userUtils.createEvent(userService.getByHashKey(headers.get(TOKEN)),
                     String.format("Deleted user \"%s %s\"", user.getFirstName(), user.getLastName()),
                     UserEventType.DELETE);

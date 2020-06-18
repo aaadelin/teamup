@@ -22,10 +22,10 @@
               <option value="CLOSED" >Closed</option>
             </select>
           </label>
-            <div class="col">
+            <div class="col" style="display: none">
              <label class="" style="min-width: 80px; cursor: pointer; margin-left: 3%; margin-top: 5px;" @click="showAdvanced = !showAdvanced">Advanced (Alpha)</label>
           </div>
-          <div class="row" style="margin-left: 20px;">
+          <div class="row" style="margin-left: 20px; display: none">
             <input v-model="query" v-show="showAdvanced" style="width: 1290px;" class="col-9 input-group">
             <button v-show="showAdvanced" class="btn btn-secondary col-1" style="width: 50px;" @click="searchByQuery"> > </button>
           </div>

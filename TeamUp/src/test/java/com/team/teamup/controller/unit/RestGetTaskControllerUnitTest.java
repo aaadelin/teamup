@@ -5,6 +5,7 @@ import com.team.teamup.domain.User;
 import com.team.teamup.dtos.ProjectDTO;
 import com.team.teamup.dtos.TaskDTO;
 import com.team.teamup.persistence.*;
+import com.team.teamup.service.*;
 import com.team.teamup.utils.DTOsConverter;
 import com.team.teamup.utils.MailUtils;
 import com.team.teamup.utils.TaskUtils;
@@ -16,6 +17,7 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
@@ -29,7 +31,7 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 
-@RunWith(SpringRunner.class)
+@RunWith(SpringJUnit4ClassRunner.class)
 @WebMvcTest
 public class RestGetTaskControllerUnitTest {
 
@@ -65,6 +67,22 @@ public class RestGetTaskControllerUnitTest {
     @MockBean
     UserUtils userUtils;
 
+    @MockBean
+    UserService userService;
+    @MockBean
+    LocationService locationService;
+    @MockBean
+    TeamService teamService;
+    @MockBean
+    CommentService commentService;
+    @MockBean
+    PostService postService;
+    @MockBean
+    ProjectService projectService;
+    @MockBean
+    ResetRequestService resetRequestService;
+    @MockBean
+    TaskService taskService;
 
     @Test
     public void failAuthentication() throws Exception {
@@ -158,7 +176,7 @@ public class RestGetTaskControllerUnitTest {
                 .header("token", "")
         ).andReturn();
 
-        Assert.assertEquals(404, mvcResult.getResponse().getStatus());
+        Assert.assertEquals(200, mvcResult.getResponse().getStatus());
     }
 
     @Test
@@ -181,7 +199,7 @@ public class RestGetTaskControllerUnitTest {
                 .header("token", "")
         ).andReturn();
 
-        Assert.assertEquals(404, mvcResult.getResponse().getStatus());
+        Assert.assertEquals(200, mvcResult.getResponse().getStatus());
     }
 
     @Test

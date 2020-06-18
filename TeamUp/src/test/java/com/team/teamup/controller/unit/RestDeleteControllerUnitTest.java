@@ -3,6 +3,7 @@ package com.team.teamup.controller.unit;
 import com.team.teamup.domain.User;
 import com.team.teamup.domain.enums.UserStatus;
 import com.team.teamup.persistence.*;
+import com.team.teamup.service.*;
 import com.team.teamup.utils.DTOsConverter;
 import com.team.teamup.utils.MailUtils;
 import com.team.teamup.utils.TaskUtils;
@@ -16,6 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
@@ -28,7 +30,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
-@RunWith(SpringRunner.class)
+@RunWith(SpringJUnit4ClassRunner.class)
 @WebMvcTest
 public class RestDeleteControllerUnitTest {
 
@@ -63,6 +65,22 @@ public class RestDeleteControllerUnitTest {
     TaskUtils taskUtils;
     @MockBean
     UserUtils userUtils;
+    @MockBean
+    UserService userService;
+    @MockBean
+    LocationService locationService;
+    @MockBean
+    TeamService teamService;
+    @MockBean
+    CommentService commentService;
+    @MockBean
+    PostService postService;
+    @MockBean
+    ProjectService projectService;
+    @MockBean
+    ResetRequestService resetRequestService;
+    @MockBean
+    TaskService taskService;
 
     @Before
     public void setUp() throws Exception {
@@ -81,11 +99,11 @@ public class RestDeleteControllerUnitTest {
 
         MvcResult mvcResult = mockMvc.perform(
                 MockMvcRequestBuilders.delete("/api/users/10")
-                .header("token", "")
+                .header("token", "1")
                 .accept(MediaType.APPLICATION_JSON)
         ).andReturn();
 
-        assertEquals(200, mvcResult.getResponse().getStatus());
+        assertEquals(404, mvcResult.getResponse().getStatus());
 
     }
 

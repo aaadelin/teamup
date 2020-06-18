@@ -5,6 +5,7 @@ import com.team.teamup.validation.UserValidation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.annotation.Order;
+import org.springframework.security.core.parameters.P;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.CrossOrigin;
 
@@ -35,7 +36,7 @@ public class AuthenticationFilter implements Filter {
 
         if (isAuthorized(req.getRequestURI(), req.getMethod(), tokenHeader)) {
 //            if((userValidation.isUserLoggedIn(tokenHeader) || req.getRequestURI().equals("/api/login") || req.getRequestURI().contains(""))){ // - for swagger
-            if ((userValidation.isUserLoggedIn(tokenHeader) || req.getRequestURI().equals("/api/login"))) {
+            if ((userValidation.isUserLoggedIn(tokenHeader) || req.getRequestURI().equals("/api/login") || req.getRequestURI().equals("/api/requests"))) {
                 log.debug(String.format("User with token %s is eligible to access %s", tokenHeader, req.getRequestURI()));
                 chain.doFilter(request, response);
             } else {
@@ -78,6 +79,8 @@ public class AuthenticationFilter implements Filter {
             case "PUT":
                 if (adminAuthenticationPUT.stream().anyMatch(protectedUri -> protectedUri.equals(uri))) {
                     return userValidation.isValid(token, UserStatus.ADMIN);
+                } else if (uri.equals("/api/requests")) {
+                    return true;
                 } else {
                     return userValidation.isValid(token);
                 }
