@@ -61,6 +61,13 @@
         </label>
         </li>
       </ul>
+        <ul class="list-unstyled components">
+        <li style="text-align: center">
+          <button class="btn btn-outline-light" @click="reload">
+            <i class="fas fa-sync-alt"></i> Refresh
+          </button>
+        </li>
+      </ul>
     </div>
   </transition>
 </template>
@@ -109,6 +116,9 @@ export default {
     },
     hide () {
       this.$emit('hide')
+    },
+    reload () {
+      this.$emit('reload')
     }
   }
 }

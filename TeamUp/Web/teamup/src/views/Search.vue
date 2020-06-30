@@ -22,6 +22,13 @@
               <option value="CLOSED" >Closed</option>
             </select>
           </label>
+            <div class="col" style="display: none">
+             <label class="" style="min-width: 80px; cursor: pointer; margin-left: 3%; margin-top: 5px;" @click="showAdvanced = !showAdvanced">Advanced (Alpha)</label>
+          </div>
+          <div class="row" style="margin-left: 20px; display: none">
+            <input v-model="query" v-show="showAdvanced" style="width: 1290px;" class="col-9 input-group">
+            <button v-show="showAdvanced" class="btn btn-secondary col-1" style="width: 50px;" @click="searchByQuery"> > </button>
+          </div>
         </div>
         <div>
           <transition name="fadeHeight">
@@ -77,7 +84,7 @@
 <script>
 import {
   findProjects,
-  getSearchedSortedFilteredTasks
+  getSearchedSortedFilteredTasks, getTasksByQuery
 } from '../persistance/RestGetRepository'
 import TaskSearchBox from '../components/containers/TaskSearchBox'
 import ProjectBox from '../components/containers/ProjectBox'
@@ -146,7 +153,9 @@ export default {
       projectsPage: 0,
       nextTasksAvailable: false,
       previousTasksAvailable: false,
-      CURRENT_MAX_RESULTS: MAX_RESULTS
+      CURRENT_MAX_RESULTS: MAX_RESULTS,
+      showAdvanced: false,
+      query: ''
     }
   },
   methods: {
@@ -230,6 +239,12 @@ export default {
         this.CURRENT_MAX_RESULTS = MAX_RESULTS / 2
         this.hideHeaders()
       }
+    },
+    async searchByQuery () {
+      this.reportedTasks = []
+      NProgress.start()
+      this.assignedToTasks = await getTasksByQuery(this.query)
+      NProgress.done()
     }
   }
 }

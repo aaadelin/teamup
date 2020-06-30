@@ -123,7 +123,8 @@
     <div>
       <task-category class="overflow-auto"
       :is-visible="showTasks"
-      :user-id="userId"
+      :id="statisticsId"
+      :type="statisticsType"
       :task-category="taskCategory"
       @close="showTasks=false"/>
     </div>
@@ -245,7 +246,9 @@ export default {
       team: null,
       leadingTeams: [],
       ownedProjects: [],
-      statisticOption: { type: 'user' }
+      statisticOption: { type: 'user' },
+      statisticsId: this.$route.query.userId,
+      statisticsType: 'user'
     }
   },
   methods: {
@@ -331,15 +334,21 @@ export default {
       let files = ev.target.files
       this.uploadPhoto(files)
     },
-    async changeStatistics (option) {
+    changeStatistics (option) {
       switch (option.type) {
         case 'user':
+          this.statisticsType = 'user'
+          this.statisticsId = this.userId
           this.getUserStatistics()
           break
         case 'team':
+          this.statisticsType = 'team'
+          this.statisticsId = option.id
           this.getTeamsStatistics(option.id)
           break
         case 'project':
+          this.statisticsType = 'project'
+          this.statisticsId = option.id
           this.getProjectStatistics(option.id)
           break
       }

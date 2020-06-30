@@ -60,7 +60,8 @@
 </template>
 
 <script>
-import { getMyID, getUsersPhoto, logout } from '../persistance/RestGetRepository'
+import { getMyID, getUsersPhoto } from '../persistance/RestGetRepository'
+import { logout } from '../persistance/RestPutRepository'
 import CreateTask from './create-components/CreateTask'
 
 export default {

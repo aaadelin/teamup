@@ -17,16 +17,6 @@
                   @reload="getLocations" @edit="toggleHeader('enable')" @cancel="toggleHeader('cancel')"></location-row>
       </tbody>
     </table>
-
-    <div class="row justify-content-center" style="margin-bottom: 20px">
-      <div @click="changePage('-')" :class="[page === 0 ? 'disableArrow' : 'enableArrow']">
-        <i class="fas fa-caret-left"></i>
-      </div>
-      <div style="padding: 0 5px 0 5px">page {{page}}</div>
-      <div @click="changePage('+')" :class="['disableArrow']">
-        <i class="fas fa-caret-right"></i>
-      </div>
-    </div>
   </div>
 
   <create-location class="overflow-auto"

@@ -1,7 +1,7 @@
 <template>
   <div class="container" style="box-shadow: 5px 5px 12px grey; margin: 20px auto 20px auto; padding-bottom: 15px">
     <div class="row justify-content-between" style="padding: 15px">
-      <h3 class="col-2">Projects</h3>
+      <h3 class="col-2" style="cursor: pointer" @click="refresh" title="Refresh" v-b-tooltip.hover>Projects</h3>
       <div class="col-10" style="text-align: right; padding: 0" >
         <button class="btn btn-outline-secondary" style="height: 40px; border-radius: 3px 0 0 3px" title="Archived projects" @click="showArchivedProjects = !showArchivedProjects" v-b-tooltip.hover>
           <i class="fas fa-archive"></i>
@@ -53,6 +53,11 @@ export default {
           this.$refs[i][0].hideDescription()
         }
       }
+    },
+    refresh () {
+      this.page = 0
+      this.projects = []
+      this.loadData()
     },
     async loadData () {
       let newProjects = await getProjects(this.page++)

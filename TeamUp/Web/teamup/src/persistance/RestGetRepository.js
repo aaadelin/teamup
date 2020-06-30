@@ -19,21 +19,6 @@ function fetchDataFromUrl (url, defaultParam = null) {
   })
 }
 
-export function logout () {
-  let url = `${baseURL}/logout`
-
-  axios.get(url, {
-    headers: {
-      'token': localStorage.getItem('access_key')
-    }
-  }).then(res => {
-    localStorage.clear()
-    location.reload()
-  }).catch(rez => {
-    console.log('request denied')
-  })
-}
-
 export async function getMyID () {
   let url = `${baseURL}/key`
   return fetchDataFromUrl(url)
@@ -208,8 +193,18 @@ export async function getTasksByProjectId (id) {
   return fetchDataFromUrl(url)
 }
 
-export async function getTasksByProjectIdAndPage (id, page = 0) {
-  let url = `${baseURL}/projects/${id}/tasks?page=${page}`
+export async function getTasksByProjectIdAndPage (id, page = 0, statuses = '') {
+  let url = `${baseURL}/projects/${id}/tasks?page=${page}&status=${statuses}`
+  return fetchDataFromUrl(url)
+}
+
+export async function getTasksByTeamId (id) {
+  let url = `${baseURL}/teams/${id}/tasks`
+  return fetchDataFromUrl(url)
+}
+
+export async function getTasksByTeamIdAndPage (id, page = 0, statuses = '') {
+  let url = `${baseURL}/teams/${id}/tasks?page=${page}&status=${statuses}`
   return fetchDataFromUrl(url)
 }
 
@@ -282,4 +277,10 @@ export async function getTeamsStatistics (teamID) {
 export async function getUsernames () {
   let url = `${baseURL}/users/usernames`
   return fetchDataFromUrl(url)
+}
+
+export async function getTasksByQuery (query) {
+  let url = `${baseURL}/tasks/query?search-query=${query}`
+  url = encodeURI(url)
+  return fetchDataFromUrl(url, [])
 }
