@@ -156,20 +156,6 @@ public class RestGetUserController {
 
     /**
      *
-     * @param headers headers containing the token of the requester
-     * @return ok if the user is eligible to logout or forbidden if the key is not valid
-     */
-    @RequestMapping(value = "/logout", method = GET)
-    public ResponseEntity<?> logout(@RequestHeader Map<String, String> headers) {
-        log.info(String.format("Entering logout method with headers: %s", headers.toString()));
-        String key = headers.get("token");
-        boolean loggedOut = userService.logout(key);
-
-        return new ResponseEntity<>(loggedOut ? HttpStatus.OK : HttpStatus.FORBIDDEN);
-    }
-
-    /**
-     *
      * @param id user's id
      * @param headers requester's headers
      * @return user's photo if he has one or the default photo

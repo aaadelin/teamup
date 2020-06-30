@@ -165,10 +165,11 @@ public class RestPostController {
     }
 
     @PostMapping(value = "/login")
-    public ResponseEntity<?> getKeyForUser(@RequestParam Map<String, String> requestParameters) {
+    public ResponseEntity<?> getKeyForUser(@RequestParam Map<String, String> requestParameters,
+                                           @RequestBody Map<String, String> requestBody) {
         log.info(String.format("Entering method to login with requested parameters: %s", requestParameters));
-        String username = requestParameters.get("username");
-        String password = requestParameters.get("password");
+        String username = requestBody.get("username");
+        String password = requestBody.get("password");
 
         password = new String(Base64.getDecoder().decode(password));
 

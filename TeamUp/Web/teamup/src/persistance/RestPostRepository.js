@@ -26,22 +26,42 @@ export function login (username, password) {
   // password = AES.encrypt(password, key)
 
   password = btoa(password)
-  let data = new FormData()
-  data.set('username', username)
-  data.set('password', password)
+  // let data = new FormData()
+  // data.set('username', username)
+  // data.set('password', password)
+  let data2 = JSON.stringify({username: username, password: password})
 
-  return axios.post(url, data, {
-    headers: { 'token': localStorage.getItem('access_key') }
+  return axios({
+    url: url,
+    method: 'post',
+    headers: {
+      'token': localStorage.getItem('access_key'),
+      'Content-Type': 'Application/Json'
+    },
+    data: data2
   }).then(res => {
-    localStorage.setItem('access_key', res.data.key)
-    localStorage.setItem('isAdmin', res.data.isAdmin)
-    localStorage.setItem('name', res.data.name)
-    localStorage.setItem('id', res.data.id)
-    location.reload()
-    return true
-  }).catch(rez => {
-    return false
-  })
+      localStorage.setItem('access_key', res.data.key)
+      localStorage.setItem('isAdmin', res.data.isAdmin)
+      localStorage.setItem('name', res.data.name)
+      localStorage.setItem('id', res.data.id)
+      location.reload()
+      return true
+    }).catch(rez => {
+      return false
+    })
+
+  // return axios.post(url, data, {
+  //   headers: { 'token': localStorage.getItem('access_key') }
+  // }).then(res => {
+  //   localStorage.setItem('access_key', res.data.key)
+  //   localStorage.setItem('isAdmin', res.data.isAdmin)
+  //   localStorage.setItem('name', res.data.name)
+  //   localStorage.setItem('id', res.data.id)
+  //   location.reload()
+  //   return true
+  // }).catch(rez => {
+  //   return false
+  // })
 }
 
 export function uploadPhoto (photo, id, component) {

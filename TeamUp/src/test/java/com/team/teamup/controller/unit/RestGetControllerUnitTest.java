@@ -607,7 +607,7 @@ public class RestGetControllerUnitTest {
         when(userService.getByHashKey("2")).thenReturn(null);
 
         MvcResult mvcResult = mockMvc.perform(
-                MockMvcRequestBuilders.get("/api/logout")
+                MockMvcRequestBuilders.put("/api/logout")
                         .header("token", "1")
                         .accept(MediaType.APPLICATION_JSON)
         ).andReturn();
@@ -618,7 +618,7 @@ public class RestGetControllerUnitTest {
                         .header("token", "2")
                         .accept(MediaType.APPLICATION_JSON)
         ).andReturn();
-        assertEquals(403, mvcResult.getResponse().getStatus());
+        assertEquals(405, mvcResult.getResponse().getStatus());
     }
 
     @Test

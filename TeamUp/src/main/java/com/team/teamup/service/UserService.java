@@ -100,7 +100,7 @@ public class UserService {
      */
     public List<UserDTO> getSortedAndFilteredUsers(String filter, String sort, Integer page, String token){
         if(filter == null || filter.equals("")){
-            Boolean isAdmin = userValidation.isValid(token, UserStatus.ADMIN);
+            boolean isAdmin = userValidation.isValid(token, UserStatus.ADMIN);
             return userUtils.sortUsers(page, sort, isAdmin, PAGE_SIZE);
         } else {
             return userUtils.filterUsers(filter);

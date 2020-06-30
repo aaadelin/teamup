@@ -11,7 +11,6 @@ import org.springframework.context.annotation.Bean;
 
 import java.io.File;
 
-//todo: add comments and tests. 70% of app should be tested
 @SpringBootApplication
 @Slf4j
 public class TeamUpApplication {
@@ -43,7 +42,7 @@ public class TeamUpApplication {
 			file.mkdirs();
 		}
 		ImageCompressor imageCompressor = new ImageCompressor();
-		String avatarURI = "https://ucbcb4e03d32256f6b9a385fd6e9.previews.dropboxusercontent.com/p/thumb/AAyxjvrtwuGOXeeKNWpQus-n0ULh3InqNO0IlHVKMrpu62bA-s16i_87nFDrYfd1gDeEZUFzLrf7wwaxKK_ljvcllb25QTNiyNRhYFM4YtfK3giHvHeYe9ngMwAEi9XY2sR118OcdFbBPPiJAvHMcx_qaSjbAJHKCtRfifSELfAkBhe51uUompYEiROOFah78we2MlgTRoxt97kctM9U135egdGKZAmyJ-94FcLE20LVLfht1cI0nZ6PWeF6-8qEN_T_kFLtNTP6G0JDa51PMyN0oAKLEz7ChLSqYCgmzmrBUuGVzUwuIFIO8COjVKK2oHmFM-rGzRxZbpCj7EEV9Gxeej2-v_cEerxXjxS5adKeGSf-5Y6ZCHeCq7cVq2gM5p82EMcAWzNWH3iMpAj9LJ26/p.png?fv_content=true&size_mode=5";
+		String avatarURI = "https://ucb1bf8cdb070b26be3f1a687d03.previews.dropboxusercontent.com/p/thumb/AA1W26q8Xh_TJE2TRvckuDgd7XurL3ZOrPCbLx4Gwq2BRdfpf31tjpGiV4t9BMGmvsAEiBNZZGXGGw3HKwT4F3g6k6NIQcbHwOXUXAS3sIQa2pjLSy0fUPdnzz0yAlC3iPMMhmGOMasJclfWHyPVfyJYeAfVaMHfrzYtP1qNkwguawqytSOVrrU-7kj7H1NdVRG5o5Ga215z7NouHLYT8z5mjqznJrsvD_igXf6EOJGza-hwtFA0yAtBmOIN8ORibNEoPjbC9R-kVUqurzmDNTJlBLA03D-caix7zTl4Pks18bgEEnYrOTGAm3zfSyYrejwRrwk8HeEyzRoZLFqbioknnhR8bNOxn6Q3idrj6sYBZO-XqpjeStEutgeGnGVtu9NJoEky_XtoSbu4A5wDOFbZ/p.png?fv_content=true&size_mode=5";
 		String logoURI = "https://uc70693ab5639b8cd2be406547d5.dl.dropboxusercontent.com/cd/0/get/A1v5FjEX_TkLUkqu6ShXocv2QqSkEQ8xyX65pBbnfYu9MIHaI2iASsgWjvgSoEW3dBO60x2vD9T766n7ZqSWySG6dQwTrqXff_aBUE4OAGHJhoibNOG-5uHMcsh7RqtI31c/file?_download_id=2834776476044081526213627308252551087371116758876803216535281285&_notify_domain=www.dropbox.com&dl=1";
 		String mailURI = "https://uc83eb289fdd519d31c6e1d53ace.dl.dropboxusercontent.com/cd/0/get/A1sqrE1UP_ZXmHaTiRaaO3PbPD9O_-oxKXdeK5W5iMZ8lrpF8ln7lmLggb8VAtSaGdtYaFW0FGOVr8bOZLhwYrf8LOIsVQc9A1RAJ0k5bADgt1k-MICNkGXif75_xEea6zI/file?_download_id=3521662688113973482907172788592283372855001390067024666847760364208&_notify_domain=www.dropbox.com&dl=1";
 		String bootstrapURI = "https://uc9713b927f7e1b9c7fead178dff.dl.dropboxusercontent.com/cd/0/get/A1tdqF80S2cXG1L8tUgNGo2QExU7-xyFhjfVvESZzvEvSK8EftDTMXFjBaUGVyTBjm_jBsfYi0Poif1g6zh7dyoL7Yl2OWa5IwnIA9HKlv0Cwy3esD--ym9g6TeS24bya7E/file?_download_id=29337331885310498012872057261391577771793038110347170712334640275&_notify_domain=www.dropbox.com&dl=1";

@@ -19,21 +19,6 @@ function fetchDataFromUrl (url, defaultParam = null) {
   })
 }
 
-export function logout () {
-  let url = `${baseURL}/logout`
-
-  axios.get(url, {
-    headers: {
-      'token': localStorage.getItem('access_key')
-    }
-  }).then(res => {
-    localStorage.clear()
-    location.reload()
-  }).catch(rez => {
-    console.log('request denied')
-  })
-}
-
 export async function getMyID () {
   let url = `${baseURL}/key`
   return fetchDataFromUrl(url)

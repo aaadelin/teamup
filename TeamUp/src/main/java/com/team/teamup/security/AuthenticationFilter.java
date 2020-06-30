@@ -55,7 +55,8 @@ public class AuthenticationFilter implements Filter {
         List<String> adminAuthenticationPOST = List.of(
                 "/api/users",
 //                "/api/project",
-                "/api/team"
+                "/api/team",
+                "/api/requests"
         );
         List<String> adminAuthenticationPUT = List.of(
                 "/api/user"

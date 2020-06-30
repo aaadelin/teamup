@@ -143,7 +143,7 @@ public class UserValidation {
         if(!user.isActive() || user.getLastActive() == null){
             return true;
         }
-        if(user.getLastActive().isBefore(LocalDateTime.now().minusMinutes(user.getMinutesUntilLogout()))){ //if user hasn't been active in last 4 hours (didn't make any request)
+        if(user.getLastActive().isBefore(LocalDateTime.now().minusMinutes(user.getMinutesUntilLogout()))){ //if user hasn't been active in last 1 hours (didn't make any request)
             user.setActive(false);
             userRepository.save(user);
             return true;

@@ -156,7 +156,7 @@ public class UserUtils {
 
         User user = dtOsConverter.getUserFromDTO(userDTO);
         user = userRepository.save(user);
-        log.debug("Created admin with username {}", user.getUsername());
+        log.info("Created admin with username {}", user.getUsername());
         return user;
     }
 
@@ -207,7 +207,7 @@ public class UserUtils {
      * @param pageSize Integer, number of items per page
      * @return List of userDTOs sorted by the sort criteria
      */
-    public List<UserDTO> sortUsers(Integer page, String sort, Boolean isAdmin, Integer pageSize){
+    public List<UserDTO> sortUsers(Integer page, String sort, boolean isAdmin, Integer pageSize){
         List<UserDTO> users;
         if(page == -1){
             if(isAdmin){

@@ -20,6 +20,9 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 
+import static org.springframework.web.bind.annotation.RequestMethod.GET;
+import static org.springframework.web.bind.annotation.RequestMethod.PUT;
+
 //PUT methods - for updating
 
 
@@ -307,5 +310,19 @@ public class RestPutController {
         } else {
             return new ResponseEntity<>(HttpStatus.FORBIDDEN);
         }
+    }
+
+    /**
+     *
+     * @param headers headers containing the token of the requester
+     * @return ok if the user is eligible to logout or forbidden if the key is not valid
+     */
+    @RequestMapping(value = "/logout", method = PUT)
+    public ResponseEntity<?> logout(@RequestHeader Map<String, String> headers) {
+        log.info(String.format("Entering logout method with headers: %s", headers.toString()));
+        String key = headers.get("token");
+        boolean loggedOut = userService.logout(key);
+
+        return new ResponseEntity<>(loggedOut ? HttpStatus.OK : HttpStatus.FORBIDDEN);
     }
 }

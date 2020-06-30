@@ -56,3 +56,24 @@ export async function updateLocation (location) {
   let url = `${baseURL}/locations`
   return putDataToUrl(location, url)
 }
+
+export function logout () {
+  let url = `${baseURL}/logout`
+
+  putDataToUrl('', url).then(res => {
+    localStorage.clear()
+    location.reload()
+  }).catch(rez => {
+    console.log('request denied')
+  })
+  // axios.put(url, {
+  //   headers: {
+  //     'token': localStorage.getItem('access_key')
+  //   },
+  // }).then(res => {
+  //   localStorage.clear()
+  //   location.reload()
+  // }).catch(rez => {
+  //   console.log('request denied')
+  // })
+}
