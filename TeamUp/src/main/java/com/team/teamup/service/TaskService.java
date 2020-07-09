@@ -3,16 +3,18 @@ package com.team.teamup.service;
 import com.team.teamup.domain.Project;
 import com.team.teamup.domain.Task;
 import com.team.teamup.domain.User;
-import com.team.teamup.domain.enums.TaskStatus;
+import com.team.teamup.domain.TaskStatus;
 import com.team.teamup.dtos.ProjectDTO;
 import com.team.teamup.dtos.TaskDTO;
 import com.team.teamup.persistence.TaskRepository;
+import com.team.teamup.persistence.TaskStatusRepository;
 import com.team.teamup.utils.DTOsConverter;
 import com.team.teamup.utils.TaskUtils;
 import com.team.teamup.utils.query.ReflectionQueryLanguageParser;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Component;
 
 import java.sql.Date;
@@ -29,6 +31,7 @@ public class TaskService {
     private static final int PAGE_SIZE = 10;
 
     private final TaskRepository taskRepository;
+    private final TaskStatusRepository taskStatusRepository;
 
     private final DTOsConverter dtOsConverter;
     private final TaskUtils taskUtils;
@@ -37,10 +40,12 @@ public class TaskService {
     @Autowired
     public TaskService(TaskRepository taskRepository,
                        DTOsConverter dtOsConverter,
-                       TaskUtils taskUtils) {
+                       TaskUtils taskUtils,
+                       TaskStatusRepository taskStatusRepository) {
         this.taskRepository = taskRepository;
         this.dtOsConverter = dtOsConverter;
         this.taskUtils = taskUtils;
+        this.taskStatusRepository = taskStatusRepository;
         this.queryLanguageParser = new ReflectionQueryLanguageParser<>(taskRepository);
         queryLanguageParser.setClazz(Task.class);
     }
@@ -117,7 +122,7 @@ public class TaskService {
             log.info("Filter type selected: by one single status");
             taskDTOS = taskRepository.findTasksWithStatusAssignedToOrReportedBy(
                     user.getId(),
-                    status.ordinal(),
+                    status.getId(),
                     PageRequest.of(startPage, PAGE_SIZE))
                     .stream()
                     .map(dtOsConverter::getDTOFromTask).collect(Collectors.toList());
@@ -125,7 +130,7 @@ public class TaskService {
             log.info("Filter type selected: by multiple statuses");
             taskDTOS = taskRepository.findTasksWithStatusesAssignedToOrReportedBy(
                     user.getId(),
-                    statuses.stream().map(Enum::ordinal).collect(Collectors.toList()),
+                    statuses.stream().map(TaskStatus::getId).collect(Collectors.toList()),
                     PageRequest.of(startPage, PAGE_SIZE))
                     .stream()
                     .map(dtOsConverter::getDTOFromTask).collect(Collectors.toList());
@@ -192,8 +197,7 @@ public class TaskService {
     public List<TaskDTO> getTasksByAssigneesWithStatus(List<User> members, List<String> statuses, Integer page) {
         return convertListToDTOS(
                 taskRepository.findDistinctByAssigneesInAndTaskStatusIn(members,
-                        statuses.stream().map(status -> TaskStatus.valueOf(status.toUpperCase()))
-                                .collect(Collectors.toList()),
+                        taskUtils.getTaskStatusesFromStrings(statuses),
                         PageRequest.of(page, PAGE_SIZE))
         );
     }
@@ -207,9 +211,15 @@ public class TaskService {
             page = (page * -1) - 1;
             return convertListToDTOS(taskRepository.findAllByProjectOrderByIdDesc(project, PageRequest.of(page, PAGE_SIZE)));
         } else {
+
             return convertListToDTOS(taskRepository.findAllByProjectAndTaskStatusIn(project,
-                    statuses.stream().map(TaskStatus::valueOf).collect(Collectors.toList()),
+                    taskUtils.getTaskStatusesFromStrings(statuses),
                     PageRequest.of(page, PAGE_SIZE)));
         }
+    }
+
+
+    public List<TaskStatus> getAllTaskStatuses(){
+        return taskStatusRepository.findAll(PageRequest.of(0, 10, Sort.by("order"))).getContent();
     }
 }

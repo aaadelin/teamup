@@ -2,7 +2,7 @@ package com.team.teamup.controller.unit;
 
 import com.team.teamup.domain.*;
 import com.team.teamup.domain.enums.Department;
-import com.team.teamup.domain.enums.TaskStatus;
+import com.team.teamup.domain.TaskStatus;
 import com.team.teamup.domain.enums.TaskType;
 import com.team.teamup.domain.enums.UserStatus;
 import com.team.teamup.dtos.PostDTO;
@@ -16,7 +16,6 @@ import com.team.teamup.utils.MailUtils;
 import com.team.teamup.utils.TaskUtils;
 import com.team.teamup.utils.UserUtils;
 import com.team.teamup.validation.UserValidation;
-import org.hibernate.cfg.NotYetImplementedException;
 import org.json.JSONArray;
 import org.junit.Before;
 import org.junit.Test;
@@ -27,7 +26,6 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
@@ -339,7 +337,7 @@ public class RestGetControllerUnitTest {
         ).andReturn();
 
         assertEquals(200, mvcResult.getResponse().getStatus());
-        List<TaskStatus> taskStatuses = Arrays.asList(TaskStatus.values());
+        List<TaskStatus> taskStatuses = new ArrayList<>(); //Arrays.asList(TaskStatus.values());
         JSONArray statusesArray = new JSONArray(taskStatuses);
         JSONArray statusesResponse = new JSONArray(mvcResult.getResponse().getContentAsString());
         assertEquals(statusesArray.toString(), statusesResponse.toString());

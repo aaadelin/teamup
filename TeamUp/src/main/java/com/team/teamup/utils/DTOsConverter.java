@@ -1,7 +1,7 @@
 package com.team.teamup.utils;
 
 import com.team.teamup.domain.*;
-import com.team.teamup.domain.enums.TaskStatus;
+import com.team.teamup.domain.TaskStatus;
 import com.team.teamup.domain.enums.UserStatus;
 import com.team.teamup.dtos.*;
 import com.team.teamup.persistence.*;
@@ -33,6 +33,7 @@ public class DTOsConverter {
     private final CommentRepository commentRepository;
     private final LocationRepository locationRepository;
     private ResetRequestRepository resetRequestRepository;
+    private final TaskStatusRepository taskStatusRepository;
     private final TaskValidation taskValidation;
 
     public DTOsConverter(UserRepository userRepository,
@@ -41,7 +42,8 @@ public class DTOsConverter {
                          ProjectRepository projectRepository,
                          PostRepository postRepository,
                          LocationRepository locationRepository,
-                         CommentRepository commentRepository) {
+                         CommentRepository commentRepository,
+                         TaskStatusRepository taskStatusRepository) {
 
         this.userRepository = userRepository;
         this.teamRepository = teamRepository;
@@ -50,6 +52,7 @@ public class DTOsConverter {
         this.postRepository = postRepository;
         this.locationRepository = locationRepository;
         this.commentRepository = commentRepository;
+        this.taskStatusRepository = taskStatusRepository;
         this.taskValidation = new TaskValidation();
 
         log.debug("Instance of class DtosConverter created");
@@ -89,12 +92,21 @@ public class DTOsConverter {
             userDTO.setTeamID(-1);
         }
 
-        int tasksUnfinished = taskRepository.countTaskByAssigneesContainingAndTaskStatusIn(user, List.of(TaskStatus.OPEN, TaskStatus.REOPENED, TaskStatus.IN_PROGRESS));
+        int tasksUnfinished = taskRepository.countTaskByAssigneesContainingAndTaskStatusIn(user, getUnfinishedTaskStatuses());
 
         userDTO.setHasUnfinishedTasks(tasksUnfinished > 0);
 
         log.debug(String.format("UserDTO instance created: %s", userDTO));
         return userDTO;
+    }
+
+    private List<TaskStatus> getUnfinishedTaskStatuses() {
+        List<TaskStatus> statuses = taskStatusRepository.findAll();
+        if (statuses.size() <= 1) {
+            return new ArrayList<>();
+        }
+        TaskStatus closing = statuses.stream().max((ts1, ts2) -> Integer.compare(ts1.getOrder(), ts2.getOrder())).get();
+        return statuses.stream().filter(status -> !status.equals(closing)).collect(Collectors.toList());
     }
 
     /**
@@ -167,7 +179,7 @@ public class DTOsConverter {
         task.setDescription(taskDTO.getDescription());
         task.setDoneAt(taskDTO.getDoneAt());
         task.setLastChanged(LocalDateTime.now());
-        task.setTaskStatus(taskDTO.getTaskStatus());
+        task.setTaskStatus(getTaskStatusFromString(taskDTO.getTaskStatus()));
         task.setCreatedAt(LocalDateTime.now());
 
         Optional<Project> project = projectRepository.findById(taskDTO.getProject());
@@ -221,10 +233,10 @@ public class DTOsConverter {
         boolean onlyTheStatusIsUpdated = taskDTO.getDescription() == null && taskDTO.getDeadline() == null && taskDTO.getTaskType() == null &&
                 taskDTO.getDifficulty() == 0 && taskDTO.getPriority() == 0 && taskDTO.getTaskStatus() != null &&
                 (task.getAssignees().contains(user) || task.getReporter().getId() == user.getId()) &&
-                taskValidation.isTaskStatusChangeValid(task, taskDTO);
+                taskValidation.isTaskStatusChangeValid(task, getTaskStatusFromString(taskDTO.getTaskStatus()));
 
         if (onlyTheStatusIsUpdated) {
-            task.setTaskStatus(taskDTO.getTaskStatus());
+            task.setTaskStatus(getTaskStatusFromString(taskDTO.getTaskStatus()));
             task.setLastChanged(LocalDateTime.now());
             return task;
 
@@ -233,7 +245,7 @@ public class DTOsConverter {
         boolean everyAttributeOfTaskIsUpdated = taskDTO.getDescription() != null && !taskDTO.getDescription().trim().equals("") &&
                 taskDTO.getDeadline() != null && taskDTO.getTaskType() != null &&
                 taskDTO.getDifficulty() != 0 && taskDTO.getPriority() != 0 && taskDTO.getTaskStatus() != null &&
-                taskValidation.isTaskStatusChangeValid(task, taskDTO);
+                taskValidation.isTaskStatusChangeValid(task, getTaskStatusFromString(taskDTO.getTaskStatus()));
 
         if (everyAttributeOfTaskIsUpdated && isReporterOrAdmin) {
             return getEveryAttributeChangedTask(taskDTO, task);
@@ -253,11 +265,14 @@ public class DTOsConverter {
         if (taskDTO.getPriority() >= 1 && taskDTO.getPriority() <= 3) {
             task.setPriority(taskDTO.getPriority());
         }
-        task.setTaskStatus(taskDTO.getTaskStatus());
-        if (task.getTaskStatus().equals(TaskStatus.CLOSED)) {
-            task.setDoneAt(LocalDateTime.now());
-        } else {
-            task.setDoneAt(null);
+        task.setTaskStatus(getTaskStatusFromString(taskDTO.getTaskStatus()));
+        Optional<TaskStatus> closing = taskStatusRepository.findAll().stream().max((ts1, ts2) -> Integer.compare(ts1.getOrder(), ts2.getOrder()));
+        if (closing.isPresent()) {
+            if (task.getTaskStatus().equals(closing.get())) {
+                task.setDoneAt(LocalDateTime.now());
+            } else {
+                task.setDoneAt(null);
+            }
         }
         task.setLastChanged(LocalDateTime.now());
         task.setAssignees(taskDTO.getAssignees().stream()
@@ -282,7 +297,7 @@ public class DTOsConverter {
         taskDTO.setDoneAt(task.getDoneAt());
         taskDTO.setLastChanged(task.getLastChanged());
         taskDTO.setDeadline(task.getDeadline());
-        taskDTO.setTaskStatus(task.getTaskStatus());
+        taskDTO.setTaskStatus(task.getTaskStatus().getStatus());
         taskDTO.setProject(task.getProject().getId());
         taskDTO.setDifficulty(task.getDifficulty());
         taskDTO.setPriority(task.getPriority());
@@ -577,5 +592,12 @@ public class DTOsConverter {
             resetRequest.setCreatedAt(resetRequestDTO.getCreatedAt());
         }
         return resetRequest;
+    }
+
+    public TaskStatus getTaskStatusFromString(String status){
+        if (status.trim().isBlank()){
+            return taskStatusRepository.findAll().stream().min((ts1, ts2) -> ts1.getOrder() - ts2.getOrder()).orElseThrow();
+        }
+        return taskStatusRepository.findByStatus(status).orElseThrow();
     }
 }

@@ -1,7 +1,7 @@
 package com.team.teamup.controller.integration;
 
 import com.team.teamup.domain.Task;
-import com.team.teamup.domain.enums.TaskStatus;
+import com.team.teamup.domain.TaskStatus;
 import com.team.teamup.domain.enums.TaskType;
 import com.team.teamup.dtos.ProjectDTO;
 import com.team.teamup.dtos.TaskDTO;
@@ -19,7 +19,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-import org.springframework.test.context.junit4.SpringRunner;
 
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.CoreMatchers.is;
@@ -69,8 +68,8 @@ public class RestGetTaskControllerIntegrationTest {
     public void getAllTaskStatus() {
         Response response = getHeaderRequest().get(baseUrl + "/task-status");
 
-        response.then().assertThat().statusCode(200).and().body("size()", is(TaskStatus.values().length));
-        Assert.assertArrayEquals(response.as(TaskStatus[].class), TaskStatus.values());
+        response.then().assertThat().statusCode(200).and().body("size()", is(0));
+        Assert.assertArrayEquals(response.as(TaskStatus[].class), new TaskStatus[0]);
     }
 
     @Test

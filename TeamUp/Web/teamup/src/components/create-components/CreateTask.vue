@@ -275,7 +275,7 @@ export default {
           difficulty: this.difficulty,
           priority: this.priority,
           taskType: this.taskType,
-          taskStatus: 'OPEN',
+          taskStatus: '',
           department: this.department,
           reporter: this.$store.state.access_key,
           assignees: assigneesIds,

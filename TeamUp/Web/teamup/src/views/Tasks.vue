@@ -12,95 +12,28 @@
       &#9776;
     </button>
   <div id="content" class="container-fluid" >
-<!--      <div class="row" style="text-align: left">-->
-<!--        <div class="col-4" style="margin-top: 5px">-->
-<!--          <p style="margin: 5px; padding: 0">Tasks</p>-->
-<!--        </div>-->
-<!--      </div>-->
+
       <div class="row justify-content-center" v-drag-and-drop:options="draggable_options" >
 
-      <div class="col columnCategory" >
-        <span class="header" @click="todo_category = !todo_category">
-          <b class="category">TO DO </b>
-          <span class="quantity">{{ tasks[0].length }}{{ this.showMore[0] ? '+':'' }}</span>
+      <div class="col columnCategory" v-for="(item, index) in taskStatuses" :key="item.key">
+        <span class="header" @click="toggleColumnVisibility(index)">
+          <b class="category">{{item.key}} </b>
+          <span class="quantity">{{ tasks[index].length }}{{ showMore[index] ? '+':'' }}</span>
         </span>
         <transition name="fadeHeight" mode="out-in">
-          <div id="todo-category" v-if="todo_category">
-            <div v-for="task1 in tasks[0]" v-bind:key="task1.id">
+          <div :id=" item.key.toLowerCase().replace(' ', '-') + '-category'" v-if="visibleCategory[index] === true">
+            <div v-for="task1 in tasks[index]" v-bind:key="task1.id">
               <task-box v-if="!smallView"
                         :task="task1"/>
               <small-task-box v-else
                               :task="task1"/>
             </div>
             </div>
-  <!--        duplicated id is needed. if the list is empty, the div is not rendered and the drag&drop will not work. those two elements will never be rendered at the same time-->
-        </transition>
-        <div id="todo-category" v-if="tasks[0].length === 0">
-        </div>
-
-        <div style="color: #6d7fcc; cursor: pointer" v-if="this.showMore[0]" @click="loadMore('todo')">Load more...</div>
-      </div>
-
-      <div class="col columnCategory">
-        <span class="header" @click="in_progress_category = !in_progress_category">
-          <b class="category">IN PROGRESS </b>
-          <span class="quantity">{{ tasks[1].length }}{{ this.showMore[1]  ? '+':'' }}</span>
-        </span>
-        <transition name="fadeHeight" mode="out-in">
-          <div id="in-progress-category" v-show="in_progress_category" >
-            <div v-for="task1 in tasks[1]" v-bind:key="task1.id">
-              <task-box v-if="!smallView"
-                        :task="task1"/>
-              <small-task-box v-else
-                              :task="task1"/>
-            </div>
-          </div>
         </transition>
 
-        <div id="in-progress-category" v-if="tasks[1].length === 0">
-        </div>
-      <div style="color: #6d7fcc; cursor: pointer" v-if="this.showMore[1]" @click="loadMore('in-progress')">Load more...</div>
+        <div style="color: #6d7fcc; cursor: pointer" v-if="showMore[index]" @click="loadMore(index)">Load more...</div>
       </div>
 
-      <div class="col columnCategory">
-        <span class="header" @click="under_review_category = !under_review_category">
-          <b class="category">UNDER REVIEW </b>
-          <span class="quantity"> {{ tasks[2].length }}{{ this.showMore[2] ? '+':'' }}</span>
-        </span>
-        <transition name="fadeHeight" mode="out-in">
-          <div id="under-review-category" v-show="under_review_category"  >
-            <div v-for="task1 in tasks[2]" v-bind:key="task1.id">
-              <task-box v-if="!smallView"
-                        :task="task1"/>
-              <small-task-box v-else
-                              :task="task1"/>
-            </div>
-          </div>
-        </transition>
-        <div id="under-review-category" v-if="tasks[2].length === 0">
-        </div>
-        <div style="color: #6d7fcc; cursor: pointer" v-if="this.showMore[2]" @click="loadMore('under-review')">Load more...</div>
-      </div>
-
-      <div class="col columnCategory" name="fadeHeight" mode="out-in">
-        <span class="header" @click="done_category = !done_category">
-          <b class="category">DONE </b>
-          <span class="quantity">{{ tasks[3].length }}{{ this.showMore[3]  ? '+':'' }}</span>
-        </span>
-        <transition name="fadeHeight" mode="out-in">
-          <div id="done-category" v-show="done_category" >
-            <div v-for="task1 in tasks[3]" v-bind:key="task1.id">
-            <task-box v-if="!smallView"
-                      :task="task1"/>
-            <small-task-box v-else
-                            :task="task1"/>
-            </div>
-          </div>
-        </transition>
-        <div id="done-category" v-if="tasks[3].length === 0">
-        </div>
-        <div style="color: #6d7fcc; cursor: pointer" v-if="this.showMore[3]" @click="loadMore('done')">Load more...</div>
-      </div>
       <div></div>
     </div>
 
@@ -119,7 +52,7 @@
 import TaskBox from '../components/containers/TaskBox'
 import RightMenu from '../components/MySideMenu'
 import {
-  getTaskById,
+  getTaskById, getDetailedTaskStatus,
   getUsersAssignedTasksWithStatuses,
   getUsersReportedAndAssignedTasksWithStatuses
 } from '../persistance/RestGetRepository'
@@ -130,6 +63,8 @@ import { MAX_RESULTS } from '../persistance/Repository'
 
 export default {
   async beforeMount () {
+    this.taskStatuses = await getDetailedTaskStatus()
+    this.setDefaultValues()
     await this.getUsersTasks()
     document.title = 'TeamUp | Tasks'
   },
@@ -144,17 +79,15 @@ export default {
   components: { SmallTaskBox, RightMenu, TaskBox },
   data () {
     return {
-      tasks: [[], [], [], []],
-      todo_category: true,
-      in_progress_category: true,
-      under_review_category: true,
-      done_category: true,
+      tasks: [],
+      taskStatuses: [],
+      visibleCategory: [],
       navName: 'Options',
       reportedTasks: false,
       menu: [],
       oldDraggedTask: null,
-      pages: [0, 0, 0, 0],
-      showMore: [true, true, true, true],
+      pages: [],
+      showMore: [],
       maxPagesLoad: 5,
       filterWord: '',
       query: 'sort=deadline&desc=false',
@@ -173,13 +106,6 @@ export default {
           let ans = await this.isDroppable(event)
           if (ans) {
             this.changeStatus(event)
-            // used to append node. as long as tasks are refreshed there's no need for this
-            // let item = event.items[0]
-            // let parent = item.parentNode
-            // let target = event.droptarget
-
-            // parent.removeChild(item)
-            // target.appendChild(item)
           } else {
             event.drop()
           }
@@ -200,6 +126,19 @@ export default {
     }
   },
   methods: {
+    setDefaultValues () {
+      let size = this.taskStatuses.length
+      this.tasks = Array.from(Array(size), (_, i) => [])
+      this.visibleCategory = Array.from(Array(size), (_, i) => true)
+      this.pages = Array.from(Array(size), (_, i) => 0)
+      this.showMore = Array.from(Array(size), (_, i) => true)
+    },
+    toggleColumnVisibility (index) {
+      this.visibleCategory[index] = !this.visibleCategory[index]
+      let temp = JSON.parse(JSON.stringify(this.visibleCategory))
+      this.visibleCategory.length = []
+      this.visibleCategory.push(...temp)
+    },
     hideScroll () {
       this.showScroll = window.scrollY >= 130
     },
@@ -209,14 +148,15 @@ export default {
     },
     async changeVisibleTasks () {
       this.reportedTasks = !this.reportedTasks
-      this.pages = [0, 0, 0, 0]
-      this.showMore = [true, true, true, true]
+      this.pages = []; this.showMore = []
+      this.pages = Array.from(Array(this.taskStatuses.length), (_, i) => 0)
+      this.showMore = Array.from(Array(this.taskStatuses.length), (_, i) => true)
       await this.getUsersTasks()
     },
     async getUsersTasks () {
       NProgress.start()
-      this.showMore = [true, true, true, true]
-      this.tasks = [[], [], [], []]
+      this.showMore = Array.from(Array(this.taskStatuses.length), (_, i) => true)
+      this.tasks = Array.from(Array(this.taskStatuses.length), (_, i) => [])
       if (this.reportedTasks) {
         await this.getAssignedAndReportedTasks()
       } else {
@@ -233,13 +173,12 @@ export default {
       }
     },
     async getAssignedTasks () {
-      this.tasks = [[], [], [], []]
+      this.tasks = Array.from(Array(this.taskStatuses.length), (_, i) => [])
 
-      let categories = ['OPEN,REOPENED', 'IN_PROGRESS', 'UNDER_REVIEW', 'APPROVED']
-      for (let j = 0; j < categories.length; j++) {
+      for (let j = 0; j < this.taskStatuses.length; j++) {
         let newTasks = []
         for (let i = 0; i <= this.pages[j]; i++) {
-          newTasks = await getUsersAssignedTasksWithStatuses(i, categories[j], this.filterWord, this.query)
+          newTasks = await getUsersAssignedTasksWithStatuses(i, this.taskStatuses[j].key, this.filterWord, this.query)
           this.tasks[j].push(...newTasks)
         }
         if (newTasks.length < MAX_RESULTS) {
@@ -248,13 +187,12 @@ export default {
       }
     },
     async getAssignedAndReportedTasks () {
-      this.tasks = [[], [], [], []]
+      this.tasks = Array.from(Array(this.taskStatuses.length), (_, i) => [])
 
-      let categories = ['OPEN,REOPENED', 'IN_PROGRESS', 'UNDER_REVIEW', 'APPROVED']
-      for (let j = 0; j < categories.length; j++) {
+      for (let j = 0; j < this.taskStatuses.length; j++) {
         let newTasks = []
         for (let i = 0; i <= this.pages[j]; i++) {
-          newTasks = await getUsersReportedAndAssignedTasksWithStatuses(i, categories[j], this.filterWord) // todo add query parameter for sort
+          newTasks = await getUsersReportedAndAssignedTasksWithStatuses(i, this.taskStatuses[j].key, this.filterWord) // todo add query parameter for sort
           this.tasks[j].push(...newTasks)
         }
         if (newTasks.length < MAX_RESULTS) {
@@ -262,23 +200,18 @@ export default {
         }
       }
     },
-    async loadMore (category) {
-      let categories = [['todo', 'OPEN,REOPENED'], ['in-progress', 'IN_PROGRESS'], ['under-review', 'UNDER_REVIEW'], ['done', 'APPROVED']]
-      for (let i = 0; i < categories.length; i++) {
-        if (category === categories[i][0]) {
-          let newTasks = []
-          this.pages[i]++
-          if (this.reportedTasks) {
-            newTasks = await getUsersReportedAndAssignedTasksWithStatuses(this.pages[i], categories[i][1], '', this.query)
-          } else {
-            newTasks = await getUsersAssignedTasksWithStatuses(this.pages[i], categories[i][1], '', this.query)
-          }
-          if (newTasks.length < MAX_RESULTS) {
-            this.showMore[i] = false
-          }
-          this.tasks[i].push(...newTasks)
-        }
+    async loadMore (categoryIndex) {
+      let newTasks = []
+      this.pages[categoryIndex]++
+      if (this.reportedTasks) {
+        newTasks = await getUsersReportedAndAssignedTasksWithStatuses(this.pages[categoryIndex], this.taskStatuses[categoryIndex].key, '', this.query)
+      } else {
+        newTasks = await getUsersAssignedTasksWithStatuses(this.pages[categoryIndex], this.taskStatuses[categoryIndex].key, '', this.query)
       }
+      if (newTasks.length < MAX_RESULTS) {
+        this.showMore[categoryIndex] = false
+      }
+      this.tasks[categoryIndex].push(...newTasks)
     },
     getIds (tasks) {
       let ids = []
@@ -349,20 +282,7 @@ export default {
     changeStatus (event) {
       let taskId = event.items[0].childNodes[0].childNodes[0].id
       let taskStatus = event.droptarget.id
-      switch (taskStatus) {
-        case 'todo-category':
-          taskStatus = 'OPEN'
-          break
-        case 'in-progress-category':
-          taskStatus = 'IN_PROGRESS'
-          break
-        case 'under-review-category':
-          taskStatus = 'UNDER_REVIEW'
-          break
-        case 'done-category':
-          taskStatus = 'APPROVED'
-          break
-      }
+      taskStatus = taskStatus.replace('-category', '').replace('-', ' ').toUpperCase()
       let task = {
         id: taskId,
         taskStatus: taskStatus
@@ -373,57 +293,42 @@ export default {
     },
     isBeforeOrAfter (taskStatus, target) {
       // getting the columns that a task can be dropped in depending on the category it is currently in
-      let status = []
-      switch (taskStatus) {
-        case 'OPEN':
-          status.push('in-progress-category')
-          break
-        case 'IN_PROGRESS':
-          status.push('todo-category')
-          status.push('under-review-category')
-          break
-        case 'UNDER_REVIEW':
-          status.push('in-progress-category')
-          status.push('done-category')
-          break
-        case 'APPROVED':
-          status.push('under-review-category')
-          // status.push(' todo-category')
-          break
+      target = this.classToStatus(target).toLowerCase()
+
+      let sourceValue, targetValue
+      for(let i = 0; i < this.taskStatuses.length; i++) {
+        if (this.taskStatuses[i].key.toLowerCase() === taskStatus.toLowerCase()) {
+          sourceValue = this.taskStatuses[i].value
+        }
+        if (this.taskStatuses[i].key.toLowerCase() === target) {
+          targetValue = this.taskStatuses[i].value
+        }
       }
-      return status.includes(target)
+
+      if (Math.abs(targetValue - sourceValue) <= 1) {
+        return true
+      }
+      //todo add from last one to first one
+      return false;
+    },
+    statusToClass (status) {
+      return status.replace(' ', '-').toLowerCase() + '-category'
+    },
+    classToStatus (clazz) {
+      return clazz.replace('-category', '').replace('-', ' ').toUpperCase()
     },
     getCurrentCategories (task) {
       // getting the category the task is currently in
-      let status = []
-      switch (task.taskStatus) {
-        case 'OPEN':
-          status.push('todo-category')
-          break
-        case 'IN_PROGRESS':
-        case 'IN PROGRESS':
-          status.push('in-progress-category')
-          break
-        case 'UNDER_REVIEW':
-        case 'UNDER REVIEW':
-          status.push('under-review-category')
-          break
-        case 'APPROVED':
-          status.push('done-category')
-          break
-        case 'REOPENED':
-          status.push('todo-category')
-      }
-      return status
+      return [task.taskStatus.replace(' ', '-').toLowerCase() + '-category']
     },
     async filterTasks (word) {
       this.filterWord = word.toLowerCase()
       if (word.trim() === '') {
-        this.pages = [0, 0, 0, 0]
+        this.pages = Array.from(Array(this.taskStatuses.length), (_, i) => 0)
         this.getUsersTasks()
         return
       }
-      this.pages = [5, 5, 5, 5]
+      this.pages = Array.from(Array(this.taskStatuses.length), (_, i) => 5)
       await this.getUsersTasks()
     },
     async sortTasks (query) {
@@ -436,12 +341,16 @@ export default {
     toggleClassToDropAreas (event) {
       let item = event.items[0]
       let taskId = item.childNodes[0].childNodes[0].id
+
       getTaskById(taskId).then((task) => {
         let status = task.taskStatus
-        let columns = ['todo-category', 'in-progress-category', 'under-review-category', 'done-category']
-        for (let i = 0; i < columns.length; i++) {
-          if (this.isBeforeOrAfter(status, columns[i])) {
-            let parent = document.getElementById(columns[i]).parentNode
+
+        for (let i = 0; i < this.taskStatuses.length; i++) {
+          let clazz = this.statusToClass(this.taskStatuses[i].key);
+
+          if (this.isBeforeOrAfter(status, clazz)) {
+
+            let parent = document.getElementById(clazz).parentNode
             parent.classList.toggle('droppable')
           }
         }

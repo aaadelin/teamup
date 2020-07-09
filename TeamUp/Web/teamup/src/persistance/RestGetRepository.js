@@ -34,6 +34,11 @@ export async function getTaskStatus () {
   return fetchDataFromUrl(url, [])
 }
 
+export async function getDetailedTaskStatus () {
+  let url = `${baseURL}/task-status/detailed`
+  return fetchDataFromUrl(url, [])
+}
+
 export async function getDepartments () {
   let url = `${baseURL}/departments`
   return fetchDataFromUrl(url, [])

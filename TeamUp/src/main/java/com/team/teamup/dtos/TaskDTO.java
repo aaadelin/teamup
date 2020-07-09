@@ -2,7 +2,6 @@ package com.team.teamup.dtos;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.team.teamup.domain.enums.Department;
-import com.team.teamup.domain.enums.TaskStatus;
 import com.team.teamup.domain.enums.TaskType;
 
 import java.time.LocalDateTime;
@@ -31,7 +30,7 @@ TaskDTO {
 
     private LocalDateTime deadline;
 
-    private TaskStatus taskStatus;
+    private String taskStatus;
 
     private TaskType taskType;
 
@@ -101,11 +100,11 @@ TaskDTO {
         this.deadline = deadline;
     }
 
-    public TaskStatus getTaskStatus() {
+    public String getTaskStatus() {
         return taskStatus;
     }
 
-    public void setTaskStatus(TaskStatus taskStatus) {
+    public void setTaskStatus(String taskStatus) {
         this.taskStatus = taskStatus;
     }
 

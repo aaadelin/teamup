@@ -29,7 +29,7 @@ export function login (username, password) {
   // let data = new FormData()
   // data.set('username', username)
   // data.set('password', password)
-  let data2 = JSON.stringify({username: username, password: password})
+  let data2 = JSON.stringify({ username: username, password: password })
 
   return axios({
     url: url,
@@ -40,15 +40,15 @@ export function login (username, password) {
     },
     data: data2
   }).then(res => {
-      localStorage.setItem('access_key', res.data.key)
-      localStorage.setItem('isAdmin', res.data.isAdmin)
-      localStorage.setItem('name', res.data.name)
-      localStorage.setItem('id', res.data.id)
-      location.reload()
-      return true
-    }).catch(rez => {
-      return false
-    })
+    localStorage.setItem('access_key', res.data.key)
+    localStorage.setItem('isAdmin', res.data.isAdmin)
+    localStorage.setItem('name', res.data.name)
+    localStorage.setItem('id', res.data.id)
+    location.reload()
+    return true
+  }).catch(rez => {
+    return false
+  })
 
   // return axios.post(url, data, {
   //   headers: { 'token': localStorage.getItem('access_key') }

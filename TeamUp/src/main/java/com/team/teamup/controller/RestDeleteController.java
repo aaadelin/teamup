@@ -83,6 +83,9 @@ public class RestDeleteController {
                     log.info("Photo deleted successfully");
                     return new ResponseEntity<>(HttpStatus.OK);
                 }
+            }else{
+                user.setPhoto(null);
+                userService.save(user);
             }
         }
         return new ResponseEntity<>(HttpStatus.NOT_FOUND);

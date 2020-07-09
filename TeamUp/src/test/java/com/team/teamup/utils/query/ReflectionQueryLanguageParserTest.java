@@ -1,6 +1,6 @@
 package com.team.teamup.utils.query;
 
-import com.team.teamup.domain.enums.TaskStatus;
+import com.team.teamup.domain.TaskStatus;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -30,6 +30,10 @@ public class ReflectionQueryLanguageParserTest {
         qlp.setClazz(MockTask.class);
 
         LocalDateTime dateTime = LocalDateTime.of(2020, 10, 2, 10, 10);
+
+        TaskStatus open = new TaskStatus("OPEN", 1);
+        TaskStatus inProgress = new TaskStatus("IN PROGRESS", 2);
+        TaskStatus closed = new TaskStatus("CLOSED", 3);
 
         MockLocation location1 = MockLocation.builder()
                 .address("van")
@@ -63,7 +67,7 @@ public class ReflectionQueryLanguageParserTest {
                 .difficulty(1)
                 .lastChanged(dateTime)
                 .owner(user1)
-                .status(TaskStatus.OPEN)
+                .status(open)
                 .assignees(List.of(user1))
                 .difficulties(List.of(1))
                 .tags(List.of("test"))
@@ -77,7 +81,7 @@ public class ReflectionQueryLanguageParserTest {
                 .difficulty(2)
                 .lastChanged(dateTime.plusDays(1).plusMinutes(1))
                 .owner(user1)
-                .status(TaskStatus.OPEN)
+                .status(open)
                 .assignees(List.of(user2))
                 .difficulties(List.of(1, 2))
                 .tags(List.of("test2"))
@@ -91,7 +95,7 @@ public class ReflectionQueryLanguageParserTest {
                 .difficulty(3)
                 .lastChanged(dateTime.plusDays(1))
                 .owner(user2)
-                .status(TaskStatus.OPEN)
+                .status(open)
                 .assignees(List.of(user1))
                 .difficulties(List.of(4))
                 .tags(List.of("update"))
@@ -105,7 +109,7 @@ public class ReflectionQueryLanguageParserTest {
                 .difficulty(4)
                 .lastChanged(dateTime.plusDays(2))
                 .owner(user2)
-                .status(TaskStatus.CLOSED)
+                .status(closed)
                 .assignees(List.of(user2))
                 .difficulties(List.of(5))
                 .tags(List.of("test", "read"))
@@ -119,7 +123,7 @@ public class ReflectionQueryLanguageParserTest {
                 .difficulty(2)
                 .lastChanged(dateTime.plusDays(3))
                 .owner(user2)
-                .status(TaskStatus.IN_PROGRESS)
+                .status(inProgress)
                 .assignees(List.of(user1, user2))
                 .difficulties(List.of(5))
                 .tags(List.of("read"))

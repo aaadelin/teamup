@@ -2,7 +2,7 @@ package com.team.teamup.controller.get;
 
 import com.team.teamup.domain.*;
 import com.team.teamup.domain.enums.Department;
-import com.team.teamup.domain.enums.TaskStatus;
+import com.team.teamup.domain.TaskStatus;
 import com.team.teamup.domain.enums.UserStatus;
 import com.team.teamup.dtos.*;
 import com.team.teamup.service.*;
@@ -121,7 +121,7 @@ public class RestGetController {
             Collections.reverse(postDTO.getComments());
             log.info(String.format("Returning post comments: %s", postDTO.getComments()));
             return new ResponseEntity<>(postDTO.getComments(), HttpStatus.OK);
-        } catch(NoSuchElementException ifnore) {
+        } catch (NoSuchElementException ifnore) {
             log.info(String.format("No post found with id %d", postId));
             return new ResponseEntity<>("NOT FOUND", HttpStatus.NOT_FOUND);
         }
@@ -130,11 +130,11 @@ public class RestGetController {
     @RequestMapping(value = "/teams/{id}", method = GET)
     public ResponseEntity<?> getTeamById(@PathVariable int id, @RequestHeader Map<String, String> headers) {
         log.info(String.format("Entering get team by id method with teamId: %d /n and headers: %s", id, headers.toString()));
-        try{
+        try {
             TeamDTO teamDTO = teamService.getTeamDTOByID(id);
             log.info(String.format("Returning team: %s", teamDTO.toString()));
             return new ResponseEntity<>(teamDTO, HttpStatus.OK);
-        } catch (NoSuchElementException ignore){
+        } catch (NoSuchElementException ignore) {
             log.info(String.format("No team found with id %d", id));
             return new ResponseEntity<>("NOT FOUND", HttpStatus.NOT_FOUND);
         }
@@ -143,11 +143,11 @@ public class RestGetController {
     @RequestMapping(value = "/projects/{id}", method = GET)
     public ResponseEntity<?> getProjectById(@PathVariable int id, @RequestHeader Map<String, String> headers) {
         log.info(String.format("Entering get project by id method with projectId: %d /n and headers: %s", id, headers.toString()));
-        try{
+        try {
             ProjectDTO project = projectService.getDTOByID(id);
             log.info(String.format("Returning project %s", project.toString()));
             return new ResponseEntity<>(project, HttpStatus.OK);
-        } catch (NoSuchElementException ignore){
+        } catch (NoSuchElementException ignore) {
             log.info("No project found");
             return new ResponseEntity<>("NOT FOUND", HttpStatus.NOT_FOUND);
         }
@@ -158,26 +158,19 @@ public class RestGetController {
         log.info(String.format("Entering get project's statistics by id method with projectId: %d /n and headers: %s", id, headers.toString()));
         try {
             Project project = projectService.getByID(id);
-            int[] stats = new int[3];
-            for(Task task : project.getTasks()){
-                switch (task.getTaskStatus()){
-                    case OPEN:
-                    case REOPENED:
-                        stats[0]++;
-                        break;
-                    case IN_PROGRESS:
-                        stats[1]++;
-                        break;
-                    case UNDER_REVIEW:
-                    case APPROVED:
-                        stats[2]++;
-                        break;
-                    //todo add CLOSED to the finished category and Under_review at in_progress category?
+            List<TaskStatus> taskStatuses = taskService.getAllTaskStatuses();
+            int[] stats = new int[taskStatuses.size()];
+
+            for (Task task : project.getTasks()) {
+                for (int i = 0; i < taskStatuses.size(); i++) {
+                    if (taskStatuses.get(i).equals(task.getTaskStatus())) {
+                        stats[i]++;
+                    }
                 }
             }
             log.info(String.format("Returning project's statistics %s", Arrays.toString(stats)));
             return new ResponseEntity<>(stats, HttpStatus.OK);
-        } catch(NoSuchElementException ignore) {
+        } catch (NoSuchElementException ignore) {
             log.info("No project found");
             return new ResponseEntity<>("NOT FOUND", HttpStatus.NOT_FOUND);
         }
@@ -195,10 +188,10 @@ public class RestGetController {
     @RequestMapping(value = "/projects/{id}/tasks", method = GET)
     public ResponseEntity<?> getProjectsTasks(@PathVariable int id,
                                               @RequestParam(name = "page", required = false, defaultValue = "0") Integer page,
-                                              @RequestParam(name = "status", required = false, defaultValue = "") List<String> statuses){
+                                              @RequestParam(name = "status", required = false, defaultValue = "") List<String> statuses) {
         log.info(String.format("Entering method to get all tasks from a project with project id %s page %s", id, page));
         Project project = projectService.getByID(id);
-        if(statuses != null && !statuses.isEmpty()){
+        if (statuses != null && !statuses.isEmpty()) {
             List<TaskDTO> tasks = taskService.getAllByProjectAndStatuses(project, statuses, page);
             return new ResponseEntity<>(tasks, HttpStatus.OK);
         }
@@ -210,11 +203,11 @@ public class RestGetController {
     @RequestMapping(value = "/key", method = GET)
     public ResponseEntity<?> getIdForCurrentUser(@RequestHeader Map<String, String> headers) {
         log.info(String.format("Entering get key for current user method with headers: %s", headers.toString()));
-        try{
+        try {
             User user = userService.getByHashKey(headers.get("token"));
             log.info(String.format("Returning user id %s", user.getId()));
             return new ResponseEntity<>(user.getId(), HttpStatus.OK);
-        } catch (NoSuchElementException ignore){
+        } catch (NoSuchElementException ignore) {
             log.info("No user found");
             return new ResponseEntity<>("NOT FOUND", HttpStatus.NOT_FOUND);
         }
@@ -224,13 +217,13 @@ public class RestGetController {
     public ResponseEntity<?> getPostByTaskId(@PathVariable int id, @RequestHeader Map<String, String> headers) {
         log.info(String.format("Entering get post by taskId method with taskId: %d /n and headers: %s", id, headers.toString()));
 
-        try{
+        try {
             Task task = taskService.getByID(id);
 
             Optional<Post> postOptional = postService.getByTask(task);
             if (postOptional.isPresent()) {
                 PostDTO postDTO = dtOsConverter.getDTOFromPost(postOptional.get());
-                if(postDTO.getComments() == null){
+                if (postDTO.getComments() == null) {
                     postDTO.setComments(Collections.emptyList());
                 }
                 Collections.reverse(postDTO.getComments());
@@ -246,14 +239,14 @@ public class RestGetController {
                 log.info(String.format("Returning post: %s", postDTO));
                 return new ResponseEntity<>(postDTO, HttpStatus.OK);
             }
-        } catch (NoSuchElementException ignore){
+        } catch (NoSuchElementException ignore) {
             log.info(String.format("No task found with id %s", id));
             return new ResponseEntity<>("NOT FOUND", HttpStatus.NOT_FOUND);
         }
     }
 
     @RequestMapping(value = "/admin", method = GET)
-    public ResponseEntity<?> isUserAdmin(@RequestHeader Map<String, String> headers){
+    public ResponseEntity<?> isUserAdmin(@RequestHeader Map<String, String> headers) {
         log.info(String.format("Entering method to check if user is admin with headers %s", headers));
         Boolean status = userValidation.isValid(headers, UserStatus.ADMIN);
         log.info(String.format("Exiting with status %s", status));
@@ -261,11 +254,11 @@ public class RestGetController {
     }
 
     @RequestMapping(value = "/requests/{id}", method = GET)
-    public ResponseEntity<?> getRequestById(@PathVariable int id){
+    public ResponseEntity<?> getRequestById(@PathVariable int id) {
         log.info("Entered method to get request with request id: {}", id);
         ResetRequestDTO resetRequestDTO = dtOsConverter.getDTOFromResetRequest(resetRequestService.getByID(id));
 
-        if(resetRequestDTO.getCreatedAt().equals(LocalDateTime.MIN)){
+        if (resetRequestDTO.getCreatedAt().equals(LocalDateTime.MIN)) {
             return new ResponseEntity<>(HttpStatus.FORBIDDEN);
         }
 
@@ -274,7 +267,7 @@ public class RestGetController {
     }
 
     @RequestMapping(value = "/teams/{id}/statistics", method = GET)
-    public ResponseEntity<?> getTeamsStatistics(@PathVariable int id){
+    public ResponseEntity<?> getTeamsStatistics(@PathVariable int id) {
         log.info("Entered method to get teams statistics with team id {} ", id);
         Team team = teamService.getTeamByID(id);
         List<Task> tasks = taskService.getTasksByAssignees(team.getMembers());
@@ -285,10 +278,10 @@ public class RestGetController {
     @RequestMapping(value = "/teams/{id}/tasks", method = GET)
     public ResponseEntity<?> getTeamsTasks(@PathVariable int id,
                                            @RequestParam(name = "page", required = false, defaultValue = "0") Integer page,
-                                           @RequestParam(name = "status", required = false, defaultValue = "") List<String> statuses){
+                                           @RequestParam(name = "status", required = false, defaultValue = "") List<String> statuses) {
         log.info("Entered method to get teams tasks with team id {} ", id);
         Team team = teamService.getTeamByID(id);
-        if(statuses != null && !statuses.isEmpty()){
+        if (statuses != null && !statuses.isEmpty()) {
             List<TaskDTO> tasks = taskService.getTasksByAssigneesWithStatus(team.getMembers(), statuses, page);
             return new ResponseEntity<>(tasks, HttpStatus.OK);
         }

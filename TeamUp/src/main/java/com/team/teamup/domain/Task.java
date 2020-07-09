@@ -2,7 +2,6 @@ package com.team.teamup.domain;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.team.teamup.domain.enums.Department;
-import com.team.teamup.domain.enums.TaskStatus;
 import com.team.teamup.domain.enums.TaskType;
 import com.team.teamup.utils.query.annotations.SearchEntity;
 import com.team.teamup.utils.query.annotations.SearchField;
@@ -53,6 +52,7 @@ public class Task implements HasNameAndDescription{
     @SearchField(name = "type")
     private TaskType taskType;
 
+    @ManyToOne
     @SearchField(name = "status")
     private TaskStatus taskStatus;
 

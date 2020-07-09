@@ -2,7 +2,7 @@ package com.team.teamup.utils;
 
 import com.team.teamup.domain.Task;
 import com.team.teamup.domain.User;
-import com.team.teamup.domain.enums.TaskStatus;
+import com.team.teamup.domain.TaskStatus;
 import org.springframework.data.jpa.domain.Specification;
 
 import javax.persistence.criteria.CriteriaBuilder;

@@ -2,9 +2,10 @@ package com.team.teamup.utils;
 
 import com.team.teamup.domain.Task;
 import com.team.teamup.domain.User;
-import com.team.teamup.domain.enums.TaskStatus;
+import com.team.teamup.domain.TaskStatus;
 import com.team.teamup.dtos.TaskDTO;
 import com.team.teamup.persistence.TaskRepository;
+import com.team.teamup.persistence.TaskStatusRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
@@ -22,10 +23,13 @@ public class TaskUtils {
 
     private TaskRepository taskRepository;
     private DTOsConverter dtOsConverter;
+    private TaskStatusRepository taskStatusRepository;
 
     @Autowired
-    public TaskUtils(TaskRepository taskRepository, DTOsConverter dtOsConverter){
+    public TaskUtils(TaskRepository taskRepository, TaskStatusRepository taskStatusRepository,
+                     DTOsConverter dtOsConverter){
         this.taskRepository = taskRepository;
+        this.taskStatusRepository = taskStatusRepository;
         this.dtOsConverter = dtOsConverter;
     }
 
@@ -45,12 +49,18 @@ public class TaskUtils {
         //get only one type of task
         if(type != null && type.toLowerCase().equals("assignedto")){
             // get tasks assigned to the user
-            tasks = taskRepository.findAllByAssigneesContainingAndSummaryContainingOrDescriptionContainingAndTaskStatusIn(user.getId(), term, statuses.stream().map(Enum::ordinal)
-                    .collect(Collectors.toList()), PageRequest.of(page, PAGE_SIZE));
+            tasks = taskRepository.findAllByAssigneesContainingAndSummaryContainingOrDescriptionContainingAndTaskStatusIn(
+                    user.getId(),
+                    term,
+                    statuses.stream().map(TaskStatus::getId).collect(Collectors.toList()),
+                    PageRequest.of(page, PAGE_SIZE));
         }else if(type != null && type.toLowerCase().equals("assignedby")){
             //get tasks assigned by the user
-            tasks = taskRepository.findAllByReporterAndSummaryContainingOrDescriptionContainingAndTaskStatusIn(user.getId(), term, statuses.stream().map(Enum::ordinal)
-                    .collect(Collectors.toList()), PageRequest.of(page, PAGE_SIZE));
+            tasks = taskRepository.findAllByReporterAndSummaryContainingOrDescriptionContainingAndTaskStatusIn(
+                    user.getId(),
+                    term,
+                    statuses.stream().map(TaskStatus::getId).collect(Collectors.toList()),
+                    PageRequest.of(page, PAGE_SIZE));
         }
 
         //get both assigned to and by the user
@@ -154,7 +164,7 @@ public class TaskUtils {
         List<Task> tasks;
         log.debug("Filter method preferred: by multiple statuses");
         if(statuses == null){
-            statuses = List.of(TaskStatus.values());
+            statuses = taskStatusRepository.findAll();
         }
 
         if(sort.equals("")){
@@ -195,9 +205,9 @@ public class TaskUtils {
             page = 0;
         }
         if (statuses == null || statuses.isEmpty()){
-            statuses = Arrays.asList(TaskStatus.values());
+            statuses = taskStatusRepository.findAll();
         }
-        tasks = findAllTasksWithTaskStatusInAndSummaryOrDescriptionContainingSordedBy(statuses.stream().map(Enum::ordinal)
+        tasks = findAllTasksWithTaskStatusInAndSummaryOrDescriptionContainingSordedBy(statuses.stream().map(TaskStatus::getId)
                 .collect(Collectors.toList()), search, sort, descending, page);
 
         List<TaskDTO> taskDTOS = tasks.stream().map(dtOsConverter::getDTOFromTask).collect(Collectors.toList());
@@ -265,19 +275,39 @@ public class TaskUtils {
      * @return list of integers containing the number of OPEN + REOPENED tasks, IN PROGRESS, UNDER REVIEW and APPROVED
      */
     public List<Integer> createStatisticsFromListOfTasks(List<Task> tasks){
-        Map<TaskStatus, Integer> statusCount = new HashMap<>();
+        Map<TaskStatus, Integer> statusCount = new LinkedHashMap<>();
 
-        for(Task task : tasks){
-            if(statusCount.containsKey(task.getTaskStatus())){
-                statusCount.put(task.getTaskStatus(), statusCount.get(task.getTaskStatus()) + 1);
-            }else {
-                statusCount.put(task.getTaskStatus(), 1);
-            }
+        List<TaskStatus> statuses = taskStatusRepository.findAll(Sort.by("order"));
+        for(TaskStatus status : statuses){
+            statusCount.put(status, 0);
         }
 
-        return List.of(statusCount.getOrDefault(TaskStatus.OPEN, 0) + statusCount.getOrDefault(TaskStatus.REOPENED, 0),
-                statusCount.getOrDefault(TaskStatus.IN_PROGRESS, 0),
-                statusCount.getOrDefault(TaskStatus.UNDER_REVIEW, 0),
-                statusCount.getOrDefault(TaskStatus.APPROVED, 0));
+        for(Task task : tasks){
+            statusCount.put(task.getTaskStatus(), statusCount.get(task.getTaskStatus()) + 1);
+        }
+
+        return new ArrayList<>(statusCount.values());
+    }
+
+    public List<TaskStatus> getTaskStatusesFromStrings(List<String> statuses){
+        if(statuses == null){
+            return null;
+        }
+        List<TaskStatus> taskStatuses = new ArrayList<>();
+        for(String status : statuses){
+            Optional<TaskStatus> statusOptional = taskStatusRepository.findByStatus(status);
+            statusOptional.ifPresent(taskStatuses::add);
+        }
+        return taskStatuses;
+    }
+
+    public TaskStatus getTaskStatusFromString(String status){
+        if(status == null){
+            return null;
+        }
+        if (status.trim().isBlank()){
+            return taskStatusRepository.findAll().stream().min((ts1, ts2) -> Integer.min(ts1.getOrder(), ts2.getOrder())).orElseThrow();
+        }
+        return taskStatusRepository.findByStatus(status).orElseThrow();
     }
 }

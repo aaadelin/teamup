@@ -9,7 +9,7 @@
 
             <div class="modal-header justify-content-end" style="height: 50px">
               <div class="col-10">
-                {{taskCategory.replace('_', ' ')}}
+                {{taskCategory}}
               </div>
               <div name="header" class="col-1" >
                 <p @click="closePopup" style="cursor: pointer; font-size: 23px">X</p>
@@ -108,29 +108,11 @@ export default {
     async fetchTasks () {
       let newTasks = []
       if (this.type === 'user') {
-        if (this.taskCategory === 'TO DO') {
-          newTasks.push(...await getUsersAssignedTasksByUserIdAndTaskStatuses(this.id, this.page, 'OPEN,REOPENED'))
-        } else if (this.taskCategory === 'DONE') {
-          newTasks.push(...await getUsersAssignedTasksByUserIdAndTaskStatuses(this.id, this.page, 'APPROVED'))
-        } else {
-          newTasks.push(...await getUsersAssignedTasksByUserIdAndTaskStatuses(this.id, this.page, this.taskCategory.replace(' ', '_')))
-        }
+        newTasks.push(...await getUsersAssignedTasksByUserIdAndTaskStatuses(this.id, this.page, this.taskCategory))
       } else if (this.type === 'project') {
-        if (this.taskCategory === 'TO DO') {
-          newTasks.push(...await getTasksByProjectIdAndPage(this.id, this.page, 'OPEN,REOPENED'))
-        } else if (this.taskCategory === 'DONE') {
-          newTasks.push(...await getTasksByProjectIdAndPage(this.id, this.page, 'APPROVED'))
-        } else {
-          newTasks.push(...await getTasksByProjectIdAndPage(this.id, this.page, this.taskCategory.replace(' ', '_')))
-        }
+        newTasks.push(...await getTasksByProjectIdAndPage(this.id, this.page, this.taskCategory))
       } else if (this.type === 'team') {
-        if (this.taskCategory === 'TO DO') {
-          newTasks.push(...await getTasksByTeamIdAndPage(this.id, this.page, 'OPEN,REOPENED'))
-        } else if (this.taskCategory === 'DONE') {
-          newTasks.push(...await getTasksByTeamIdAndPage(this.id, this.page, 'APPROVED'))
-        } else {
-          newTasks.push(...await getTasksByTeamIdAndPage(this.id, this.page, this.taskCategory.replace(' ', '_')))
-        }
+        newTasks.push(...await getTasksByTeamIdAndPage(this.id, this.page, this.taskCategory))
       }
       this.page++
       if (newTasks.length < 10) {

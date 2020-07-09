@@ -3,7 +3,7 @@ package com.team.teamup.controller.get;
 import com.team.teamup.domain.Task;
 import com.team.teamup.domain.User;
 import com.team.teamup.domain.UserEvent;
-import com.team.teamup.domain.enums.TaskStatus;
+import com.team.teamup.domain.TaskStatus;
 import com.team.teamup.domain.enums.UserStatus;
 import com.team.teamup.dtos.ProjectDTO;
 import com.team.teamup.dtos.TaskDTO;
@@ -182,20 +182,23 @@ public class RestGetUserController {
     public ResponseEntity<?> getTasksFor(@PathVariable int id,
                                          @RequestParam(value = "type", required = false) String type,
                                          @RequestParam(value = "search", required = false) String term,
-                                         @RequestParam(value = "statuses", required = false) List<TaskStatus> statuses,
+                                         @RequestParam(value = "statuses", required = false) List<String> statuses,
                                          @RequestParam(value = "page") Integer page,
                                          @RequestHeader Map<String, String> headers) {
         log.info(String.format("Entering get user's tasks with user id %s, type value %s, term value %s, page %s, statuses %s and headers %s", id, type, term, page, statuses, headers));
         User user = userService.getByID(id);
+        List<TaskStatus> taskStatuses;
+
         if(statuses == null || statuses.isEmpty()) {
             //if no statuses are selected, all tatuses are being taken into consideration
-            statuses = Arrays.asList(TaskStatus.values());
+            taskStatuses = taskService.getAllTaskStatuses();
+        }else{
+            taskStatuses = taskUtils.getTaskStatusesFromStrings(statuses);
         }
         if (type == null) {
-
             JSONObject arrays = new JSONObject();
-            arrays.put("reported", new JSONArray(taskUtils.getFilteredTasksByType(user, term, "assignedby", page, statuses)));
-            arrays.put("assigned", new JSONArray(taskUtils.getFilteredTasksByType(user, term, "assignedto", page, statuses)));
+            arrays.put("reported", new JSONArray(taskUtils.getFilteredTasksByType(user, term, "assignedby", page, taskStatuses)));
+            arrays.put("assigned", new JSONArray(taskUtils.getFilteredTasksByType(user, term, "assignedto", page, taskStatuses)));
 
             log.info(String.format("Exited with list of tasks assigned to and by user %s: %s", user, arrays.toString()));
             return new ResponseEntity<>(arrays, HttpStatus.OK);
@@ -204,9 +207,9 @@ public class RestGetUserController {
 
             if (type.toLowerCase().equals("assignedto")) {
                 arrays.put("reported", new JSONArray());
-                arrays.put("assigned", new JSONArray(taskUtils.getFilteredTasksByType(user, term, type, page, statuses)));
+                arrays.put("assigned", new JSONArray(taskUtils.getFilteredTasksByType(user, term, type, page, taskStatuses)));
             } else if (type.toLowerCase().equals("assignedby")) {
-                arrays.put("reported", new JSONArray(taskUtils.getFilteredTasksByType(user, term, type, page, statuses)));
+                arrays.put("reported", new JSONArray(taskUtils.getFilteredTasksByType(user, term, type, page, taskStatuses)));
                 arrays.put("assigned", new ArrayList<>());
             } else {
                 log.info(String.format("Type option not eligible. Send type: %s", type));

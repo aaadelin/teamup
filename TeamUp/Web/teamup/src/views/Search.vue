@@ -15,11 +15,8 @@
             </select>
             <select v-model="filter" class="col-1 custom-select mr-sm-2" style="margin-left: 30px; height: 35px; min-width: 130px" data-live-search="true" @change="filtersChanged">
               <option value="" selected disabled>Filter by</option>
-              <option value="OPEN,REOPENED" >To do</option>
-              <option value="IN_PROGRESS" >In progress</option>
-              <option value="UNDER_REVIEW" >Under review</option>
-              <option value="APPROVED" >Done</option>
-              <option value="CLOSED" >Closed</option>
+              <option v-for="status in taskStatuses" :key="status" :value="status">{{status.charAt(0).toUpperCase() + status.slice(1).toLowerCase()}}</option>
+
             </select>
           </label>
             <div class="col" style="display: none">
@@ -84,7 +81,7 @@
 <script>
 import {
   findProjects,
-  getSearchedSortedFilteredTasks, getTasksByQuery
+  getSearchedSortedFilteredTasks, getTasksByQuery, getTaskStatus
 } from '../persistance/RestGetRepository'
 import TaskSearchBox from '../components/containers/TaskSearchBox'
 import ProjectBox from '../components/containers/ProjectBox'
@@ -140,7 +137,7 @@ export default {
       searchTerm: this.$route.query.q,
       assignedToTasks: [],
       reportedTasks: [],
-
+      taskStatuses: [],
       projects: [],
 
       showTasks: true,
@@ -174,6 +171,7 @@ export default {
       // let myId = await getMyID()
       // let tasks = await getUsersTasks(myId, this.searchTerm, null, ++this.tasksPage, this.filter)
       let tasks = await getSearchedSortedFilteredTasks(++this.tasksPage, this.filter, this.searchTerm, this.sort, 'false')
+      this.taskStatuses = await getTaskStatus()
 
       this.splitTasksOnColumns(tasks)
 

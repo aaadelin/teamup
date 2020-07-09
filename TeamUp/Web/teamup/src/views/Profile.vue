@@ -141,7 +141,7 @@
 import {
   getDetailedStatisticsByProjectId,
   getLeadingTeams,
-  getMyID, getOwnedProjects,
+  getMyID, getOwnedProjects, getTaskStatus,
   getTeam, getTeamsStatistics,
   getUserById,
   getUsersPhoto,
@@ -211,24 +211,8 @@ export default {
     return {
       image: '',
       showPhoto: false,
-      series: [1, 1, 1, 1],
-      chartOptions: {
-        labels: ['TO DO', 'IN PROGRESS', 'UNDER REVIEW', 'DONE'],
-        chart: {
-          width: 1000
-        },
-        responsive: [{
-          breakpoint: 480,
-          options: {
-            chart: {
-              width: 200
-            },
-            legend: {
-              position: 'bottom'
-            }
-          }
-        }]
-      },
+      series: [],
+      chartOptions: {},
       user: {},
       userId: this.$route.query.userId,
       canEdit: false,
@@ -287,6 +271,24 @@ export default {
       }
     },
     async getUserStatistics () {
+      let chartOptions = {
+        labels: await getTaskStatus(),
+        chart: {
+          width: 410
+        },
+        responsive: [{
+          breakpoint: 480,
+          options: {
+            chart: {
+              width: 200
+            },
+            legend: {
+              position: 'bottom'
+            }
+          }
+        }]
+      }
+      this.chartOptions = chartOptions
       this.series = await getUserStatistics(this.userId)
     },
     async getProjectStatistics (projectID) {

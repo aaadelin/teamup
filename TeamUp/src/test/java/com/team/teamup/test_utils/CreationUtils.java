@@ -4,7 +4,7 @@ import com.team.teamup.domain.Project;
 import com.team.teamup.domain.Task;
 import com.team.teamup.domain.User;
 import com.team.teamup.domain.enums.Department;
-import com.team.teamup.domain.enums.TaskStatus;
+import com.team.teamup.domain.TaskStatus;
 import com.team.teamup.persistence.ProjectRepository;
 import com.team.teamup.persistence.TaskRepository;
 import com.team.teamup.persistence.UserRepository;
@@ -54,7 +54,7 @@ public class CreationUtils {
             task.setDescription("");
             task.setSummary("");
             task.setDeadline(LocalDateTime.now().plusDays(1));
-            task.setTaskStatus(TaskStatus.OPEN);
+            task.setTaskStatus(new TaskStatus("OPEN", 1));
             task.setProject(getLastProject());
             task.setReporter(getLastUser());
             task.setCreatedAt(LocalDateTime.now().minusMinutes(10));

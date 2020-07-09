@@ -56,9 +56,9 @@
         Progress so far:
       </span>
       <div class="progress col-5" style="margin-top: 5px; padding: 0">
-        <div class="progress-bar bg-info" role="progressbar" :title="todoCount" :style="todoStyle" aria-valuenow="10" aria-valuemin="0" aria-valuemax="100">To do({{todoCount}})</div>
-        <div class="progress-bar bg-warning" role="progressbar" :title="inProgressCount" :style="inProgressStyle" aria-valuenow="20" aria-valuemin="0" aria-valuemax="100">In progress({{inProgressCount}})</div>
-        <div class="progress-bar bg-success" role="progressbar" :title="doneCount" :style="doneStyle" aria-valuenow="20" aria-valuemin="0" aria-valuemax="100">Done({{doneCount}})</div>
+        <div class="progress-bar" :key="index" v-for="(item, index) in this.taskStatuses" :class="'bg-'+bgTypes[index % 4]" :title="stats[index]" :style="styles[index]">
+          {{item.charAt(0).toUpperCase() + item.slice(1).toLowerCase()}} ({{stats[index]}})
+        </div>
       </div>
 
       <span :id="'deadline' + project.id" class="col-5 justify-content-end" style="text-align: right">
@@ -79,7 +79,7 @@
 </template>
 
 <script>
-import { getMyID, getStatisticsByProjectId } from '../../persistance/RestGetRepository'
+import { getMyID, getStatisticsByProjectId, getTaskStatus } from '../../persistance/RestGetRepository'
 import { updateProject } from '../../persistance/RestPutRepository'
 import { saveProject } from '../../persistance/RestPostRepository'
 
@@ -104,13 +104,10 @@ export default {
   },
   data () {
     return {
-      todoStyle: 'width: ' + 100 / 3 + '%',
-      inProgressStyle: 'width: ' + 100 / 3 + '%',
-      doneStyle: 'width: ' + 100 / 3 + '%',
       stats: [],
-      todoCount: 0,
-      inProgressCount: 0,
-      doneCount: 0,
+      taskStatuses: [],
+      styles: [],
+      bgTypes: ['success', 'info', 'warning', 'danger'],
       showDate: false,
       showDescription: false,
       showVersion: false,
@@ -137,15 +134,17 @@ export default {
     },
     async calculatePercentage () {
       this.stats = await getStatisticsByProjectId(this.project.id)
-      let total = this.stats[0] + this.stats[1] + this.stats[2]
+      this.taskStatuses = await getTaskStatus()
 
-      this.todoCount = this.stats[0]
-      this.inProgressCount = this.stats[1]
-      this.doneCount = this.stats[2]
+      let total = 0
+      for (let i = 0; i < this.stats.length; i++) {
+        total += this.stats[i]
+      }
 
-      this.todoStyle = `width: ${this.todoCount * 100 / total}%`
-      this.inProgressStyle = `width: ${this.inProgressCount * 100 / total}%`
-      this.doneStyle = `width: ${this.doneCount * 100 / total}%`
+      for (let i = 0; i < this.stats.length; i++) {
+        this.styles.push(`width: ${total !== 0 ? this.stats[i] * 100 / total : 100 / this.stats.length}%`)
+      }
+      console.log(this.stats, this.taskStatuses, this.styles, total)
     },
     async enableEdit () {
       let myId = await getMyID()
