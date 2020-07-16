@@ -32,10 +32,10 @@ public class UserUtils {
     private static final int MAX_PAGE_SIZE = 10000;
 
     private final UserRepository userRepository;
-    private UserEventRepository userEventRepository;
-    private TaskRepository taskRepository;
-    private ProjectRepository projectRepository;
-    private DTOsConverter dtOsConverter;
+    private final UserEventRepository userEventRepository;
+    private final TaskRepository taskRepository;
+    private final ProjectRepository projectRepository;
+    private final DTOsConverter dtOsConverter;
 
     @Autowired
     public UserUtils(UserRepository userRepository, UserEventRepository userEventRepository, TaskRepository taskRepository,
@@ -97,17 +97,18 @@ public class UserUtils {
     }
 
     /**
-     * Method to handle user deletion.
+     * Method to handle user when a user is deleted or locked.
+     * todo add another user parameter to assign tasks to him "delegator". should be chosen by admin
      * The user will be removed from the assignees list from all the tasks
-     * Reporter will be changed to his superior
+     * Reporter will be changed to his superior //if a delegator is not specified
      * Project ownership will be set to his superior
      *
      * If he doesn't has a superior, an admin will be selected
-     * If an admin is not available (Improbable case, since admin users cannot be deleted and the deletion bust be initiated by an admin)
+     * If an admin is not available (Improbable case, since admin users cannot be deleted and the deletion must be initiated by an admin)
      * one will be created
      * @param user User that will be deleted
      */
-    public void deleteUserInitiated(User user) {
+    public void migrateUserTasksAndProjects(User user) {
         List<Task> assignedTasks = taskRepository.findAllByAssigneesContaining(user);
         List<Task> reportedTasks = taskRepository.findAllByReporter(user);
         List<Project> projects = projectRepository.findAllByOwner(user);

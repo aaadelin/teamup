@@ -16,8 +16,8 @@ async function putDataToUrl (data, url) {
   })
 }
 
-export async function updateTask (task) {
-  let url = `${baseURL}/tasks`
+export async function updateTask (task, ignoreOrder = false) {
+  let url = `${baseURL}/tasks?ignoreOrder=${ignoreOrder}`
   return putDataToUrl(task, url)
 }
 
@@ -76,4 +76,9 @@ export function logout () {
   // }).catch(rez => {
   //   console.log('request denied')
   // })
+}
+
+export function updateTaskStatuses (statuses) {
+  let url = `${baseURL}/task-status`
+  return putDataToUrl(statuses, url)
 }

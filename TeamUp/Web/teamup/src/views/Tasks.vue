@@ -1,7 +1,7 @@
 <template xmlns:v-drag-and-drop="http://www.w3.org/1999/xhtml">
   <div id="tasks">
     <right-menu :name="navName" :menu="menu"
-                :show-menu="showMenu"
+                :show-menu="showMenu" :projects="projects"
                 @reportedChanged="changeVisibleTasks"
                 @filter="filterTasks"
                 @sort="sortTasks"
@@ -54,7 +54,7 @@ import RightMenu from '../components/MySideMenu'
 import {
   getTaskById, getDetailedTaskStatus,
   getUsersAssignedTasksWithStatuses,
-  getUsersReportedAndAssignedTasksWithStatuses
+  getUsersReportedAndAssignedTasksWithStatuses, getProjects
 } from '../persistance/RestGetRepository'
 import { updateTask } from '../persistance/RestPutRepository'
 import NProgress from 'nprogress'
@@ -66,6 +66,7 @@ export default {
     this.taskStatuses = await getDetailedTaskStatus()
     this.setDefaultValues()
     await this.getUsersTasks()
+    this.projects = await getProjects()
     document.title = 'TeamUp | Tasks'
   },
   mounted () {
@@ -94,6 +95,7 @@ export default {
       smallView: false,
       showScroll: false,
       showMenu: true,
+      projects: [],
 
       draggable_options: {
         dropzoneSelector: 'div',
@@ -296,7 +298,7 @@ export default {
       target = this.classToStatus(target).toLowerCase()
 
       let sourceValue, targetValue
-      for(let i = 0; i < this.taskStatuses.length; i++) {
+      for (let i = 0; i < this.taskStatuses.length; i++) {
         if (this.taskStatuses[i].key.toLowerCase() === taskStatus.toLowerCase()) {
           sourceValue = this.taskStatuses[i].value
         }
@@ -308,8 +310,8 @@ export default {
       if (Math.abs(targetValue - sourceValue) <= 1) {
         return true
       }
-      //todo add from last one to first one
-      return false;
+      // todo add option to go from last one to first one
+      return false
     },
     statusToClass (status) {
       return status.replace(' ', '-').toLowerCase() + '-category'
@@ -346,10 +348,9 @@ export default {
         let status = task.taskStatus
 
         for (let i = 0; i < this.taskStatuses.length; i++) {
-          let clazz = this.statusToClass(this.taskStatuses[i].key);
+          let clazz = this.statusToClass(this.taskStatuses[i].key)
 
           if (this.isBeforeOrAfter(status, clazz)) {
-
             let parent = document.getElementById(clazz).parentNode
             parent.classList.toggle('droppable')
           }

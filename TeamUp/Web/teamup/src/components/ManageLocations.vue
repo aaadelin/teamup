@@ -22,7 +22,7 @@
   <create-location class="overflow-auto"
                :is-visible="addLocationIsVisible"
                ref="createLocation"
-               @done="closeUser"/>
+               @done="closeLocation"/>
 </div>
 </template>
 
@@ -56,7 +56,7 @@ export default {
     createLocation () {
       this.addLocationIsVisible = true
     },
-    closeUser () {
+    closeLocation () {
       this.addLocationIsVisible = false
       this.getLocations()
       this.$emit('changeContent')

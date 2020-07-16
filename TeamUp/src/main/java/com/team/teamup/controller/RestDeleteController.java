@@ -51,7 +51,7 @@ public class RestDeleteController {
             userUtils.createEvent(userService.getByHashKey(headers.get(TOKEN)),
                     String.format("Deleted user \"%s %s\"", user.getFirstName(), user.getLastName()),
                     UserEventType.DELETE);
-            userUtils.deleteUserInitiated(user);
+            userUtils.migrateUserTasksAndProjects(user);
             userService.deleteById(id);
             log.info(String.format("User with id %s has been successfully deleted", id));
             return new ResponseEntity<>("OK", HttpStatus.OK);

@@ -153,15 +153,14 @@
 </template>
 git
 <script>
-  import {
-    getCommentsByPostId, getDetailedTaskStatus,
-    getMyID,
-    getPostByTaskId, getProjectByTaskId,
-    getTaskStatus,
-    getTaskTypes,
-    getUserById,
-    getUsersByIds, getUsersByPage
-  } from '../persistance/RestGetRepository'
+import {
+  getCommentsByPostId, getDetailedTaskStatus,
+  getMyID,
+  getPostByTaskId, getProjectByTaskId,
+  getTaskTypes,
+  getUserById,
+  getUsersByIds, getUsersByPage
+} from '../persistance/RestGetRepository'
 import { updateTask } from '../persistance/RestPutRepository'
 import CommentForm from '../components/CommentForm'
 import SimpleComment from '../components/containers/SimpleComment'
@@ -378,11 +377,12 @@ export default {
     },
     async getTaskStatusPossibilities () {
       let statuses = await getDetailedTaskStatus()
-      statuses.sort( function (ts1, ts2) {
+      statuses.sort(function (ts1, ts2) {
         return ts1.value - ts2.value
       })
 
-      let currentIndex, available = []
+      let currentIndex
+      let available = []
       for (let i = 0; i < statuses.length; i++) {
         if (statuses[i].key.toLowerCase() === this.currentStatus.toLowerCase()) {
           currentIndex = i
@@ -391,7 +391,7 @@ export default {
       }
 
       available.push(statuses[currentIndex].key)
-      if (currentIndex === 0){
+      if (currentIndex === 0) {
         available.push(statuses[currentIndex + 1].key)
       } else if (currentIndex === statuses.length - 1) {
         available.push(statuses[currentIndex - 1].key)
@@ -399,8 +399,7 @@ export default {
         available.push(statuses[currentIndex - 1].key)
         available.push(statuses[currentIndex + 1].key)
       }
-      return available;
-
+      return available
     },
     removeFromAssignees (assignee) {
       for (let i = 0; i < this.assignees.length; i++) {

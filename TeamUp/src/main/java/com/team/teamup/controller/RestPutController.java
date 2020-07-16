@@ -6,9 +6,11 @@ import com.team.teamup.domain.enums.UserStatus;
 import com.team.teamup.dtos.*;
 import com.team.teamup.service.*;
 import com.team.teamup.utils.DTOsConverter;
+import com.team.teamup.utils.Pair;
 import com.team.teamup.utils.TokenUtils;
 import com.team.teamup.utils.UserUtils;
 import com.team.teamup.validation.UserValidation;
+import jdk.dynalink.linker.LinkerServices;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -16,9 +18,11 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import static org.springframework.web.bind.annotation.RequestMethod.GET;
 import static org.springframework.web.bind.annotation.RequestMethod.PUT;
@@ -151,7 +155,8 @@ public class RestPutController {
      * @return response ok, not_found, Forbidden
      */
     @PutMapping(value = "/tasks")
-    public ResponseEntity<?> updateTask(@RequestBody TaskDTO taskDTO, @RequestHeader Map<String, String> headers) {
+    public ResponseEntity<?> updateTask(@RequestParam(required = false, defaultValue = "false") boolean ignoreOrder,
+                                        @RequestBody TaskDTO taskDTO, @RequestHeader Map<String, String> headers) {
         log.info(String.format("Entering update task with task: %s and headers: %s", taskDTO, headers));
 
         try {
@@ -165,7 +170,7 @@ public class RestPutController {
                     taskByID.getReporter().getId() == user.getId() ||
                     user.getStatus().equals(UserStatus.ADMIN)) {
 
-                Task task = dtOsConverter.getTaskFromDTOForUpdate(taskDTO, user);
+                Task task = dtOsConverter.getTaskFromDTOForUpdate(taskDTO, user, ignoreOrder);
                 taskService.save(task);
                 log.info(String.format("Task with id %s has been successfully updated in database", task.getId()));
                 return new ResponseEntity<>("OK", HttpStatus.OK);
@@ -324,5 +329,18 @@ public class RestPutController {
         boolean loggedOut = userService.logout(key);
 
         return new ResponseEntity<>(loggedOut ? HttpStatus.OK : HttpStatus.FORBIDDEN);
+    }
+
+    @RequestMapping(value = "/task-status", method = PUT)
+    public ResponseEntity<?> updateTaskStatuses(@RequestBody List<Pair<String, Integer>> taskStatuses) {
+        log.info("Entering method to update task statuses: " + taskStatuses);
+        List<TaskStatus> statuses = taskStatuses.stream()
+                                    .map(p -> new TaskStatus(p.getKey(), p.getValue()))
+                                    .collect(Collectors.toList());
+
+        List<Pair<String, Integer>> response = taskService.saveNewTaskStatuses(statuses).stream()
+                                                .map(ts -> new Pair<>(ts.getStatus(), ts.getOrder()))
+                                                .collect(Collectors.toList());
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 }

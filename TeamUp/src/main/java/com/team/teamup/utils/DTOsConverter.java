@@ -224,7 +224,7 @@ public class DTOsConverter {
      * @param user    User that made the change
      * @return task updated accordingly
      */
-    public Task getTaskFromDTOForUpdate(final TaskDTO taskDTO, final User user) {
+    public Task getTaskFromDTOForUpdate(final TaskDTO taskDTO, final User user, boolean ignoreOrder) {
         log.debug(String.format("Method to update Task from TaskDto called with parameter: %s", taskDTO));
 
         Optional<Task> taskOptional = taskRepository.findById(taskDTO.getId());
@@ -233,7 +233,7 @@ public class DTOsConverter {
         boolean onlyTheStatusIsUpdated = taskDTO.getDescription() == null && taskDTO.getDeadline() == null && taskDTO.getTaskType() == null &&
                 taskDTO.getDifficulty() == 0 && taskDTO.getPriority() == 0 && taskDTO.getTaskStatus() != null &&
                 (task.getAssignees().contains(user) || task.getReporter().getId() == user.getId()) &&
-                taskValidation.isTaskStatusChangeValid(task, getTaskStatusFromString(taskDTO.getTaskStatus()));
+                taskValidation.isTaskStatusChangeValid(task, getTaskStatusFromString(taskDTO.getTaskStatus()), ignoreOrder);
 
         if (onlyTheStatusIsUpdated) {
             task.setTaskStatus(getTaskStatusFromString(taskDTO.getTaskStatus()));
@@ -245,7 +245,7 @@ public class DTOsConverter {
         boolean everyAttributeOfTaskIsUpdated = taskDTO.getDescription() != null && !taskDTO.getDescription().trim().equals("") &&
                 taskDTO.getDeadline() != null && taskDTO.getTaskType() != null &&
                 taskDTO.getDifficulty() != 0 && taskDTO.getPriority() != 0 && taskDTO.getTaskStatus() != null &&
-                taskValidation.isTaskStatusChangeValid(task, getTaskStatusFromString(taskDTO.getTaskStatus()));
+                taskValidation.isTaskStatusChangeValid(task, getTaskStatusFromString(taskDTO.getTaskStatus()), ignoreOrder);
 
         if (everyAttributeOfTaskIsUpdated && isReporterOrAdmin) {
             return getEveryAttributeChangedTask(taskDTO, task);

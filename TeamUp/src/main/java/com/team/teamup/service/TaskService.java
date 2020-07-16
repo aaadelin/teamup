@@ -1,5 +1,6 @@
 package com.team.teamup.service;
 
+import com.sun.nio.sctp.IllegalReceiveException;
 import com.team.teamup.domain.Project;
 import com.team.teamup.domain.Task;
 import com.team.teamup.domain.User;
@@ -9,6 +10,7 @@ import com.team.teamup.dtos.TaskDTO;
 import com.team.teamup.persistence.TaskRepository;
 import com.team.teamup.persistence.TaskStatusRepository;
 import com.team.teamup.utils.DTOsConverter;
+import com.team.teamup.utils.Pair;
 import com.team.teamup.utils.TaskUtils;
 import com.team.teamup.utils.query.ReflectionQueryLanguageParser;
 import lombok.extern.slf4j.Slf4j;
@@ -221,5 +223,16 @@ public class TaskService {
 
     public List<TaskStatus> getAllTaskStatuses(){
         return taskStatusRepository.findAll(PageRequest.of(0, 10, Sort.by("order"))).getContent();
+    }
+
+    public List<TaskStatus> saveNewTaskStatuses(List<TaskStatus> statuses) {
+        if (statuses.size() < 2) {
+            throw new IllegalReceiveException();
+        }
+
+        taskUtils.removeTaskStatuses(statuses);
+        taskUtils.saveNewStatuses(statuses);
+
+        return taskStatusRepository.findAll();
     }
 }

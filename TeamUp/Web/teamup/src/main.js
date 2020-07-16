@@ -35,6 +35,7 @@ import {
   faAngleRight,
   faAngleDown,
   faSortUp,
+  faSortDown,
   faEdit,
   faEyeSlash,
   faEye,
@@ -60,7 +61,7 @@ NProgress.configure({ showSpinner: false })
 library.add(faCamera, faClock, faCalendar, faChevronLeft, faChevronRight, faCalendarCheck, faTrashAlt,
   faTimesCircle, faArrowUp, faArrowDown, faAngleUp, faAngleDoubleUp, faSortUp, faEdit, faEyeSlash, faEye,
   faAngleRight, faAngleDown, faMinus, faPlus, faExchangeAlt, faArrowAltCircleUp, faSave, faCaretLeft,
-  faCaretRight, faRedo, faTimes, faBan, faSearch, faEllipsisV, faArchive, faLock, faLockOpen, faSyncAlt)
+  faCaretRight, faRedo, faTimes, faBan, faSearch, faEllipsisV, faArchive, faLock, faLockOpen, faSyncAlt, faSortDown)
 
 Vue.component('fas', FontAwesomeIcon)
 

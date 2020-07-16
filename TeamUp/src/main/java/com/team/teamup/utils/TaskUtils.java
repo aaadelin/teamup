@@ -1,5 +1,6 @@
 package com.team.teamup.utils;
 
+import com.sun.nio.sctp.IllegalReceiveException;
 import com.team.teamup.domain.Task;
 import com.team.teamup.domain.User;
 import com.team.teamup.domain.TaskStatus;
@@ -309,5 +310,71 @@ public class TaskUtils {
             return taskStatusRepository.findAll().stream().min((ts1, ts2) -> Integer.min(ts1.getOrder(), ts2.getOrder())).orElseThrow();
         }
         return taskStatusRepository.findByStatus(status).orElseThrow();
+    }
+
+    public void removeTaskStatuses(List<TaskStatus> statuses) {
+        List<TaskStatus> originalStatuses = taskStatusRepository.findAll();
+
+                originalStatuses = originalStatuses.stream().filter(ts -> !statuses.contains(ts)).collect(Collectors.toList()); //removeIf(statuses::contains);
+        for ( TaskStatus status : originalStatuses ){
+            if (statusHasTasks(status)) {
+                migrateTasksToAnotherStatus(status);
+            }
+            taskStatusRepository.delete(status);
+        }
+    }
+
+    private void migrateTasksToAnotherStatus(TaskStatus status) {
+        List<Task> tasks = taskRepository.findAllByTaskStatus(status);
+
+        List<TaskStatus> previousStatuses = taskStatusRepository.findAll().stream()
+                                            .filter(ts -> ts.getOrder() < status.getOrder())
+                                            .collect(Collectors.toList());
+        TaskStatus newStatus;
+
+        if (previousStatuses.size() == 0) {
+            Optional<TaskStatus> taskStatus = taskStatusRepository.findAll().stream()
+                    .filter(ts -> ts.getOrder() > status.getOrder())
+                    .min((ts1, ts2) -> Integer.min(ts1.getOrder(), ts2.getOrder()));
+            if (taskStatus.isPresent()) {
+                newStatus = taskStatus.get();
+            }else {
+                throw new IllegalReceiveException();
+            }
+        } else {
+            previousStatuses.sort((ts1, ts2) -> ts1.getOrder() - ts2.getOrder());
+            newStatus = previousStatuses.get(previousStatuses.size() - 1);
+        }
+
+        for(Task task : tasks) {
+            task.setTaskStatus(newStatus);
+            taskRepository.save(task);
+        }
+    }
+
+    private boolean statusHasTasks(TaskStatus status) {
+        return taskRepository.findAllByTaskStatus(status).size() > 0;
+    }
+
+    public void saveNewStatuses(List<TaskStatus> statuses) {
+        List<TaskStatus> originalStatuses = taskStatusRepository.findAll();
+
+        for(TaskStatus status : statuses){
+            boolean found = false;
+
+            for (TaskStatus status1 : originalStatuses) {
+                if (status1.getStatus().equalsIgnoreCase(status.getStatus())) {
+                    if (status1.getOrder() != status.getOrder()) {
+                        status1.setOrder(status.getOrder());
+                        taskStatusRepository.save(status1);
+                    }
+                    found = true;
+                    break;
+                }
+            }
+            if (!found) {
+                taskStatusRepository.save(status);
+            }
+        }
     }
 }

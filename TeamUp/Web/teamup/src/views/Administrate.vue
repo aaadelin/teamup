@@ -8,6 +8,7 @@
         <div class="left-option" @click="updateComponent('ManageUsers')" :class="{ 'currentTab': (component === 'ManageUsers')}"> Users </div>
         <div class="left-option" @click="updateComponent('ManageTeams')" :class="{ 'currentTab': (component === 'ManageTeams')}"> Teams </div>
         <div class="left-option" @click="updateComponent('ManageLocations')" :class="{ 'currentTab': (component === 'ManageLocations')}"> Locations </div>
+        <div class="left-option" @click="updateComponent('ManageTaskStatuses')" :class="{ 'currentTab': (component === 'ManageTaskStatuses')}"> Tasks Statuses </div>
       </div>
       <div class="col container" style="max-width: 1000px; margin-top: 15px" >
         <keep-alive>

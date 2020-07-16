@@ -22,6 +22,12 @@
             Also see reported issues
           </label>
         </li>
+        <li>
+          <select v-model="projectId" class="form-control" style="width: 200px; margin: auto" data-live-search="true" @change="projectChanged">
+            <option value="-1" selected>No Project</option>
+            <option v-for="project in projects" :key="project.id" :value="project.id">{{project.name}}</option>
+          </select>
+        </li>
       </ul>
       <ul class="components">
         <li>
@@ -91,11 +97,16 @@ export default {
     showMenu: {
       required: true,
       default: true
+    },
+    projects: {
+      required: true,
+      default: []
     }
   },
   data () {
     return {
-      filter: ''
+      filter: '',
+      projectId: -1
     }
   },
   methods: {
@@ -104,6 +115,9 @@ export default {
     },
     filterChanged () {
       this.$emit('filter', this.filter)
+    },
+    projectChanged () {
+      console.log(this.projectId)
     },
     sortChanged () {
       let sort = document.querySelector('input[name="sort"]:checked').value
