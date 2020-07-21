@@ -8,7 +8,7 @@
           <div class="modal-container">
 
             <div class="modal-header justify-content-end" style="height: 50px">
-              <div class="col-10">
+              <div class="col-10" style="text-align: center">
                 {{taskCategory}}
               </div>
               <div name="header" class="col-1" >
@@ -21,7 +21,7 @@
               <div v-for="task in tasks" :key="task.id">
                 <task-box :task="task"></task-box>
               </div>
-              <div v-if="loadMore" style="font-size: 12px; color: darkblue; cursor: pointer" @click="fetchTasks">Show more...</div>
+              <div v-if="loadMore" style="font-size: 12px; color: darkblue; cursor: pointer; text-align: center" @click="fetchTasks">Show more...</div>
             </div>
           </div>
         </div>

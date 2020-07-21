@@ -52,7 +52,11 @@ import {
   faArchive,
   faLock,
   faLockOpen,
-  faSyncAlt
+  faSyncAlt,
+  faCog,
+  faUser,
+  faChartBar,
+  faTasks
 } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 import VueDraggable from 'vue-draggable'
@@ -61,7 +65,8 @@ NProgress.configure({ showSpinner: false })
 library.add(faCamera, faClock, faCalendar, faChevronLeft, faChevronRight, faCalendarCheck, faTrashAlt,
   faTimesCircle, faArrowUp, faArrowDown, faAngleUp, faAngleDoubleUp, faSortUp, faEdit, faEyeSlash, faEye,
   faAngleRight, faAngleDown, faMinus, faPlus, faExchangeAlt, faArrowAltCircleUp, faSave, faCaretLeft,
-  faCaretRight, faRedo, faTimes, faBan, faSearch, faEllipsisV, faArchive, faLock, faLockOpen, faSyncAlt, faSortDown)
+  faCaretRight, faRedo, faTimes, faBan, faSearch, faEllipsisV, faArchive, faLock, faLockOpen, faSyncAlt, faSortDown,
+  faCog, faUser, faChartBar, faTasks)
 
 Vue.component('fas', FontAwesomeIcon)
 

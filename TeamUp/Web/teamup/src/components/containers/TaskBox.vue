@@ -1,7 +1,7 @@
 <template>
     <div id="box" @click="openTaskPage" v-b-tooltip.hover :title="tooltipContent">
       <div class="container" id="taskContainer">
-        <span class="container" :id="task.id">
+        <span class="container justify-content-center" :id="task.id">
           <p> <b>{{ trimTitle(task.summary) }}</b></p>
           <p>Deadline: {{task.deadline}}</p>
           <span class="row">
