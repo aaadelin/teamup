@@ -49,7 +49,3 @@ public class TaskStatus {
         return status;
     }
 }
-
-//public enum TaskStatus {
-//    OPEN, IN_PROGRESS, UNDER_REVIEW, APPROVED, REOPENED, CLOSED
-//}

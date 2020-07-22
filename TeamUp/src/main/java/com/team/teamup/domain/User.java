@@ -27,32 +27,19 @@ public class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
 
-    @Column(unique = true, length = 100)
-    @SearchField
-    private String username;
-
-    @JsonIgnore
-    private String password;
-
     private String photo;
 
     private String newPhoto;
+
+    private String mail;
 
     private String firstName;
 
     private String lastName;
 
-    private LocalDateTime lastActive;
-
-    private boolean isActive;
-
-    private String hashKey;
-
     private Date joinedAt;
 
     private UserStatus status;
-    @Column(columnDefinition = "integer default 60")
-    private int minutesUntilLogout;
 
     @JsonBackReference(value = "userTeamGroups")
     @ManyToOne
@@ -60,35 +47,47 @@ public class User {
     @ToString.Exclude
     private Team team;
 
+    @OneToOne
+    @JoinColumn(name = "AUTH_ID")
+    private UserAuthentication authentication;
+
+    @OneToOne
+    @JoinColumn(name = "PREF_ID")
+    private UserPreferences preferences;
+
     @OneToMany(mappedBy = "creator")
     @ToString.Exclude
     private List<UserEvent> history;
 
-    private String mail;
-
-    private boolean locked;
+    public UserAuthentication getAuthentication(){
+        if(authentication == null ){
+            authentication = new UserAuthentication();
+        }
+        return authentication;
+    }
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (!(o instanceof User)) return false;
         User user = (User) o;
         return id == user.id &&
-                isActive == user.isActive &&
-                Objects.equals(username, user.username) &&
-                Objects.equals(password, user.password) &&
                 Objects.equals(photo, user.photo) &&
+                Objects.equals(newPhoto, user.newPhoto) &&
+                Objects.equals(mail, user.mail) &&
                 Objects.equals(firstName, user.firstName) &&
                 Objects.equals(lastName, user.lastName) &&
-                Objects.equals(lastActive, user.lastActive) &&
-                Objects.equals(hashKey, user.hashKey) &&
+                Objects.equals(joinedAt, user.joinedAt) &&
                 status == user.status &&
-                Objects.equals(team, user.team);
+                Objects.equals(team, user.team) &&
+                Objects.equals(authentication, user.authentication) &&
+                Objects.equals(preferences, user.preferences) &&
+                Objects.equals(history, user.history);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, username, password, photo, firstName, lastName, lastActive, isActive, hashKey, status, team);
+        return Objects.hash(id, photo, newPhoto, mail, firstName, lastName, joinedAt, status, team, authentication, preferences, history);
     }
 }
 

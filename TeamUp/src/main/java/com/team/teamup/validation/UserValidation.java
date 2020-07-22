@@ -1,9 +1,12 @@
 package com.team.teamup.validation;
 
 import com.team.teamup.domain.User;
+import com.team.teamup.domain.UserAuthentication;
 import com.team.teamup.domain.enums.UserStatus;
 import com.team.teamup.dtos.ProjectDTO;
+import com.team.teamup.persistence.UserAuthenticationRepository;
 import com.team.teamup.persistence.UserRepository;
+import com.team.teamup.utils.UserUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,12 +25,18 @@ import java.util.Optional;
 public class UserValidation {
 
     private final UserRepository userRepository;
+    private final UserAuthenticationRepository authenticationRepository;
+    private final UserUtils userUtils;
     public static final Logger LOGGER = LoggerFactory.getLogger(UserValidation.class);
     private String TOKEN = "token";
 
     @Autowired
-    public UserValidation(UserRepository userRepository) {
+    public UserValidation(UserRepository userRepository,
+                          UserAuthenticationRepository authenticationRepository,
+                          UserUtils userUtils) {
         this.userRepository = userRepository;
+        this.authenticationRepository = authenticationRepository;
+        this.userUtils = userUtils;
         LOGGER.info("Creating instance of userValidationUtils");
     }
 
@@ -39,7 +48,7 @@ public class UserValidation {
      */
     public boolean isValid(String key) {
         LOGGER.info(String.format("Checking if user with key %s is valid", key));
-        Optional<User> userOptional = userRepository.findByHashKey(key);
+        Optional<UserAuthentication> userOptional = authenticationRepository.findByHashKey(key);
         boolean answer = userOptional.isPresent();
         LOGGER.info(String.format("The key is %s", answer));
         return answer;
@@ -79,8 +88,8 @@ public class UserValidation {
      */
     public boolean isValid(String key, UserStatus userStatus){
         LOGGER.info(String.format("Checking if user with key %s has status %s", key, userStatus));
-        Optional<User> userOptional = userRepository.findByHashKey(key);
-        boolean answer = userOptional.isPresent() && userOptional.get().getStatus().equals(userStatus);
+        Optional<UserAuthentication> userOptional = authenticationRepository.findByHashKey(key);
+        boolean answer = userOptional.isPresent() && userOptional.get().getUser().getStatus().equals(userStatus);
         LOGGER.info(String.format("Exiting with status: %s", answer));
         return answer;
     }
@@ -97,8 +106,8 @@ public class UserValidation {
         if (headers.containsKey(TOKEN)) {
             String token = headers.get(TOKEN);
 
-            Optional<User> userOptional = userRepository.findByHashKey(token);
-            return userOptional.isPresent() && userOptional.get().getStatus().equals(status);
+            Optional<UserAuthentication> userOptional = authenticationRepository.findByHashKey(token);
+            return userOptional.isPresent() && userOptional.get().getUser().getStatus().equals(status);
         }
         LOGGER.info("Headers did not contain necessary information");
         return false;
@@ -115,7 +124,7 @@ public class UserValidation {
         LOGGER.info(String.format("Checking if user with specified headers (%s) is the owner of the project %s", headers, projectDTO));
         if(headers.containsKey(TOKEN)){
             String token = headers.get(TOKEN);
-            Optional<User> userOptional = userRepository.findByHashKey(token);
+            Optional<UserAuthentication> userOptional = authenticationRepository.findByHashKey(token);
             return userOptional.isPresent() && userOptional.get().getId() == projectDTO.getOwnerID();
         }
         LOGGER.info("Headers did not contain necessary information");
@@ -129,8 +138,8 @@ public class UserValidation {
      * @return true if user with the key is logged in and false otherwise
      */
     public boolean isUserLoggedIn(String key){
-        Optional<User> userOptional = userRepository.findByHashKey(key);
-        return userOptional.isPresent() && !isLoggedOut(userOptional.get());
+        Optional<UserAuthentication> userOptional = authenticationRepository.findByHashKey(key);
+        return userOptional.isPresent() && !isLoggedOut(userOptional.get().getUser());
     }
 
     /**
@@ -140,16 +149,20 @@ public class UserValidation {
      * @return boolean value, true if user is logged out and false otherwise
      */
     private boolean isLoggedOut(User user){
-        if(!user.isActive() || user.getLastActive() == null){
+        UserAuthentication authentication = user.getAuthentication();
+        if(!authentication.isActive() || authentication.getLastActive() == null){
             return true;
         }
-        if(user.getLastActive().isBefore(LocalDateTime.now().minusMinutes(user.getMinutesUntilLogout()))){ //if user hasn't been active in last 1 hours (didn't make any request)
-            user.setActive(false);
-            userRepository.save(user);
+        if(authentication.getLastActive().isBefore(LocalDateTime.now().minusMinutes(authentication.getMinutesUntilLogout()))){ //if user hasn't been active in last 1 hours (didn't make any request)
+            authentication.setActive(false);
+            UserAuthentication auth = authenticationRepository.save(user.getAuthentication());
+            user.setAuthentication(auth);
+            userUtils.saveUser(user);
             return true;
         }
-        user.setLastActive(LocalDateTime.now());
-        user = userRepository.saveAndFlush(user);
+        authentication.setLastActive(LocalDateTime.now());
+        user = userUtils.saveUser(user);
+//        user = userRepository.saveAndFlush(user);
         return false;
     }
 

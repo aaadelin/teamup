@@ -37,13 +37,13 @@ public class CreationUtils {
     public void createUsers(int numberOfUsers){
         for (int i = 0; i < numberOfUsers; i++) {
             User user = new User();
-            user.setMinutesUntilLogout(80);
-            user.setPassword("a");
-            user.setHashKey("a"+LocalDateTime.now());
-            user.setUsername("a"+LocalDateTime.now());
-            user.setActive(true);
-            user.setLastActive(LocalDateTime.now());
-
+            user.getAuthentication().setMinutesUntilLogout(80);
+            user.getAuthentication().setPassword("a");
+            user.getAuthentication().setHashKey("a"+LocalDateTime.now());
+            user.getAuthentication().setUsername("a"+LocalDateTime.now());
+            user.getAuthentication().setActive(true);
+            user.getAuthentication().setLastActive(LocalDateTime.now());
+            //todo testul crapa pentru ca UserAuthentication nu e salvat
             users.add(userRepository.save(user));
         }
     }

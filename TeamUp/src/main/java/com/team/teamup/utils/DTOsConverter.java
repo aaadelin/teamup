@@ -2,7 +2,9 @@ package com.team.teamup.utils;
 
 import com.team.teamup.domain.*;
 import com.team.teamup.domain.TaskStatus;
+import com.team.teamup.domain.enums.TimelineVisibility;
 import com.team.teamup.domain.enums.UserStatus;
+import com.team.teamup.domain.enums.UserTheme;
 import com.team.teamup.dtos.*;
 import com.team.teamup.persistence.*;
 import com.team.teamup.validation.TaskValidation;
@@ -32,9 +34,12 @@ public class DTOsConverter {
     private final PostRepository postRepository;
     private final CommentRepository commentRepository;
     private final LocationRepository locationRepository;
-    private ResetRequestRepository resetRequestRepository;
+    private final ResetRequestRepository resetRequestRepository;
     private final TaskStatusRepository taskStatusRepository;
     private final TaskValidation taskValidation;
+    private final UserAuthenticationRepository authenticationRepository;
+    private final UserPreferencesRepository preferencesRepository;
+    private final TaskStatusVisibilityRepository visibilityRepository;
 
     public DTOsConverter(UserRepository userRepository,
                          TeamRepository teamRepository,
@@ -43,7 +48,11 @@ public class DTOsConverter {
                          PostRepository postRepository,
                          LocationRepository locationRepository,
                          CommentRepository commentRepository,
-                         TaskStatusRepository taskStatusRepository) {
+                         TaskStatusRepository taskStatusRepository,
+                         UserAuthenticationRepository authenticationRepository,
+                         UserPreferencesRepository preferencesRepository,
+                         TaskStatusVisibilityRepository visibilityRepository,
+                         ResetRequestRepository resetRequestRepository) {
 
         this.userRepository = userRepository;
         this.teamRepository = teamRepository;
@@ -53,14 +62,13 @@ public class DTOsConverter {
         this.locationRepository = locationRepository;
         this.commentRepository = commentRepository;
         this.taskStatusRepository = taskStatusRepository;
+        this.authenticationRepository = authenticationRepository;
+        this.preferencesRepository = preferencesRepository;
+        this.visibilityRepository = visibilityRepository;
+        this.resetRequestRepository = resetRequestRepository;
         this.taskValidation = new TaskValidation();
 
         log.debug("Instance of class DtosConverter created");
-    }
-
-    @Autowired
-    public void setResetRequestRepository(ResetRequestRepository resetRequestRepository) {
-        this.resetRequestRepository = resetRequestRepository;
     }
 
     /**
@@ -72,18 +80,18 @@ public class DTOsConverter {
         UserDTO userDTO = new UserDTO();
 
         userDTO.setId(user.getId());
-        userDTO.setUsername(user.getUsername());
+        userDTO.setUsername(user.getAuthentication().getUsername());
         userDTO.setFirstName(user.getFirstName());
         userDTO.setLastName(user.getLastName());
-        userDTO.setLastActive(user.getLastActive());
-        userDTO.setActive(user.isActive());
+        userDTO.setLastActive(user.getAuthentication().getLastActive());
+        userDTO.setActive(user.getAuthentication().isActive());
         userDTO.setStatus(user.getStatus());
         userDTO.setPhoto(user.getPhoto());
         userDTO.setJoinedAt(user.getJoinedAt());
         if (user.getMail() == null) {
             user.setMail("");
         }
-        userDTO.setLocked(user.isLocked());
+        userDTO.setLocked(user.getAuthentication().isLocked());
         userDTO.setMail(user.getMail());
         if (user.getTeam() != null) {
             userDTO.setTeamID(user.getTeam().getId());
@@ -120,7 +128,7 @@ public class DTOsConverter {
         User user;
         user = userOptional.orElseGet(User::new);
         if (userDTO.getUsername() != null) {
-            user.setUsername(userDTO.getUsername());
+            user.getAuthentication().setUsername(userDTO.getUsername());
         }
         if (userDTO.getFirstName() != null) {
             user.setFirstName(userDTO.getFirstName());
@@ -129,9 +137,9 @@ public class DTOsConverter {
             user.setLastName(userDTO.getLastName());
         }
         if (userDTO.getLastActive() != null) {
-            user.setLastActive(userDTO.getLastActive());
+            user.getAuthentication().setLastActive(userDTO.getLastActive());
         }
-        user.setActive(userDTO.isActive());
+        user.getAuthentication().setActive(userDTO.isActive());
         if (userDTO.getPhoto() != null) {
             user.setPhoto(userDTO.getPhoto());
         }
@@ -142,22 +150,48 @@ public class DTOsConverter {
             userDTO.setMail("");
         }
         user.setMail(userDTO.getMail());
-        user.setMinutesUntilLogout(60);
+        user.getAuthentication().setMinutesUntilLogout(60);
         user.setStatus(userDTO.getStatus());
-        user.setLocked(userDTO.isLocked());
+        user.getAuthentication().setLocked(userDTO.isLocked());
         if (userDTO.getPassword() != null) {
-            user.setPassword(TokenUtils.getMD5Token(userDTO.getPassword()));
+            user.getAuthentication().setPassword(TokenUtils.getMD5Token(userDTO.getPassword()));
         }
 
         Optional<Team> team = teamRepository.findById(userDTO.getTeamID());
 
         user.setTeam(team.orElse(null));
-        if (user.getHashKey() == null) {
-            user.setHashKey(TokenUtils.getMD5Token());
+        if (user.getAuthentication().getHashKey() == null) {
+            user.getAuthentication().setHashKey(TokenUtils.getMD5Token());
+        }
+
+        if(user.getPreferences() == null){
+            UserPreferences preferences = getDefaultPreferences();
+            user.setPreferences(preferences);
         }
 
         log.debug(String.format("Instance of type User created: %s", user));
         return user;
+    }
+
+    public UserPreferences getDefaultPreferences() {
+        UserPreferences preferences = new UserPreferences();
+        preferences.setTheme(UserTheme.DEFAULT_LIGHT);
+        preferences.setPrimaryColor("");
+        preferences.setSecondaryColor("");
+        preferences.setTimelineVisibility(TimelineVisibility.EVERYONE);
+
+        List<TaskStatusVisibility> statusVisibilities = new ArrayList<>();
+        for(TaskStatus status : taskStatusRepository.findAll()){
+            TaskStatusVisibility visibility = new TaskStatusVisibility();
+            visibility.setIsVisible(true);
+            visibility.setTaskStatus(status);
+            visibility = visibilityRepository.save(visibility);
+            statusVisibilities.add(visibility);
+        }
+
+        preferences.setTaskStatusVisibility(statusVisibilities);
+        preferences = preferencesRepository.save(preferences);
+        return preferences;
     }
 
     /**
@@ -184,8 +218,8 @@ public class DTOsConverter {
 
         Optional<Project> project = projectRepository.findById(taskDTO.getProject());
         task.setProject(project.orElseThrow());
-        Optional<User> reporter = userRepository.findByHashKey(reporterKey);
-        task.setReporter(reporter.orElseThrow());
+        Optional<UserAuthentication> reporter = authenticationRepository.findByHashKey(reporterKey);
+        task.setReporter(reporter.orElseThrow().getUser());
 
         if (taskDTO.getDeadline().isBefore(task.getProject().getDeadline()) && taskDTO.getDeadline()
                 .isAfter(LocalDateTime.now().minusMinutes(1))) {
@@ -599,5 +633,52 @@ public class DTOsConverter {
             return taskStatusRepository.findAll().stream().min((ts1, ts2) -> ts1.getOrder() - ts2.getOrder()).orElseThrow();
         }
         return taskStatusRepository.findByStatus(status).orElseThrow();
+    }
+
+    public UserPreferencesDTO getDTOFromPreferences(UserPreferences preferences){
+        UserPreferencesDTO dto = new UserPreferencesDTO();
+        dto.setId(preferences.getId());
+        dto.setPrimaryColor(preferences.getPrimaryColor());
+        dto.setSecondaryColor(preferences.getSecondaryColor());
+        List<Pair<String, Boolean>> visibility = preferences.getTaskStatusVisibility().stream()
+                                                .sorted((tsv1, tsv2) -> tsv1.getTaskStatus().getOrder() - tsv2.getTaskStatus().getOrder())
+                                                .map(preference -> new Pair<String, Boolean>(preference.getTaskStatus().getStatus(), preference.getIsVisible()))
+                                                .collect(Collectors.toList());
+        dto.setTaskStatusVisibility(visibility);
+        dto.setTheme(preferences.getTheme());
+        dto.setTimelineVisibility(preferences.getTimelineVisibility());
+        return dto;
+    }
+
+    public UserPreferences getPreferencesFromDTO(UserPreferencesDTO dto){
+        Optional<UserPreferences> prefOptional = preferencesRepository.findById(dto.getId());
+        UserPreferences preferences;
+
+        preferences = prefOptional.orElseGet(UserPreferences::new);
+        if(dto.getPrimaryColor() != null) {
+            preferences.setPrimaryColor(dto.getPrimaryColor());
+        }
+        if(dto.getSecondaryColor() != null) {
+            preferences.setSecondaryColor(dto.getSecondaryColor());
+        }
+        if(dto.getTheme() != null) {
+            preferences.setTheme(dto.getTheme());
+        }
+        if(dto.getTimelineVisibility() != null) {
+            preferences.setTimelineVisibility(dto.getTimelineVisibility());
+        }
+        if(preferences.getTaskStatusVisibility() == null){
+            preferences.setTaskStatusVisibility(new ArrayList<>());
+        }
+        if(dto.getTaskStatusVisibility() != null) {
+            for(Pair<String, Boolean> pair : dto.getTaskStatusVisibility()){
+                for(TaskStatusVisibility visibility : preferences.getTaskStatusVisibility()){
+                    if(visibility.getTaskStatus().getStatus().equalsIgnoreCase(pair.getKey())) {
+                        visibility.setIsVisible(pair.getValue());
+                    }
+                }
+            }
+        }
+        return preferences;
     }
 }

@@ -312,16 +312,17 @@ public class TaskUtils {
         return taskStatusRepository.findByStatus(status).orElseThrow();
     }
 
-    public void removeTaskStatuses(List<TaskStatus> statuses) {
+    public List<TaskStatus> removeTaskStatuses(List<TaskStatus> statuses) {
         List<TaskStatus> originalStatuses = taskStatusRepository.findAll();
 
-                originalStatuses = originalStatuses.stream().filter(ts -> !statuses.contains(ts)).collect(Collectors.toList()); //removeIf(statuses::contains);
+        originalStatuses = originalStatuses.stream().filter(ts -> !statuses.contains(ts)).collect(Collectors.toList()); //removeIf(statuses::contains);
         for ( TaskStatus status : originalStatuses ){
             if (statusHasTasks(status)) {
                 migrateTasksToAnotherStatus(status);
             }
             taskStatusRepository.delete(status);
         }
+        return originalStatuses;
     }
 
     private void migrateTasksToAnotherStatus(TaskStatus status) {
@@ -356,8 +357,9 @@ public class TaskUtils {
         return taskRepository.findAllByTaskStatus(status).size() > 0;
     }
 
-    public void saveNewStatuses(List<TaskStatus> statuses) {
+    public List<TaskStatus> saveNewStatuses(List<TaskStatus> statuses) {
         List<TaskStatus> originalStatuses = taskStatusRepository.findAll();
+        List<TaskStatus> added = new ArrayList<>();
 
         for(TaskStatus status : statuses){
             boolean found = false;
@@ -366,15 +368,18 @@ public class TaskUtils {
                 if (status1.getStatus().equalsIgnoreCase(status.getStatus())) {
                     if (status1.getOrder() != status.getOrder()) {
                         status1.setOrder(status.getOrder());
-                        taskStatusRepository.save(status1);
+                        TaskStatus ts = taskStatusRepository.save(status1);
+                        added.add(ts);
                     }
                     found = true;
                     break;
                 }
             }
             if (!found) {
-                taskStatusRepository.save(status);
+                TaskStatus ts = taskStatusRepository.save(status);
+                added.add(ts);
             }
         }
+        return added;
     }
 }

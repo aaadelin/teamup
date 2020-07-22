@@ -1,5 +1,6 @@
 package com.team.teamup.controller.get;
 
+import com.team.teamup.domain.TaskStatusVisibility;
 import com.team.teamup.domain.User;
 import com.team.teamup.domain.TaskStatus;
 import com.team.teamup.domain.enums.TaskType;
@@ -82,10 +83,21 @@ public class RestGetTaskController {
      * @return possible task statuses
      */
     @RequestMapping(value = "/task-status/detailed", method = GET)
-    public ResponseEntity<?> getAllTaskStatusDetailed() {
-        log.info("Entering get all task status with details");
-        List<Pair<String, Integer>> taskStatuses = taskService.getAllTaskStatuses()
-                .stream().map(ts -> new Pair<String, Integer>(ts.getStatus(), ts.getOrder())).collect(Collectors.toList());
+    public ResponseEntity<?> getAllTaskStatusDetailed(@RequestParam(name = "visible", defaultValue = "false", required = false) Boolean visibleOnly,
+                                                      @RequestHeader(name = "token") String token) {
+        log.info("Entering get task statuses with details");
+        List<Pair<String, Integer>> taskStatuses;
+        if(visibleOnly) {
+            User user = userService.getByHashKey(token);
+            taskStatuses = user.getPreferences().getTaskStatusVisibility()
+                    .stream()
+                    .filter(TaskStatusVisibility::getIsVisible)
+                    .map(tsv -> new Pair<String, Integer>(tsv.getTaskStatus().getStatus(), tsv.getTaskStatus().getOrder()))
+                    .collect(Collectors.toList());
+        }else{
+            taskStatuses = taskService.getAllTaskStatuses()
+                    .stream().map(ts -> new Pair<String, Integer>(ts.getStatus(), ts.getOrder())).collect(Collectors.toList());
+        }
         log.info(String.format("Returning current possible task statuses: %s", taskStatuses.toString()));
         return new ResponseEntity<>(taskStatuses, HttpStatus.OK);
     }

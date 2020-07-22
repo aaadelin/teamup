@@ -12,6 +12,7 @@ import com.team.teamup.persistence.TaskStatusRepository;
 import com.team.teamup.utils.DTOsConverter;
 import com.team.teamup.utils.Pair;
 import com.team.teamup.utils.TaskUtils;
+import com.team.teamup.utils.UserUtils;
 import com.team.teamup.utils.query.ReflectionQueryLanguageParser;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,6 +40,8 @@ public class TaskService {
     private final TaskUtils taskUtils;
     private final ReflectionQueryLanguageParser<Task, Integer> queryLanguageParser;
 
+    private UserUtils userUtils;
+
     @Autowired
     public TaskService(TaskRepository taskRepository,
                        DTOsConverter dtOsConverter,
@@ -50,6 +53,11 @@ public class TaskService {
         this.taskStatusRepository = taskStatusRepository;
         this.queryLanguageParser = new ReflectionQueryLanguageParser<>(taskRepository);
         queryLanguageParser.setClazz(Task.class);
+    }
+
+    @Autowired
+    public void setUserUtils(UserUtils userUtils){
+        this.userUtils = userUtils;
     }
 
     /**
@@ -230,9 +238,13 @@ public class TaskService {
             throw new IllegalReceiveException();
         }
 
-        taskUtils.removeTaskStatuses(statuses);
-        taskUtils.saveNewStatuses(statuses);
+        List<User> users = userUtils.findAllUsers();
 
+        List<TaskStatus> removedStatuses = taskUtils.removeTaskStatuses(statuses);
+        List<TaskStatus> addedStatuses = taskUtils.saveNewStatuses(statuses);
+
+        userUtils.removeTaskStatusesFromPreferences(removedStatuses, users);
+        userUtils.addTaskStatusesToPreferences(addedStatuses);
         return taskStatusRepository.findAll();
     }
 }

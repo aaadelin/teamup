@@ -39,7 +39,7 @@
 
 <script>
 import CreateUser from './create-components/CreateUser'
-import { getFilteredUsers, getUsersSortBy } from '../persistance/RestGetRepository'
+import { getFilteredUsers, getTeams, getUsersSortBy } from '../persistance/RestGetRepository'
 import { MAX_RESULTS } from '../persistance/Repository'
 import UserRow from './containers/UserRow'
 import NProgress from 'nprogress'
@@ -47,18 +47,9 @@ import NProgress from 'nprogress'
 export default {
   name: 'ManageUsers',
   components: { UserRow, CreateUser },
-  mounted () {
+  async mounted () {
     this.getUsers()
-    let interval = setInterval(() => {
-      this.teams = this.$refs.createUser.teams
-      if (this.teams === null) {
-        this.teams = []
-      }
-      this.statuses = this.$refs.createUser.statuses
-      if (this.teams.length !== 0 && this.statuses.length !== 0) {
-        clearInterval(interval)
-      }
-    }, 100)
+    this.teams = await getTeams()
   },
   data () {
     return {

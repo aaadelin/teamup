@@ -165,7 +165,7 @@ export default {
         this.user.department = ''
       }
       this.canEdit = (this.myId === parseInt(this.userId))
-      this.team = this.user.teamID !== -1 ? (await getTeam(this.user.teamID)) : {}
+      this.team = this.user.teamID !== -1 ? (await getTeam(this.user.teamID)) : null
 
       this.leadingTeams = await getLeadingTeams(this.userId)
       this.ownedProjects = await getOwnedProjects(this.userId)

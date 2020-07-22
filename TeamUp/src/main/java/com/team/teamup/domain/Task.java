@@ -46,6 +46,8 @@ public class Task implements HasNameAndDescription{
     @SearchField
     private int difficulty;
 
+    private float storyPoints;
+
     @SearchField
     private Integer priority;
 
@@ -83,23 +85,28 @@ public class Task implements HasNameAndDescription{
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (!(o instanceof Task)) return false;
         Task task = (Task) o;
         return id == task.id &&
+                difficulty == task.difficulty &&
+                Float.compare(task.storyPoints, storyPoints) == 0 &&
                 Objects.equals(summary, task.summary) &&
                 Objects.equals(description, task.description) &&
-                Objects.equals(reporter, task.reporter) &&
                 Objects.equals(createdAt, task.createdAt) &&
                 Objects.equals(doneAt, task.doneAt) &&
                 Objects.equals(lastChanged, task.lastChanged) &&
                 Objects.equals(deadline, task.deadline) &&
-                taskStatus == task.taskStatus &&
+                Objects.equals(priority, task.priority) &&
+                taskType == task.taskType &&
+                Objects.equals(taskStatus, task.taskStatus) &&
+                department == task.department &&
+                Objects.equals(reporter, task.reporter) &&
+                Objects.equals(assignees, task.assignees) &&
                 Objects.equals(project, task.project);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, summary, description, reporter, createdAt, doneAt, lastChanged, deadline, taskStatus, project);
+        return Objects.hash(id, summary, description, createdAt, doneAt, lastChanged, deadline, difficulty, storyPoints, priority, taskType, taskStatus, department, reporter, assignees, project);
     }
-
 }

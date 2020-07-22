@@ -39,7 +39,7 @@ public class RestGetTaskControllerIntegrationTest {
     private RequestSpecification getHeaderRequest(){
         return given()
                 .header("Content-Type", "application/json")
-                .header("token", creationUtils.getLastUser().getHashKey());
+                .header("token", creationUtils.getLastUser().getAuthentication().getHashKey());
     }
 
     @Before

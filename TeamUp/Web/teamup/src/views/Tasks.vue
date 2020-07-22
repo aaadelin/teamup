@@ -63,7 +63,7 @@ import { MAX_RESULTS } from '../persistance/Repository'
 
 export default {
   async beforeMount () {
-    this.taskStatuses = await getDetailedTaskStatus()
+    this.taskStatuses = await getDetailedTaskStatus(true)
     this.setDefaultValues()
     await this.getUsersTasks()
     this.projects = await getProjects()

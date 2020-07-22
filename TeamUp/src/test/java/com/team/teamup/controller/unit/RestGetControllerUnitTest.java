@@ -62,6 +62,8 @@ public class RestGetControllerUnitTest {
     @MockBean
     CommentRepository commentRepository;
     @MockBean
+    UserAuthenticationRepository authenticationRepository;
+    @MockBean
     UserEventRepository userEventRepository;
     @MockBean
     UserValidation userValidation;
@@ -406,7 +408,7 @@ public class RestGetControllerUnitTest {
 
     @Test
     public void getAssignedTasksForUser() throws Exception {
-        when(userRepository.findByHashKey("1")).thenReturn(Optional.of(new User()));
+        when(authenticationRepository.findByHashKey("1")).thenReturn(Optional.of(new UserAuthentication()));
         when(taskRepository.findAll()).thenReturn(Collections.emptyList());
 
         MvcResult mvcResult = mockMvc.perform(
@@ -421,7 +423,7 @@ public class RestGetControllerUnitTest {
     @Test
     public void getReportedTasksByUser() throws Exception {
 
-        when(userRepository.findByHashKey("1")).thenReturn(Optional.of(new User()));
+        when(authenticationRepository.findByHashKey("1")).thenReturn(Optional.of(new UserAuthentication()));
         when(taskRepository.findAll()).thenReturn(Collections.emptyList());
 
         MvcResult mvcResult = mockMvc.perform(
@@ -599,7 +601,7 @@ public class RestGetControllerUnitTest {
     public void logout() throws Exception {
         User user = new User();
         user.setId(1);
-        user.setHashKey("1");
+        user.getAuthentication().setHashKey("1");
 
         when(userService.getByHashKey("1")).thenReturn(user);
         when(userService.getByHashKey("2")).thenReturn(null);

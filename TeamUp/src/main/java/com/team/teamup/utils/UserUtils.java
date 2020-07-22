@@ -4,10 +4,7 @@ import com.team.teamup.domain.*;
 import com.team.teamup.domain.enums.UserEventType;
 import com.team.teamup.domain.enums.UserStatus;
 import com.team.teamup.dtos.UserDTO;
-import com.team.teamup.persistence.ProjectRepository;
-import com.team.teamup.persistence.TaskRepository;
-import com.team.teamup.persistence.UserEventRepository;
-import com.team.teamup.persistence.UserRepository;
+import com.team.teamup.persistence.*;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.tomcat.util.codec.binary.Base64;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,6 +15,7 @@ import org.springframework.stereotype.Component;
 import javax.crypto.Cipher;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
+import javax.persistence.EntityNotFoundException;
 import java.security.Key;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -33,17 +31,29 @@ public class UserUtils {
 
     private final UserRepository userRepository;
     private final UserEventRepository userEventRepository;
+    private final UserAuthenticationRepository authenticationRepository;
+    private final UserPreferencesRepository preferencesRepository;
+    private final TaskStatusVisibilityRepository visibilityRepository;
     private final TaskRepository taskRepository;
     private final ProjectRepository projectRepository;
     private final DTOsConverter dtOsConverter;
 
     @Autowired
-    public UserUtils(UserRepository userRepository, UserEventRepository userEventRepository, TaskRepository taskRepository,
-                     ProjectRepository projectRepository, DTOsConverter dtOsConverter) {
+    public UserUtils(UserRepository userRepository,
+                     UserEventRepository userEventRepository,
+                     TaskRepository taskRepository,
+                     ProjectRepository projectRepository,
+                     UserAuthenticationRepository authenticationRepository,
+                     UserPreferencesRepository preferencesRepository,
+                     TaskStatusVisibilityRepository visibilityRepository,
+                     DTOsConverter dtOsConverter) {
         this.userRepository = userRepository;
         this.userEventRepository = userEventRepository;
         this.taskRepository = taskRepository;
         this.projectRepository = projectRepository;
+        this.authenticationRepository = authenticationRepository;
+        this.preferencesRepository = preferencesRepository;
+        this.visibilityRepository = visibilityRepository;
         this.dtOsConverter = dtOsConverter;
     }
 
@@ -156,8 +166,8 @@ public class UserUtils {
         userDTO.setStatus(UserStatus.ADMIN);
 
         User user = dtOsConverter.getUserFromDTO(userDTO);
-        user = userRepository.save(user);
-        log.info("Created admin with username {}", user.getUsername());
+        user = saveUser(user);
+        log.info("Created admin with username {}", user.getAuthentication().getUsername());
         return user;
     }
 
@@ -200,6 +210,10 @@ public class UserUtils {
                 .stream().map(dtOsConverter::getDTOFromUser).collect(Collectors.toList());
     }
 
+    public List<User> findAllUsers(){
+        return userRepository.findAll();
+    }
+
     /**
      * Method to return sorted users
      * @param page Integer, page number to get users from
@@ -230,5 +244,68 @@ public class UserUtils {
             }
         }
         return users;
+    }
+
+    public User saveUser(User user){
+        UserAuthentication authentication = authenticationRepository.save(user.getAuthentication());
+        user.setAuthentication(authentication);
+        user = userRepository.save(user);
+        authentication.setUser(user);
+        authenticationRepository.save(authentication);
+
+        UserPreferences preferences = user.getPreferences();
+        if(preferences == null) {
+            preferences = dtOsConverter.getDefaultPreferences();
+        }
+        preferences = preferencesRepository.save(preferences);
+        user = userRepository.save(user);
+        return user;
+    }
+
+    public void deleteUserById(int id) {
+        Optional<User> user = userRepository.findById(id);
+
+        if(user.isPresent()) {
+            UserAuthentication auth = user.get().getAuthentication();
+            authenticationRepository.deleteById(auth.getId());
+            userRepository.deleteById(id);
+        }
+
+    }
+
+    public void removeTaskStatusesFromPreferences(List<TaskStatus> removedStatuses) {
+        removeTaskStatusesFromPreferences(removedStatuses, userRepository.findAll());
+    }
+
+    public void removeTaskStatusesFromPreferences(List<TaskStatus> removedStatuses, List<User> users) {
+        for(User user : users){
+            UserPreferences preferences1 = user.getPreferences();
+            preferences1.getTaskStatusVisibility().removeIf(visibility -> removedStatuses.contains(visibility.getTaskStatus()));
+            try{
+                saveUser(user);
+            }catch (EntityNotFoundException e){
+                System.out.println(e);
+            }
+        }
+    }
+
+    public void addTaskStatusesToPreferences(List<TaskStatus> addedStatuses, List<User> users) {
+        for (TaskStatus status : addedStatuses) {
+            for (User user : users) {
+                UserPreferences preferences1 = user.getPreferences();
+                boolean containsStatus = preferences1.getTaskStatusVisibility().stream().map(TaskStatusVisibility::getTaskStatus).collect(Collectors.toList()).contains(status);
+                if(containsStatus) {
+                    break;
+                }
+                TaskStatusVisibility statusVisibility = new TaskStatusVisibility(0, status, true);
+                statusVisibility = visibilityRepository.save(statusVisibility);
+                preferences1.getTaskStatusVisibility().add(statusVisibility);
+                saveUser(user);
+            }
+        }
+    }
+
+    public void addTaskStatusesToPreferences(List<TaskStatus> addedStatuses) {
+        addTaskStatusesToPreferences(addedStatuses, userRepository.findAll());
     }
 }

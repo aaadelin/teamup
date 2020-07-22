@@ -13,6 +13,7 @@ import com.team.teamup.validation.UserValidation;
 import jdk.dynalink.linker.LinkerServices;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -246,11 +247,11 @@ public class RestPutController {
 
         if (requester.getId() == userToChange.getId() || requester.getStatus() == UserStatus.ADMIN) {
 
-            if (userToChange.getPassword().equalsIgnoreCase(oldPassword)) {
-                userToChange.setPassword(newPassword);
+            if (userToChange.getAuthentication().getPassword().equalsIgnoreCase(oldPassword)) {
+                userToChange.getAuthentication().setPassword(newPassword);
                 log.info("Password successfully changed");
                 if (parameters.get("logout").equals("true")) {
-                    userToChange.setActive(false);
+                    userToChange.getAuthentication().setActive(false);
                     log.info("User has been logged out");
                 }
                 userService.save(userToChange);
@@ -280,10 +281,10 @@ public class RestPutController {
         ResetRequest resetRequest = dtOsConverter.getResetRequestFromDTO(resetRequestDTO);
 
         if (LocalDateTime.now().isBefore(resetRequest.getCreatedAt().plusMinutes(ResetRequest.MAX_MINUTES)) && //if now if before expiration time
-                resetRequestDTO.getNewPassword().length() >= 5 && resetRequestDTO.getUsername().equals(resetRequest.getUser().getUsername())) {
+                resetRequestDTO.getNewPassword().length() >= 5 && resetRequestDTO.getUsername().equals(resetRequest.getUser().getAuthentication().getUsername())) {
 
             User user = resetRequest.getUser();
-            user.setPassword(TokenUtils.getMD5Token(resetRequestDTO.getNewPassword()));
+            user.getAuthentication().setPassword(TokenUtils.getMD5Token(resetRequestDTO.getNewPassword()));
             userService.save(user);
 
             resetRequest.setCreatedAt(resetRequest.getCreatedAt().minusMinutes(60));
@@ -342,5 +343,19 @@ public class RestPutController {
                                                 .map(ts -> new Pair<>(ts.getStatus(), ts.getOrder()))
                                                 .collect(Collectors.toList());
         return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    @RequestMapping(value = "/users/{id}/preferences", method = PUT)
+    public ResponseEntity<?> updateUserPreferences(@RequestBody UserPreferencesDTO preferencesDTO,
+                                                   @PathVariable int id,
+                                                   @RequestHeader(name = "token") String token) {
+        log.info("Entering method to update user preferences: " + preferencesDTO);
+        User requester = userService.getByHashKey(token);
+        if(requester.getStatus().equals(UserStatus.ADMIN) || requester.getId() == id) {
+            userService.updateUserPreferences(preferencesDTO);
+            return new ResponseEntity<>(HttpStatus.OK);
+        }else{
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+        }
     }
 }

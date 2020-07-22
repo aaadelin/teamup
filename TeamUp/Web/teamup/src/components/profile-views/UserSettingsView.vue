@@ -1,10 +1,10 @@
 <template>
   <div class="form-group col container">
-    <appearance ref="appearance"/>
+    <appearance ref="appearance" :preferences="preferences" @change="updatePreferences"/>
     <hr>
-    <timeline-visibility ref="timelineVisibility"/>
+    <timeline-visibility ref="timelineVisibility" :preferences="preferences" @change="updatePreferences"/>
     <hr>
-    <visible-statuses ref="visibleStatuses"/>
+    <visible-statuses ref="visibleStatuses" :preferences="preferences" @change="updatePreferences"/>
     <hr>
     <quick-create ref="quickCreate"/>
     <hr>
@@ -21,24 +21,45 @@ import UpdatePassword from './settings-categories/UpdatePassword'
 import TimelineVisibility from './settings-categories/TimelineVisibility'
 import VisibleStatuses from './settings-categories/VisibleStatuses'
 import QuickCreate from './settings-categories/QuickCreate'
+import { getMyID, getUserPreferences } from '../../persistance/RestGetRepository'
+import { updateUserPreferences } from '../../persistance/RestPutRepository'
 export default {
   name: 'UserSettingsView',
   components: { QuickCreate, VisibleStatuses, TimelineVisibility, UpdatePassword, Appearance },
+  mounted () {
+    this.getPreferences()
+  },
   data () {
     return {
-
       colors: '#59c7f9',
       suckerCanvas: null,
       suckerArea: [],
-      isSucking: false
+      isSucking: false,
+      preferences: {}
     }
   },
   methods: {
-    saveChanges () {
-      this.$refs.updatePass.changePassword()
+    async getPreferences () {
+      let id = await getMyID()
+      this.preferences = await getUserPreferences(id)
+    },
+    async saveChanges () {
+      let id = await getMyID()
+      updateUserPreferences(id, this.preferences).then(rez => {
+        this.$notify({
+          group: 'notificationsGroup',
+          title: 'Success',
+          type: 'success',
+          text: 'Preferences saved successfully'
+        })
+      })
+      // this.$refs.updatePass.changePassword()
     },
     clearChanges () {
       this.$refs.updatePass.clearChanges()
+    },
+    updatePreferences (preferences) {
+      this.preferences = preferences
     }
   }
 }

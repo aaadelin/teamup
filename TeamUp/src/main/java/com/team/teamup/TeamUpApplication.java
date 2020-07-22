@@ -30,9 +30,9 @@ public class TeamUpApplication {
 	@Bean
 	public CommandLineRunner demo() {
 		return args -> {
+			startUpManager.createDefaultTaskStatuses();
 			startUpManager.createAdmin();
 			startUpManager.createFiles();
-			startUpManager.createDefaultTaskStatuses();
 		};
 	}
 

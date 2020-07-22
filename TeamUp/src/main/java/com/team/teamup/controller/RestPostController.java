@@ -91,7 +91,7 @@ public class RestPostController {
                     UserEventType.CREATE);
             log.info(String.format("Entering method create user with user: %s and headers: %s", user, headers));
             User userToSave = dtOsConverter.getUserFromDTO(user);
-            userToSave.setActive(false);
+            userToSave.getAuthentication().setActive(false);
             userService.save(userToSave);
 
             log.info("User has been successfully created and saved in database");
@@ -178,12 +178,12 @@ public class RestPostController {
             password = TokenUtils.getMD5Token(password);
 
             Optional<User> user = userService.findByUsernameAndPassword(username, password);
-            if (user.isPresent() && !user.get().isLocked()) {
+            if (user.isPresent() && !user.get().getAuthentication().isLocked()) {
                 boolean isAdmin = false;
 
                 User realUser = user.get();
-                realUser.setActive(true);
-                realUser.setLastActive(LocalDateTime.now());
+                realUser.getAuthentication().setActive(true);
+                realUser.getAuthentication().setLastActive(LocalDateTime.now());
 
                 if (user.get().getStatus().equals(UserStatus.ADMIN)) {
                     isAdmin = true;
@@ -193,11 +193,11 @@ public class RestPostController {
                 log.info("User's status has been saved to database as active");
 
                 JSONObject answer = new JSONObject();
-                answer.put("key", user.get().getHashKey());
+                answer.put("key", user.get().getAuthentication().getHashKey());
                 answer.put("isAdmin", isAdmin);
                 answer.put("name", user.get().getFirstName() + " " + user.get().getLastName());
                 answer.put("id", user.get().getId());
-                log.info(String.format("User has been successfully logged in and key sent :%s", user.get().getHashKey()));
+                log.info(String.format("User has been successfully logged in and key sent :%s", user.get().getAuthentication().getHashKey()));
                 return new ResponseEntity<>(answer.toString(), HttpStatus.OK);
             } else {
                 log.info("User with specified credentials has not been found or is locked");

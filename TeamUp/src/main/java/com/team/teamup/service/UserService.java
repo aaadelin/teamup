@@ -1,13 +1,14 @@
 package com.team.teamup.service;
 
 import com.team.teamup.domain.User;
+import com.team.teamup.domain.UserAuthentication;
 import com.team.teamup.domain.UserEvent;
+import com.team.teamup.domain.UserPreferences;
 import com.team.teamup.domain.enums.UserStatus;
-import com.team.teamup.dtos.ProjectDTO;
-import com.team.teamup.dtos.TaskDTO;
-import com.team.teamup.dtos.TeamDTO;
-import com.team.teamup.dtos.UserDTO;
+import com.team.teamup.dtos.*;
+import com.team.teamup.persistence.UserAuthenticationRepository;
 import com.team.teamup.persistence.UserEventRepository;
+import com.team.teamup.persistence.UserPreferencesRepository;
 import com.team.teamup.persistence.UserRepository;
 import com.team.teamup.utils.DTOsConverter;
 import com.team.teamup.utils.UserUtils;
@@ -17,6 +18,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Component;
 
+import javax.persistence.EntityNotFoundException;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -35,6 +37,8 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final ProjectService projectService;
+    private final UserAuthenticationRepository authenticationRepository;
+    private final UserPreferencesRepository preferencesRepository;
     private final TeamService teamService;
     private final TaskService taskService;
 
@@ -47,6 +51,8 @@ public class UserService {
     @Autowired
     public UserService(UserRepository userRepository,
                        ProjectService projectService,
+                       UserAuthenticationRepository authenticationRepository,
+                       UserPreferencesRepository preferencesRepository,
                        TeamService teamService,
                        UserEventRepository eventRepository,
                        TaskService taskService,
@@ -57,7 +63,8 @@ public class UserService {
         this.teamService = teamService;
         this.eventRepository = eventRepository;
         this.taskService = taskService;
-
+        this.authenticationRepository = authenticationRepository;
+        this.preferencesRepository = preferencesRepository;
         this.userValidation = userValidation;
         this.dtOsConverter = dtOsConverter;
     }
@@ -87,7 +94,7 @@ public class UserService {
      * @return user that corresponds to that key
      */
     public User getByHashKey(String key){
-        return userRepository.findByHashKey(key).orElseThrow();
+        return authenticationRepository.findByHashKey(key).orElseThrow().getUser();
     }
 
     /**
@@ -122,14 +129,14 @@ public class UserService {
      * @return true if the user has been successfully logged out or false if there is no user with that key
      */
     public boolean logout(String token){
-        Optional<User> userOptional = userRepository.findByHashKey(token);
+        Optional<UserAuthentication> userOptional = authenticationRepository.findByHashKey(token);
 
         if (userOptional.isPresent()) {
-            User user = userOptional.get();
-            user.setActive(false);
-            user.setLastActive(LocalDateTime.now());
+            User user = userOptional.get().getUser();
+            user.getAuthentication().setActive(false);
+            user.getAuthentication().setLastActive(LocalDateTime.now());
 
-            userRepository.save(user);
+            userUtils.saveUser(user);
             log.debug("User status saved in database");
             return true;
         }
@@ -240,7 +247,7 @@ public class UserService {
     }
 
     public User save(User user) {
-        return userRepository.save(user);
+        return userUtils.saveUser(user);
     }
 
     public boolean exists(int id) {
@@ -248,14 +255,34 @@ public class UserService {
     }
 
     public Optional<User> findByUsernameAndPassword(String username, String password) {
-        return userRepository.findByUsernameAndPassword(username, password);
+        Optional<UserAuthentication> userAuth = authenticationRepository.findByUsernameAndPassword(username, password);
+        if(userAuth.isEmpty()){
+            return Optional.empty();
+        }
+        return Optional.of(userAuth.get().getUser());
     }
 
     public void deleteById(int id) {
-        userRepository.deleteById(id);
+        userUtils.deleteUserById(id);
     }
 
     public List<String> getUserNames(){
-        return userRepository.findAll().stream().map(User::getUsername).collect(Collectors.toList());
+        return userRepository.findAll().stream().map(user -> user.getAuthentication().getUsername()).collect(Collectors.toList());
+    }
+
+    public UserPreferencesDTO getUserPreferencesById(int userId){
+        Optional<User> userOptional = userRepository.findById(userId);
+
+        if(userOptional.isPresent()){
+            UserPreferences preferences = userOptional.get().getPreferences();
+            return dtOsConverter.getDTOFromPreferences(preferences);
+        }else {
+            throw new EntityNotFoundException();
+        }
+    }
+
+    public void updateUserPreferences(UserPreferencesDTO preferences){
+        UserPreferences preferences1 = dtOsConverter.getPreferencesFromDTO(preferences);
+        preferencesRepository.save(preferences1);
     }
 }

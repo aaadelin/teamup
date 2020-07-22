@@ -2,6 +2,7 @@ package com.team.teamup.controller.unit;
 
 import com.team.teamup.domain.Task;
 import com.team.teamup.domain.User;
+import com.team.teamup.domain.UserAuthentication;
 import com.team.teamup.dtos.ProjectDTO;
 import com.team.teamup.dtos.TaskDTO;
 import com.team.teamup.persistence.*;
@@ -58,6 +59,8 @@ public class RestGetTaskControllerUnitTest {
     CommentRepository commentRepository;
     @MockBean
     UserEventRepository userEventRepository;
+    @MockBean
+    UserAuthenticationRepository authenticationRepository;
     @MockBean
     UserValidation userValidation;
     @MockBean
@@ -118,7 +121,7 @@ public class RestGetTaskControllerUnitTest {
 
         when(userValidation.isUserLoggedIn(anyString())).thenReturn(true);
         when(userValidation.isValid(anyString())).thenReturn(true);
-        when(userRepository.findByHashKey(anyString())).thenReturn(Optional.of(new User()));
+        when(authenticationRepository.findByHashKey(anyString())).thenReturn(Optional.of(new UserAuthentication()));
         when(dtOsConverter.getDTOFromTask(any())).thenReturn(new TaskDTO());
 
         MvcResult mvcResult = mockMvc.perform(
@@ -208,7 +211,7 @@ public class RestGetTaskControllerUnitTest {
 
         when(userValidation.isUserLoggedIn(anyString())).thenReturn(true);
         when(userValidation.isValid(anyString())).thenReturn(true);
-        when(userRepository.findByHashKey(anyString())).thenReturn(Optional.of(new User()));
+        when(authenticationRepository.findByHashKey(anyString())).thenReturn(Optional.of(new UserAuthentication()));
         when(taskRepository.findAllByTaskStatusAndReporter(any(), any(), any())).thenReturn(Arrays.asList(new Task(), new Task()));
         when(dtOsConverter.getDTOFromTask(any())).thenReturn(new TaskDTO());
 
@@ -227,7 +230,7 @@ public class RestGetTaskControllerUnitTest {
         // page, search, status
         when(userValidation.isUserLoggedIn(anyString())).thenReturn(true);
         when(userValidation.isValid(anyString())).thenReturn(true);
-        when(userRepository.findByHashKey(anyString())).thenReturn(Optional.of(new User()));
+        when(authenticationRepository.findByHashKey(anyString())).thenReturn(Optional.of(new UserAuthentication()));
         when(taskRepository.findAllByTaskStatusAndReporter(any(), any(), any())).thenReturn(Arrays.asList(new Task(), new Task()));
         when(dtOsConverter.getDTOFromTask(any())).thenReturn(new TaskDTO());
 
@@ -246,7 +249,7 @@ public class RestGetTaskControllerUnitTest {
         // page, search, status, statuses
         when(userValidation.isUserLoggedIn(anyString())).thenReturn(true);
         when(userValidation.isValid(anyString())).thenReturn(true);
-        when(userRepository.findByHashKey(anyString())).thenReturn(Optional.of(new User()));
+        when(authenticationRepository.findByHashKey(anyString())).thenReturn(Optional.of(new UserAuthentication()));
         when(taskRepository.findAllByTaskStatusAndReporter(any(), any(), any())).thenReturn(Arrays.asList(new Task(), new Task()));
         when(dtOsConverter.getDTOFromTask(any())).thenReturn(new TaskDTO());
 

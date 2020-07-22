@@ -34,8 +34,8 @@ export async function getTaskStatus () {
   return fetchDataFromUrl(url, [])
 }
 
-export async function getDetailedTaskStatus () {
-  let url = `${baseURL}/task-status/detailed`
+export async function getDetailedTaskStatus (visibleOnly = false) {
+  let url = `${baseURL}/task-status/detailed?visible=${visibleOnly}`
   return fetchDataFromUrl(url, [])
 }
 
@@ -288,4 +288,9 @@ export async function getTasksByQuery (query) {
   let url = `${baseURL}/tasks/query?search-query=${query}`
   url = encodeURI(url)
   return fetchDataFromUrl(url, [])
+}
+
+export async function getUserPreferences (id) {
+  let url = `${baseURL}/users/${id}/preferences`
+  return fetchDataFromUrl(url)
 }

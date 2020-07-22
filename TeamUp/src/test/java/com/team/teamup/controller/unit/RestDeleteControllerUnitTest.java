@@ -1,6 +1,7 @@
 package com.team.teamup.controller.unit;
 
 import com.team.teamup.domain.User;
+import com.team.teamup.domain.UserAuthentication;
 import com.team.teamup.domain.enums.UserStatus;
 import com.team.teamup.persistence.*;
 import com.team.teamup.service.*;
@@ -58,6 +59,8 @@ public class RestDeleteControllerUnitTest {
     @MockBean
     CommentRepository commentRepository;
     @MockBean
+    UserAuthenticationRepository authenticationRepository;
+    @MockBean
     UserValidation userValidation;
     @MockBean
     DTOsConverter dtOsConverter;
@@ -90,7 +93,7 @@ public class RestDeleteControllerUnitTest {
         when(userRepository.findById(10)).thenReturn(Optional.of(new User()));
         when(userRepository.findById(11)).thenReturn(Optional.empty());
         when(userValidation.isUserLoggedIn(anyString())).thenReturn(true);
-        when(userRepository.findByHashKey(anyString())).thenReturn(Optional.of(new User()));
+        when(authenticationRepository.findByHashKey(anyString())).thenReturn(Optional.of(new UserAuthentication()));
     }
 
     @Test

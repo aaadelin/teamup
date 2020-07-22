@@ -9,8 +9,6 @@ import java.util.Optional;
 
 public interface UserRepository extends JpaRepository<User, Integer> {
 
-    Optional<User> findByHashKey(String hashKey);
-    Optional<User> findByUsernameAndPassword(String username, String password);
     List<User> findAllByStatus(UserStatus userStatus);
     List<User> findAllByFirstNameContainingOrLastNameContaining(String firstName, String lastName);
 }

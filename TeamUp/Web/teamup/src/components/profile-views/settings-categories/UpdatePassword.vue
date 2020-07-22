@@ -1,6 +1,18 @@
 <template>
-  <div>
-    <h4 class="row">Update password</h4> <br>
+  <div style="text-align: left">
+    <h4 class="row">Security</h4> <br>
+    <div class="row" style="margin-bottom: 10px">
+      <label class="col-md-3" for="minutesLogout">
+        Minutes until logout
+      </label>
+
+      <div class="input-group col-md-8 no-left-padding" id="">
+
+        <input id="minutesLogout" class="form-control" type="number" v-model="minutesLogout"/>
+
+      </div>
+
+      </div>
     <div class="row" style="margin-bottom: 10px">
       <label class="col-md-3" for="oldPassword">
         Old password:
@@ -61,7 +73,8 @@ export default {
       oldPassword: '',
       newPassword: '',
       newPasswordAgain: '',
-      logout: false
+      logout: false,
+      minutesLogout: 0
     }
   },
   methods: {

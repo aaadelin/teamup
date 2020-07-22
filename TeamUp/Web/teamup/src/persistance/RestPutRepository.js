@@ -82,3 +82,8 @@ export function updateTaskStatuses (statuses) {
   let url = `${baseURL}/task-status`
   return putDataToUrl(statuses, url)
 }
+
+export function updateUserPreferences (id, preferences) {
+  let url = `${baseURL}/users/${id}/preferences`
+  return putDataToUrl(preferences, url)
+}

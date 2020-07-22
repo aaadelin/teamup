@@ -5,13 +5,11 @@ import com.team.teamup.domain.User;
 import com.team.teamup.domain.UserEvent;
 import com.team.teamup.domain.TaskStatus;
 import com.team.teamup.domain.enums.UserStatus;
-import com.team.teamup.dtos.ProjectDTO;
-import com.team.teamup.dtos.TaskDTO;
-import com.team.teamup.dtos.TeamDTO;
-import com.team.teamup.dtos.UserDTO;
+import com.team.teamup.dtos.*;
 import com.team.teamup.service.TaskService;
 import com.team.teamup.service.UserService;
 import com.team.teamup.utils.DTOsConverter;
+import com.team.teamup.utils.Pair;
 import com.team.teamup.utils.TaskUtils;
 import com.team.teamup.validation.UserValidation;
 import lombok.extern.slf4j.Slf4j;
@@ -27,6 +25,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import static org.springframework.web.bind.annotation.RequestMethod.GET;
 
@@ -323,5 +322,12 @@ public class RestGetUserController {
         log.info("Entering method to get all usernames");
         List<String> usernames = userService.getUserNames();
         return new ResponseEntity<>(usernames, HttpStatus.OK);
+    }
+
+    @RequestMapping(value = "/users/{id}/preferences", method = GET)
+    public ResponseEntity<?> getUserPreferences(@PathVariable int id){
+        log.info("Entering method to get all preferences");
+        UserPreferencesDTO preferences = userService.getUserPreferencesById(id);
+        return new ResponseEntity<>(preferences, HttpStatus.OK);
     }
 }
